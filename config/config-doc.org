@@ -1,0 +1,12 @@
+#+TITLE: Configuration file
+#+AUTHOR: Germain
+
+* File format:
+we will use a simplified yaml format
+
+* Options and blocks
+ - Server
+   - listen [host][port]
+   - server_name [name1]
+   - root [path]
+   - index [index_file]
