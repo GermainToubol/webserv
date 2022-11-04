@@ -4,3 +4,6 @@
 *.d
 .vscode
 .vscode/*
+*.test
+__*
+doc/

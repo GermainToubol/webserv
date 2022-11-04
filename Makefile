@@ -6,14 +6,31 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/03 17:53:52 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/04 15:45:20 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
+SHELL=/bin/bash
 
 # List of all the sources (.cpp)
 # -------------------------------------------------------------------------
-SRCS =		main.cpp
+SRCS =		$(addprefix config/,											\
+				configure.cpp												\
+			)
+
+# List of test sources (.cpp)
+# -------------------------------------------------------------------------
+TEST = 		$(addprefix $(SRCS_DIR)/,										\
+				$(addprefix config/,										\
+					test_configure.cpp										\
+				)															\
+			)
+
+TEST_DIR =	tests
+TEST_OBJS =	$(TEST:.cpp=.o)
+DOC_FILE = doxygen.conf
+
+TEST_EXE = $(TEST:.cpp=.test)
 
 # List of the related directories
 # -------------------------------------------------------------------------
@@ -36,9 +53,9 @@ NAME =		webserv
 # General rules on makefile
 # -------------------------------------------------------------------------
 OBJS = 		$(addprefix $(SRCS_DIR)/,$(SRCS:.cpp=.o))
-DEPS =		$(OBJS:.o=.d)
+DEPS =		$(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
 
-INCLUDES =	$(addprefix -I,$(HEAD_DIR) $(TPP_DIR))
+INCLUDES =	$(addprefix -I,$(HEAD_DIR))
 
 RM =		rm -f
 
@@ -46,22 +63,36 @@ vpath %.c $(SRCS_DIR)
 vpath %.h $(HEAD_DIR)
 
 $(NAME):	$(OBJS)
-			$(CXX) $(CXXFLAGS) -D FT=std $(INCLUDES) -o $@ $(OBJS_STD)
+			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(OBJS)
 
-%.o:	%.cpp Makefile
-			$(CXX) $(CXXFLAGS) -D FT=std $(INCLUDES) -o $@ -c $<
+%.o:		%.cpp Makefile
+			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
 
 all:		$(NAME)
 
 clean:		dclean
 			$(RM) $(OBJS)
 
-fclean:		clean
+tclean:
+			$(RM) $(TEST_OBJS) $(TEST_OBJS:.o=.test)
+
+fclean:		clean tclean
 			$(RM) $(NAME)
+
+
+doc:
+			doxygen $(DOC_FILE)
+
+test:		$(TEST_EXE)
+			pytest
+
+%.test:		%.o $(filter-out main.cpp,$(OBJS))
+			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 re:			fclean all
 
-.PHONY:		all clean fclean re
+.PHONY:		all clean fclean re doc tests
+.SILENT:	test
 .NOTPARALLEL: re
 
 # Library rules
@@ -70,7 +101,8 @@ re:			fclean all
 # General dependences management
 # ------------------------------------------------------------------------
 %.d:		%.cpp
-			$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) -D FT=ft $(INCLUDES) $< > $@
+			echo -n "$@ " > $@
+			$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) $(INCLUDES) $< >> $@
 
 dclean:
 			$(RM) $(DEPS)
