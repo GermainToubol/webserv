@@ -6,16 +6,17 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/04 15:56:04 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/16 12:53:02 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
-/** @file */
+/** @file configure.hpp */
 
 #ifndef CONFIGURE_HPP
 #define CONFIGURE_HPP
 #pragma once
 
+#include <fstream>
 #include <string>
 
 /**
@@ -30,11 +31,16 @@ public:
 	Configure(std::string const&);
 	virtual ~Configure() {}
 
-	int	status(void) const;
+	int	isGood(void) const;
 
 private:
-	std::string	filename;
-	int			_status;
+	int		readFile(void);
+	bool	readLine(std::string &);
+	void	parse(std::string const&);
+
+	std::string		filename;
+	std::ifstream	_ifs;
+	int				_status;
 };
 
 #endif
