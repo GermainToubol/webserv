@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/16 12:53:02 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/17 12:47:46 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -18,6 +18,9 @@
 
 #include <fstream>
 #include <string>
+#include <vector>
+#include "ConfigEntry.hpp"
+#include "VirtualServer.hpp"
 
 /**
  * @class Configure
@@ -37,10 +40,14 @@ private:
 	int		readFile(void);
 	bool	readLine(std::string &);
 	void	parse(std::string const&);
+	void	addServer(ConfigEntry const&);
+	void	addListen(ConfigEntry const&);
 
 	std::string		filename;
 	std::ifstream	_ifs;
 	int				_status;
+	std::vector<VirtualServer> server_list;
+	size_t			n_line;
 };
 
 #endif

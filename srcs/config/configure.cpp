@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/16 12:53:47 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/17 12:53:57 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -19,8 +19,16 @@
 #include <new>
 #include <string>
 #include "configure.hpp"
+#include "ConfigEntry.hpp"
 
-Configure::Configure(std::string const& file): filename(file), _ifs(), _status(1)
+#define MAX_LINE_SIZE 8192
+
+Configure::Configure(std::string const& file):
+	filename(file),
+	_ifs(),
+	_status(1),
+	server_list(),
+	n_line(0)
 {
 	_ifs.open(filename.c_str());
 	if (_ifs.good())
@@ -76,36 +84,78 @@ int Configure::readFile(void)
  */
 bool	Configure::readLine(std::string &current_line)
 {
-	char	buffer[4096];
+	char	buffer[8192];
 	ssize_t	count;
 
-	_ifs.getline(buffer, 4096);
+	_ifs.getline(buffer, 8192);
 	count = _ifs.gcount();
-	if (count > 0 && (size_t)count < (current_line.capacity() - current_line.size()))
+	if (count >= 0 && count < 8192)
 	{
+		++this->n_line;
 		current_line.append(buffer);
-		if (buffer[count] == '\n')
-		{
-			this->parse(current_line);
-			for (size_t i = 0; i < 4096; ++i)
-			{
-				current_line[i] = '\0';
-			}
-		}
-	}
-	else if (count == 0)
-	{
 		this->parse(current_line);
-	}
-	else
-	{
-		std::cout << "coucou\n";
+		current_line.clear(); // clear content but not allocated memory
 	}
 	return (_ifs.good());
 }
 
-
 void	Configure::parse(std::string const& line)
 {
-	(void)line;
+	ConfigEntry entry(line);
+
+	std::cout << entry.getLevel() << ">"
+			  << entry.getKey() << ">"
+			  << entry.getValue() << std::endl;
+	if (entry.getKey() == "server")
+	{
+		this->addServer(entry);
+	}
+	if (entry.getKey() == "listen")
+	{
+		this->addListen(entry);
+	}
+}
+
+void	Configure::addServer(ConfigEntry const& entry)
+{
+	if (entry.getLevel() != 0)
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": server level needs to be 0" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (!entry.hasDelimiter())
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": missing delimiter" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (!entry.isValueEmpty())
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				 << ": configuration file error" << std::endl;
+		_status = 1;
+		return ;
+	}
+	this->server_list.push_back(VirtualServer());
+}
+
+void	Configure::addListen(ConfigEntry const& entry)
+{
+	if (this->server_list.size() == 0)
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": listen block should be in server block" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (entry.getLevel() != 2)
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": listen level needs to be 1" << std::endl;
+		_status = 1;
+		return ;
+	}
 }

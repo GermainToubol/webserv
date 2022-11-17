@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/16 11:40:54 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/17 13:16:51 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -16,6 +16,7 @@ import uuid
 import subprocess
 
 BASE_PATH = "/srcs/config/"
+
 
 class TestConfigure:
     path = f"{os.getcwd()}{BASE_PATH}"
@@ -36,9 +37,11 @@ class TestConfigure:
         assert errorlog == expected_log
         assert returncode == expected_returncode
 
+
     def test_inputfile_file_no_exist(self):
         filename = "does_not_exist"
         self.run_error(filename, f"Error: {filename}: cannot read the file.\n", 1)
+
 
     def test_inputfile_permission_denied_status_1(self, tmp_path):
         """Test the configuration status depending on the configuration file status.
@@ -61,6 +64,7 @@ class TestConfigure:
         os.chmod(tmp, 0o377)
         self.run_error(tmp, f"Error: {tmp}: cannot read the file.\n", 1)
 
+
     def test_inputfile_allowed_status_0(self, tmp_path):
 
         tmp = tmp_path / str(uuid.uuid4())
@@ -73,7 +77,50 @@ class TestConfigure:
         os.chmod(tmp, 0o777)
         self.run_error(tmp, "", 0)
 
+
     def test_inputfile_folder_status_2(self, tmp_path):
         tmp = tmp_path / str(uuid.uuid4())
         tmp.mkdir()
         self.run_error(tmp, f"Error: {tmp}: unreadable.\n", 1)
+
+
+    def test_inputfile_server(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""  server
+server:
+server coucou
+server : coucou
+server:
+
+
+server:
+server: test
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 1: server level needs to be 0
+Bad config: line 3: missing delimiter
+Bad config: line 4: missing delimiter
+Bad config: line 9: configuration file error
+"""
+            , 1)
+
+
+    def test_inputfile_listen(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+listen: 127.0.0.2:80
+
+server:
+    listen: 80;
+  listen: 80;
+  listen: 80;
+""")
+        self.run_error(
+            tmp,
+        """Bad config: line 2: listen block should be in server block
+Bad config: line 5: listen level needs to be 1
+Bad config: line 7: server blocks have only one listen
+""",
+            1)
