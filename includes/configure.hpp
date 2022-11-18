@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/17 12:47:46 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/18 14:17:39 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -42,6 +42,7 @@ private:
 	void	parse(std::string const&);
 	void	addServer(ConfigEntry const&);
 	void	addListen(ConfigEntry const&);
+	bool	validHost(std::string const&);
 
 	std::string		filename;
 	std::ifstream	_ifs;

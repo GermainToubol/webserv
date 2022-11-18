@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/17 11:24:45 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/17 16:16:16 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -16,7 +16,8 @@ SHELL=/bin/bash
 # -------------------------------------------------------------------------
 SRCS =		$(addprefix config/,											\
 				configure.cpp												\
-				ConfigEntry.cpp											\
+				ConfigEntry.cpp												\
+				VirtualServer.cpp											\
 			)
 
 # List of test sources (.cpp)

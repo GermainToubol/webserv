@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/17 13:16:51 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/18 14:26:40 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -113,14 +113,30 @@ Bad config: line 9: configuration file error
 listen: 127.0.0.2:80
 
 server:
-    listen: 80;
-  listen: 80;
-  listen: 80;
+    listen: 80
+  listen: 80
+  listen: 80
+
+server:
+  listen: 183  ;
+  listen: 1sdf23
+  listen: aze123
+
+server:
+  listen: 127.0.0.2:80
+
+server:
+  listen: 127..0.0:80
+  listen: 255.255.255.255:80
 """)
         self.run_error(
             tmp,
         """Bad config: line 2: listen block should be in server block
 Bad config: line 5: listen level needs to be 1
 Bad config: line 7: server blocks have only one listen
+Bad config: line 10: listen block values must match the format [IPV4:]PORT
+Bad config: line 11: listen block values must match the format [IPV4:]PORT
+Bad config: line 12: listen block values must match the format [IPV4:]PORT
+Bad config: line 18: listen block values must match the format [IPV4:]PORT
 """,
             1)

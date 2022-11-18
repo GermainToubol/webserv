@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/17 12:53:57 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/18 14:25:52 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -14,10 +14,14 @@
  * @file configure.cpp
  */
 
+#include <algorithm>
+#include <arpa/inet.h>
 #include <fstream>
 #include <iostream>
+#include <netinet/in.h>
 #include <new>
 #include <string>
+#include <sys/socket.h>
 #include "configure.hpp"
 #include "ConfigEntry.hpp"
 
@@ -89,7 +93,7 @@ bool	Configure::readLine(std::string &current_line)
 
 	_ifs.getline(buffer, 8192);
 	count = _ifs.gcount();
-	if (count >= 0 && count < 8192)
+	if (count >= 0 and count < 8192)
 	{
 		++this->n_line;
 		current_line.append(buffer);
@@ -142,8 +146,13 @@ void	Configure::addServer(ConfigEntry const& entry)
 	this->server_list.push_back(VirtualServer());
 }
 
+//! @todo add host
 void	Configure::addListen(ConfigEntry const& entry)
 {
+	std::string port = "";
+	std::string address = "";
+	std::string::const_reverse_iterator rit;
+
 	if (this->server_list.size() == 0)
 	{
 		std::cerr << "Bad config: line " << this->n_line
@@ -158,4 +167,67 @@ void	Configure::addListen(ConfigEntry const& entry)
 		_status = 1;
 		return ;
 	}
+	if (this->server_list.back().getPort() != "")
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": server blocks have only one listen" << std::endl;
+		_status = 1;
+		return ;
+	}
+	rit = entry.getValue().rbegin();
+	while (rit !=  entry.getValue().rend() and isspace(*rit))
+	{
+		++rit;
+	}
+	while (rit != entry.getValue().rend() and isdigit(*rit))
+	{
+		port.push_back(*rit);
+		++rit;
+	}
+	if (rit != entry.getValue().rend() and *rit == ':')
+	{
+		++rit;
+		while (rit != entry.getValue().rend() and (*rit == '.' or isdigit(*rit)))
+		{
+			address.push_back(*rit);
+			++rit;
+		}
+	}
+	while (rit != entry.getValue().rend() and isspace(*rit))
+	{
+		++rit;
+	}
+	if (rit != entry.getValue().rend() or port == "")
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": listen block values must match the format [IPV4:]PORT" << std::endl;
+		_status = 1;
+		return ;
+	}
+	std::reverse(port.begin(), port.end());
+	if (address != "")
+	{
+		std::reverse(address.begin(), address.end());
+		if (!this->validHost(address))
+		{
+			std::cerr << "Bad config: line " << this->n_line
+					  << ": listen block values must match the format [IPV4:]PORT" << std::endl;
+			_status = 1;
+			return ;
+		}
+		this->server_list.back().setHost(address);
+	}
+	this->server_list.back().setPort(port);
+}
+
+bool Configure::validHost(std::string const& address)
+{
+	in_addr_t	ip;
+
+	ip = inet_addr(address.c_str());
+	if (ip == 0xffffffff && address != "255.255.255.255")
+	{
+		return (false);
+	}
+	return (true);
 }
