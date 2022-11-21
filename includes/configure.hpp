@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/18 14:17:39 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/18 14:40:06 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -35,6 +35,7 @@ public:
 	virtual ~Configure() {}
 
 	int	isGood(void) const;
+	std::vector<VirtualServer> const& getServers(void) const;
 
 private:
 	int		readFile(void);
@@ -42,6 +43,7 @@ private:
 	void	parse(std::string const&);
 	void	addServer(ConfigEntry const&);
 	void	addListen(ConfigEntry const&);
+	void	addRoot(ConfigEntry const&);
 	bool	validHost(std::string const&);
 
 	std::string		filename;

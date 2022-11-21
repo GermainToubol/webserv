@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/18 14:25:52 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/18 14:58:27 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -118,6 +118,10 @@ void	Configure::parse(std::string const& line)
 	{
 		this->addListen(entry);
 	}
+	if (entry.getKey() == "root")
+	{
+		this->addRoot(entry);
+	}
 }
 
 void	Configure::addServer(ConfigEntry const& entry)
@@ -146,7 +150,6 @@ void	Configure::addServer(ConfigEntry const& entry)
 	this->server_list.push_back(VirtualServer());
 }
 
-//! @todo add host
 void	Configure::addListen(ConfigEntry const& entry)
 {
 	std::string port = "";
@@ -164,6 +167,13 @@ void	Configure::addListen(ConfigEntry const& entry)
 	{
 		std::cerr << "Bad config: line " << this->n_line
 				  << ": listen level needs to be 1" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (!entry.hasDelimiter())
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": missing delimiter" << std::endl;
 		_status = 1;
 		return ;
 	}
@@ -230,4 +240,52 @@ bool Configure::validHost(std::string const& address)
 		return (false);
 	}
 	return (true);
+}
+
+void	Configure::addRoot(ConfigEntry const& entry)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+
+	if (this->server_list.size() == 0)
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": root block should be in server block" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (entry.getLevel() != 2)
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": root level needs to be 1" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (!entry.hasDelimiter())
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": missing delimiter" << std::endl;
+		_status = 1;
+		return ;
+	}
+	if (this->server_list.back().getRoot() != "")
+	{
+		std::cerr << "Bad config: line " << this->n_line
+				  << ": server blocks have only one root" << std::endl;
+		_status = 1;
+		return ;
+	}
+	for (it = entry.getValue().begin(); it != entry.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = entry.getValue().rbegin(); rit != entry.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+			break ;
+	}
+	std::string root;
+	root.assign(it, rit.base() + 1);
+	this->server_list.back().setRoot(root);
 }

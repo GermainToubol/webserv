@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/17 16:02:20 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/18 14:46:14 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 #ifndef VIRTUALSERVER_H
@@ -37,6 +37,5 @@ private:
 	std::string	host;
 	std::string	port;
 };
-
 
 #endif /* VIRTUALSERVER_H */
