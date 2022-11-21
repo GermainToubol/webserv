@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/18 14:58:27 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/21 09:44:23 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -107,9 +107,6 @@ void	Configure::parse(std::string const& line)
 {
 	ConfigEntry entry(line);
 
-	std::cout << entry.getLevel() << ">"
-			  << entry.getKey() << ">"
-			  << entry.getValue() << std::endl;
 	if (entry.getKey() == "server")
 	{
 		this->addServer(entry);
@@ -122,30 +119,25 @@ void	Configure::parse(std::string const& line)
 	{
 		this->addRoot(entry);
 	}
+	if (entry.getKey() == "server_name")
+	{
+		this->addServerName(entry);
+	}
 }
 
 void	Configure::addServer(ConfigEntry const& entry)
 {
 	if (entry.getLevel() != 0)
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": server level needs to be 0" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("server level needs to be 0"));
 	}
 	if (!entry.hasDelimiter())
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": missing delimiter" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("missing delimiter"));
 	}
 	if (!entry.isValueEmpty())
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				 << ": configuration file error" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("configuration file error"));
 	}
 	this->server_list.push_back(VirtualServer());
 }
@@ -158,31 +150,19 @@ void	Configure::addListen(ConfigEntry const& entry)
 
 	if (this->server_list.size() == 0)
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": listen block should be in server block" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("listen block should be in server block"));
 	}
 	if (entry.getLevel() != 2)
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": listen level needs to be 1" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("listen level needs to be 1"));
 	}
 	if (!entry.hasDelimiter())
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": missing delimiter" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("missing delimiter"));
 	}
 	if (this->server_list.back().getPort() != "")
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": server blocks have only one listen" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("server blocks have only one listen"));
 	}
 	rit = entry.getValue().rbegin();
 	while (rit !=  entry.getValue().rend() and isspace(*rit))
@@ -209,10 +189,7 @@ void	Configure::addListen(ConfigEntry const& entry)
 	}
 	if (rit != entry.getValue().rend() or port == "")
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": listen block values must match the format [IPV4:]PORT" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("listen block values must match the format [IPV4:]PORT"));
 	}
 	std::reverse(port.begin(), port.end());
 	if (address != "")
@@ -220,10 +197,7 @@ void	Configure::addListen(ConfigEntry const& entry)
 		std::reverse(address.begin(), address.end());
 		if (!this->validHost(address))
 		{
-			std::cerr << "Bad config: line " << this->n_line
-					  << ": listen block values must match the format [IPV4:]PORT" << std::endl;
-			_status = 1;
-			return ;
+			return (this->parseError("listen block values must match the format [IPV4:]PORT"));
 		}
 		this->server_list.back().setHost(address);
 	}
@@ -249,31 +223,19 @@ void	Configure::addRoot(ConfigEntry const& entry)
 
 	if (this->server_list.size() == 0)
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": root block should be in server block" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("root block should be in server block"));
 	}
 	if (entry.getLevel() != 2)
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": root level needs to be 1" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("root level needs to be 1"));
 	}
 	if (!entry.hasDelimiter())
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": missing delimiter" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("missing delimiter"));
 	}
 	if (this->server_list.back().getRoot() != "")
 	{
-		std::cerr << "Bad config: line " << this->n_line
-				  << ": server blocks have only one root" << std::endl;
-		_status = 1;
-		return ;
+		return (this->parseError("server blocks have only one root"));
 	}
 	for (it = entry.getValue().begin(); it != entry.getValue().end(); ++it)
 	{
@@ -286,6 +248,38 @@ void	Configure::addRoot(ConfigEntry const& entry)
 			break ;
 	}
 	std::string root;
-	root.assign(it, rit.base() + 1);
+	root.assign(it, rit.base());
+	if (root[0] != '/')
+	{
+		return (this->parseError("root should be absolut path"));
+	}
 	this->server_list.back().setRoot(root);
+}
+
+void	Configure::parseError(std::string const& msg)
+{
+	std::cerr << "Bad config: line " << this->n_line
+			  << ": " << msg << std::endl;
+	_status = 1;
+}
+
+void	Configure::addServerName(ConfigEntry const& entry)
+{
+	if (this->server_list.size() == 0)
+	{
+		return (this->parseError("server_name block should be in server block"));
+	}
+	if (entry.getLevel() != 2)
+	{
+		return (this->parseError("server_name level should be 1"));
+	}
+	if (!entry.hasDelimiter())
+	{
+		return (this->parseError("missing delimiter"));
+	}
+	if (this->server_list.back().getServerName() != "")
+	{
+		return (this->parseError("server blocks have only one server_name"));
+	}
+	this->server_list.back().setServerName(entry.getValue());
 }

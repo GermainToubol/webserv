@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/18 14:40:06 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/21 09:32:11 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -42,9 +42,11 @@ private:
 	bool	readLine(std::string &);
 	void	parse(std::string const&);
 	void	addServer(ConfigEntry const&);
+	void	addServerName(ConfigEntry const&);
 	void	addListen(ConfigEntry const&);
 	void	addRoot(ConfigEntry const&);
 	bool	validHost(std::string const&);
+	void	parseError(std::string const&);
 
 	std::string		filename;
 	std::ifstream	_ifs;

@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/18 15:02:09 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/21 09:45:16 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -151,9 +151,12 @@ root: test
 server:
     root
   root
-  root test
-  root: test
-  root: test
+  root /test
+  root: /test
+  root: /test
+
+server:
+  root: test/test
 """)
 
         self.run_error(
@@ -163,5 +166,26 @@ Bad config: line 4: root level needs to be 1
 Bad config: line 5: missing delimiter
 Bad config: line 6: missing delimiter
 Bad config: line 8: server blocks have only one root
+Bad config: line 11: root should be absolut path
+""",
+            1)
+
+    def test_inputfile_server_name(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server_name: coucou
+server:
+server_name: coucou
+server:
+  server_name test123
+  server_name: test
+  server_name: test
+""")
+        self.run_error(
+            tmp,
+            """Bad config: line 2: server_name block should be in server block
+Bad config: line 4: server_name level should be 1
+Bad config: line 6: missing delimiter
+Bad config: line 8: server blocks have only one server_name
 """,
             1)
