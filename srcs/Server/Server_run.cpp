@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:58:47 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:57:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "WebServer.hpp"
+#include "Setup.hpp"
 
 extern int running;
 
@@ -49,20 +50,30 @@ int	WebServer::new_connection(int fd)
 	return (0);
 }
 
+int WebServer::build_response(int fd, Request *request, Setup const &setup)
+{
+	(void)fd;
+	(void)request;
+	(void)setup;
+	return (0);
+}
 
-int	WebServer::set_response(int fd, Request *request, int listen_fd)
+int	WebServer::set_response(int fd, Request *request, VirtualServer const &entry_server)
 {
 	struct epoll_event	event;
 	int					ret;
+	Setup				setup;
 
-	(void)listen_fd;
-	ret = request->parsing();
+	(void)entry_server;
+	ret = request->parsing(&setup);
 	if (ret != 0)
-		std::cerr << "[ Error parsing request ]" << std::endl;
-	std::memset(&event, 0, sizeof(event));
-	event.data.fd = fd;
- 	event.events = EPOLLOUT;
- 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, fd, &event);
+		return (this->build_response(fd, request, setup));
+	
+	// std::memset(&event, 0, sizeof(event));
+	// event.data.fd = fd;
+ 	// event.events = EPOLLOUT;
+ 	// epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, fd, &event); pas necessairement
+	
 	return (0);
 }
 
@@ -88,7 +99,7 @@ int	WebServer::get_request(int fd)
 		if (state == 1)
 		{
 			std::cerr << "[ All Request received on " << fd << " ]" << std::endl;
-			this->set_response(fd, request, this->getListenFd(fd));
+			this->set_response(fd, request, this->getEntryServer(fd));
 			remove_fd_request(fd);
 		}
 		// this->add_request(fd, ret);

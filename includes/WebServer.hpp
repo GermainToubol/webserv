@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:15:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:51:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class WebServer
 		/*Accesseurs*/
 		std::vector<VirtualServer>				const& getVirtualServers() const;
 		std::multimap<std::string, std::string>	const& getMimeTypes() const;
-		int										const& getListenFd(int fd) const;
+		VirtualServer							const& getEntryServer(int fd) const;
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);
@@ -46,8 +46,8 @@ class WebServer
 
 		/*Run*/
 		int	send_response(int fd);
-
-		int	set_response(int fd, Request *request, int listen_fd);
+		int build_response(int fd, Request *request, Setup const &setup);
+		int	set_response(int fd, Request *request, VirtualServer const &entry_server);
 		int	get_request(int fd);
 		int	new_connection(int fd);
 		int	event_loop(struct epoll_event *events, int nb_events);

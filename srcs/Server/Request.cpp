@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:58:16 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:28:01 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,26 +31,26 @@ int	Request::addContent(std::string const& content)
 	return (0);
 }
 
-int	Request::setFirstline(std::string const& line)
+int	Request::setFirstline(Setup *setup, std::string const& line)
 {
 	std::string::size_type	pos = 0;
 	std::string::size_type	pos2 = 0;
 
 	pos = line.find(" ");
 	if (pos == std::string::npos)
-		return (perror("/!\\ No Method"), 400);
+		return (perror("/!\\ No Method"), setup->setCode(400), 400);
 	this->_method = line.substr(0, pos);
 	pos2 = line.find(" ", pos + 1);
 	if (pos2 == std::string::npos)
-		return (perror("/!\\ No Uri"), 400);
+		return (perror("/!\\ No Uri"), setup->setCode(400), 400);
 	this->_uri = line.substr(pos + 1, pos2 - pos - 1);
 	this->_version = line.substr(pos2 + 1, line.size() - pos2 - 1);
 	if (this->_version != "HTTP/1.1")
-		return (perror("/!\\ Bad HTTP version"), 505);
+		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	return (0);	
 }
 
-int	Request::parsing(void)
+int	Request::parsing(Setup *setup)
 {
 	std::string::size_type	pos;
 	std::string				line;
@@ -64,10 +64,10 @@ int	Request::parsing(void)
 	}
 	pos = this->_content.find("\r\n");
 	if (pos == std::string::npos)
-		return (perror("/!\\ Empty header"), 400);
+		return (perror("/!\\ Empty header"), setup->setCode(400), 400);
 	line = this->_content.substr(0, this->_content.find("\r\n"));
 	this->_content.erase(0, this->_content.find("\r\n") + 2);
-	ret = this->setFirstline(line);
+	ret = this->setFirstline(setup, line);
 	if (ret)
 		return (ret);
 	for (pos = this->_content.find("\r\n"); pos != std::string::npos; pos = this->_content.find("\r\n"))
@@ -75,7 +75,7 @@ int	Request::parsing(void)
 		line = this->_content.substr(0, pos);
 		this->_content.erase(0, pos + 2);
 		if (line.find(": ") == std::string::npos)
-			return (perror("/!\\ bad syntax on header field"), 400);
+			return (perror("/!\\ bad syntax on header field"), setup->setCode(400), 400);
 		this->_fields[line.substr(0, line.find(": "))] = line.substr(line.find(": ") + 2);
 	}
 	std::cerr << "[ Parsed request ]" << std::endl;

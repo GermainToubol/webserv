@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:25:55 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:53:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 
 #include <string>
 #include <map>
+
+#include "Setup.hpp"
 
 class Request
 {
@@ -32,10 +34,13 @@ class Request
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
 
-		/*Parsing*/
-		int					setFirstline(std::string const& line);
-		int					parsing(void);
+		/*Methodes*/
 		
+
+		/*Parsing*/
+		int					setFirstline(Setup *setup, std::string const& line);
+		int					parsing(Setup *setup);
+
 		/*Fonctions*/
 		int					addContent(std::string const& content);
 

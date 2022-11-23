@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:10:54 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 20:51:17 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 
 #include "WebServer.hpp"
 #include "Configure.hpp"
+#include "VirtualServer.hpp"
 
 #define DEBUG 0
 
@@ -51,7 +52,14 @@ std::multimap<std::string, std::string> const& WebServer::getMimeTypes() const
 	return (this->_mimetypes);
 }
 
-int const& WebServer::getListenFd(int fd) const
+VirtualServer const& WebServer::getEntryServer(int fd) const
 {
-	return (this->_duoCS.find(fd)->second);
+	int fd = this->_duoCS.find(fd)->second;
+	
+	for (std::vector<VirtualServer>::const_iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
+	{
+		if (it->getFd() == fd)
+			return (*it);
+	}
+	return (*this->_virtual_servers.begin());
 }
