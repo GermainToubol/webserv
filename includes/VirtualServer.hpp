@@ -1,16 +1,17 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   VirtualServer.hpp                                  :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/18 14:46:14 by gtoubol          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
-#ifndef VIRTUALSERVER_H
-#define VIRTUALSERVER_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   VirtualServer.hpp                                  :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             */
+/*   Updated: 2022/11/23 11:00:20 by lgiband          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#ifndef VIRTUALSERVER_HPP
+# define VIRTUALSERVER_HPP
 #pragma once
 
 #include <string>
@@ -36,6 +37,21 @@ private:
 	std::string root;
 	std::string	host;
 	std::string	port;
+	//index
+	//pool
+	//error_page
+	//permissions -default G
+	//max_body_size
+	//locations
+		//root
+		//index
+		//autoindex
+		//default_file directory
+		//permissions
+		//post_dir
+		//redirect
+		//cgi permissions (.php/.py....)
+		//max_body_size
 };
 
 #endif /* VIRTUALSERVER_H */

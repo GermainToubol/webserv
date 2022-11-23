@@ -1,14 +1,14 @@
-#******************************************************************************#
+# **************************************************************************** #
 #                                                                              #
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
+#    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/17 16:16:16 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/23 10:46:31 by lgiband          ###   ########.fr        #
 #                                                                              #
-#******************************************************************************#
+# **************************************************************************** #
 
 SHELL=/bin/bash
 
@@ -18,6 +18,7 @@ SRCS =		$(addprefix config/,											\
 				configure.cpp												\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
+				main.cpp													\
 			)
 
 # List of test sources (.cpp)
@@ -36,6 +37,7 @@ TEST_EXE = $(TEST:.cpp=.test)
 
 # List of the related directories
 # -------------------------------------------------------------------------
+OBJS_DIR =	objs
 SRCS_DIR =	srcs
 HEAD_DIR =	includes
 TPP_DIR =	templates
@@ -54,7 +56,7 @@ NAME =		webserv
 
 # General rules on makefile
 # -------------------------------------------------------------------------
-OBJS = 		$(addprefix $(SRCS_DIR)/,$(SRCS:.cpp=.o))
+OBJS = 		$(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))
 DEPS =		$(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
 
 INCLUDES =	$(addprefix -I,$(HEAD_DIR))
@@ -64,16 +66,36 @@ RM =		rm -f
 vpath %.c $(SRCS_DIR)
 vpath %.h $(HEAD_DIR)
 
+# Color
+# -------------------------------------------------------------------------
+_GREY		= \033[30m
+_RED		= \033[31m
+_GREEN		= \033[32m
+_YELLOW		= \033[33m
+_BLUE		= \033[34m
+_PURPLE		= \033[35m
+_CYAN		= \033[36m
+_WHITE		= \033[37m
+_NO_COLOR	= \033[0m
+
+
 $(NAME):	$(OBJS)
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(OBJS)
 
-%.o:		%.cpp Makefile
-			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp $(OBJS_DIR)/%.d
+	@if [ ! -d $(dir $@) ]; then \
+		mkdir -p $(dir $@); \
+		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \
+	fi
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
 
 all:		$(NAME)
 
 clean:		dclean
 			$(RM) $(OBJS)
+			@if [ -d $(OBJS_DIR) ]; then \
+				find $(OBJS_DIR) -type d | xargs rmdir -p --ignore-fail-on-non-empty; \
+			fi
 
 tclean:
 			$(RM) $(TEST_OBJS) $(TEST_OBJS:.o=.test)
@@ -102,9 +124,12 @@ re:			fclean all
 
 # General dependences management
 # ------------------------------------------------------------------------
-%.d:		%.cpp
-			echo -n "$@ " > $@
-			$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) $(INCLUDES) $< >> $@
+$(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp
+	@if [ ! -d $(dir $@) ]; then \
+		mkdir -p $(dir $@); \
+		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \
+	fi
+	$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) $(INCLUDES) $< >> $@
 
 dclean:
 			$(RM) $(DEPS)
