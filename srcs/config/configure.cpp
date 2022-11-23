@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   configure.cpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/21 09:44:23 by gtoubol          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   configure.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
+/*   Updated: 2022/11/23 12:14:04 by lgiband          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 /**
  * @file configure.cpp
@@ -22,7 +22,7 @@
 #include <new>
 #include <string>
 #include <sys/socket.h>
-#include "configure.hpp"
+#include "Configure.hpp"
 #include "ConfigEntry.hpp"
 
 #define MAX_LINE_SIZE 8192
@@ -46,6 +46,11 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
+}
+
+std::vector<VirtualServer> const& Configure::getServers(void) const
+{
+	return (this->server_list);
 }
 
 int Configure::isGood(void) const

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/23 11:00:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 11:39:56 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,17 +26,20 @@ public:
 	std::string const& getRoot() const;
 	std::string const& getHost() const;
 	std::string const& getPort() const;
+	int 		const& getFd() const;
 
 	void	setServerName(std::string const&);
 	void	setRoot(std::string const&);
 	void	setHost(std::string const&);
 	void	setPort(std::string const&);
+	void	setFd(int const&);
 
 private:
 	std::string server_name;
 	std::string root;
 	std::string	host;
 	std::string	port;
+	int			fd;
 	//index
 	//pool
 	//error_page
