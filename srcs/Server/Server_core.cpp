@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 13:54:45 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 17:10:54 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,4 +49,9 @@ std::vector<VirtualServer> const& WebServer::getVirtualServers() const
 std::multimap<std::string, std::string> const& WebServer::getMimeTypes() const
 {
 	return (this->_mimetypes);
+}
+
+int const& WebServer::getListenFd(int fd) const
+{
+	return (this->_duoCS.find(fd)->second);
 }

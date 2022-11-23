@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 14:28:07 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 17:58:47 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,9 @@
 
 extern int running;
 
+/*
+* Take the connection from the server socket and add it to the epoll
+*/
 int	WebServer::new_connection(int fd)
 {
 	int					client_socket;
@@ -40,14 +43,37 @@ int	WebServer::new_connection(int fd)
 		event.data.fd = client_socket;
 		event.events = EPOLLIN;
 		epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
+		this->addDuoCS(client_socket, fd);
 	}
 	std::cout << "[ New client connected on " << client_socket << " ]" << std::endl;
 	return (0);
 }
 
+
+int	WebServer::set_response(int fd, Request *request, int listen_fd)
+{
+	struct epoll_event	event;
+	int					ret;
+
+	(void)listen_fd;
+	ret = request->parsing();
+	if (ret != 0)
+		std::cerr << "[ Error parsing request ]" << std::endl;
+	std::memset(&event, 0, sizeof(event));
+	event.data.fd = fd;
+ 	event.events = EPOLLOUT;
+ 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, fd, &event);
+	return (0);
+}
+
+/*
+* Receive the request from the client and and stock it in the request vector
+*/
 int	WebServer::get_request(int fd)
 {
-	int	ret;
+	int		ret;
+	int		state;
+	Request	*request;
 	
 	ret = recv(fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
@@ -55,16 +81,30 @@ int	WebServer::get_request(int fd)
 	else
 	{
 		this->_buffer[ret] = '\0';
-		this->add_request(fd, ret);
-		if (std::strstr(this->get_request(events[i].data.fd, 0).c_str(), "\r\n\r\n") || ret != BUFFER_SIZE)
+		request = get_fd_request(fd);
+		if (request == NULL)
+			return (perror("/!\\ Request not found"), -1);
+		state = request->addContent(this->_buffer);
+		if (state == 1)
 		{
-			std::cout << "All request receive" << std::endl;
-			this->set_response(events[i].data.fd);
-			event.data.fd = events[i].data.fd;
-			event.events = EPOLLOUT;
-			epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, events[i].data.fd, &event);
+			std::cerr << "[ All Request received on " << fd << " ]" << std::endl;
+			this->set_response(fd, request, this->getListenFd(fd));
+			remove_fd_request(fd);
 		}
+		// this->add_request(fd, ret);
+		// if (std::strstr(this->get_request(events[i].data.fd, 0).c_str(), "\r\n\r\n") || ret != BUFFER_SIZE)
+		// {
+		// 	std::cout << "All request receive" << std::endl;
+		// 	this->set_response(events[i].data.fd);
+
+		// }
 	}
+	return (0);
+}
+
+int	WebServer::send_response(int fd)
+{
+	(void)fd;
 	return (0);
 }
 
@@ -84,6 +124,7 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 		else
 			epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
 	}
+	return (0);
 }
 
 int	WebServer::run(void)

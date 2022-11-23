@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 14:10:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 17:15:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,7 @@
 # define MAX_LISTEN 100
 # define MAX_CLIENTS 100
 # define TIMEOUT 200
-# define BUFFER_SIZE 8
+# define BUFFER_SIZE 4096
 
 class WebServer
 {
@@ -37,20 +37,26 @@ class WebServer
 		/*Accesseurs*/
 		std::vector<VirtualServer>				const& getVirtualServers() const;
 		std::multimap<std::string, std::string>	const& getMimeTypes() const;
+		int										const& getListenFd(int fd) const;
 		
 		/*Init*/
+		int	addDuoCS(int client, int server);
 		int	create_socket(std::string port, std::string ip);
-		int	init();
+		int	init(void);
 
 		/*Run*/
 		int	send_response(int fd);
+
+		int	set_response(int fd, Request *request, int listen_fd);
 		int	get_request(int fd);
 		int	new_connection(int fd);
 		int	event_loop(struct epoll_event *events, int nb_events);
-		int	run();
+		int	run(void);
 
 		/*Utils*/
-		int	is_server(int fd);
+		void	remove_fd_request(int fd);
+		Request	*get_fd_request(int fd);
+		int		is_server(int fd);
 		
 	private:
 		int										_epoll_fd;
@@ -59,6 +65,7 @@ class WebServer
 		std::vector<Response>					_all_response;
 		std::multimap<std::string, std::string>	_mimetypes;
 		std::map<int, std::string>				_status_codes;
+		std::map<int, int>						_duoCS;
 		char									_buffer[BUFFER_SIZE + 1];
 };
 

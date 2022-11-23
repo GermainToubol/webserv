@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 13:39:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 17:25:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,11 +16,12 @@
 # pragma once
 
 #include <string>
+#include <map>
 
 class Request
 {
 	public:
-		Request();
+		Request(int fd);
 		~Request();
 
 		/*Accesseurs*/
@@ -31,10 +32,24 @@ class Request
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
 
+		/*Parsing*/
+		int					setFirstline(std::string const& line);
+		int					parsing(void);
+		
+		/*Fonctions*/
+		int					addContent(std::string const& content);
+
 	private:
-		std::string	_boundary;
-		std::string	_content;
-		int			_fd;
+		int									_fd;
+
+		std::string							_boundary;
+		std::string							_content;
+
+		std::string							_method;
+		std::string							_uri;
+		std::string							_version;
+		std::string							_body;
+		std::map<std::string, std::string>	_fields;
 };
 
 #endif

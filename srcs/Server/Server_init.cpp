@@ -6,13 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 13:54:41 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 16:49:04 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 #include <cstring>
 #include <cstdlib>
+#include <map>
 
 #include <sys/epoll.h>
 #include <sys/socket.h>
@@ -23,6 +24,14 @@
 #include <unistd.h>
 
 #include "WebServer.hpp"
+
+int	WebServer::addDuoCS(int client, int server)
+{
+	if (this->_duoCS.find(client) != this->_duoCS.end())
+		this->_duoCS.erase(client);
+	this->_duoCS.insert(std::pair<int, int>(client, server));
+	return (0);
+}
 
 int	WebServer::create_socket(std::string port, std::string ip)
 {

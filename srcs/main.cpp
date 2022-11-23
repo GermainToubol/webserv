@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 14:27:38 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 17:57:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,9 +50,13 @@ int	main(void)
 		return (1);
 	
 	WebServer server(config);
-	if (!server.init())
+	if (server.init())
 		return (1);
 	
-	server.run();
+	Request request(4);
+
+	request.addContent("GET / HTTP/1.1\r\nHost: localhost:8080\r\nAccept: */*\r\n\r\nAlelouia");
+	request.parsing();
+	
 	return (0);
 }
