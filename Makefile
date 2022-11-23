@@ -18,22 +18,20 @@ SRCS =		$(addprefix config/,											\
 				configure.cpp												\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
-				main.cpp													\
+				ConfigTree.cpp												\
 			)
 
 # List of test sources (.cpp)
 # -------------------------------------------------------------------------
-TEST = 		$(addprefix $(SRCS_DIR)/,										\
-				$(addprefix config/,										\
+TEST =			$(addprefix config/,										\
 					test_configure.cpp										\
-				)															\
-			)
+				)
 
 TEST_DIR =	tests
-TEST_OBJS =	$(TEST:.cpp=.o)
+TEST_OBJS =	$(addprefix $(OBJS_DIR)/,$(TEST:.cpp=.o))
 DOC_FILE = doxygen.conf
 
-TEST_EXE = $(TEST:.cpp=.test)
+TEST_EXE = $(addprefix $(SRCS_DIR)/,$(TEST:.cpp=.test))
 
 # List of the related directories
 # -------------------------------------------------------------------------
@@ -110,7 +108,7 @@ doc:
 test:		$(TEST_EXE)
 			pytest
 
-%.test:		%.o $(filter-out main.cpp,$(OBJS))
+$(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out main.cpp,$(OBJS))
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 re:			fclean all
