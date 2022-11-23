@@ -6,14 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 12:41:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 13:54:45 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <map>
 #include <iostream>
 
-#include "Server.hpp"
+#include "WebServer.hpp"
 #include "Configure.hpp"
 
 #define DEBUG 0

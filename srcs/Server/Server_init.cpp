@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 12:42:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/23 13:54:41 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,12 +18,13 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <netdb.h>
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "Server.hpp"
+#include "WebServer.hpp"
 
-int	create_socket(std::string port, std::string ip)
+int	WebServer::create_socket(std::string port, std::string ip)
 {
 	int					server_fd;
 	struct sockaddr_in	address;
@@ -53,7 +54,7 @@ int	create_socket(std::string port, std::string ip)
 	return (server_fd);
 }
 
-int	WebServer::init()
+int	WebServer::init(void)
 {
 	int					max = this->_virtual_servers.size();
 	struct epoll_event	event;
@@ -66,7 +67,7 @@ int	WebServer::init()
 	/*Create all the sockets corresponding to servers in the config file*/
 	for (std::vector<VirtualServer>::iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
 	{
-		it->setFd(create_socket(it->getPort(), it->getHost()));
+		it->setFd(this->create_socket(it->getPort(), it->getHost()));
 		if (it->getFd() == -1)
 		{
 			this->_virtual_servers.erase(it);
