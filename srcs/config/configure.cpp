@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include "configure.hpp"
 #include "ConfigEntry.hpp"
+#include "ConfigTree.hpp"
 
 #define MAX_LINE_SIZE 8192
 
@@ -34,6 +35,8 @@ Configure::Configure(std::string const& file):
 	server_list(),
 	n_line(0)
 {
+	ConfigTree parse_tree;
+	this->tree = &parse_tree;
 	_ifs.open(filename.c_str());
 	if (_ifs.good())
 	{
@@ -46,6 +49,7 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
+	this->tree = NULL;
 }
 
 int Configure::isGood(void) const

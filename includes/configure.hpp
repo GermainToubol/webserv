@@ -20,6 +20,7 @@
 #include <string>
 #include <vector>
 #include "ConfigEntry.hpp"
+#include "ConfigTree.hpp"
 #include "VirtualServer.hpp"
 
 /**
@@ -53,6 +54,7 @@ private:
 	int				_status;
 	std::vector<VirtualServer> server_list;
 	size_t			n_line;
+	ConfigTree		*tree;
 };
 
 #endif
