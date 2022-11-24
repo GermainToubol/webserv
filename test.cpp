@@ -17,17 +17,21 @@ int	main(int argc, char *argv[])
 	location_pool["/test/test/test/"] = "test/test/test/";
 
 	tmp = argv[argc - 1];
-	pos = tmp.find_last_of("/");
-	while (pos != std::string::npos)
+	while (1)
 	{
+		pos = tmp.find_last_of("/");
+		if (pos == std::string::npos)
+			break ;
+		if (pos == tmp.size() - 1)
+			tmp.erase(pos);
+		else
+			tmp.erase(pos + 1);
+		std::cout << tmp << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
 			std::cout << "location: " << location_pool.find(tmp)->second << std::endl;
 			return (0);
 		}
-		tmp.erase(pos+1);
-		pos = tmp.find_last_of("/");
-		std::cout << tmp << std::endl;
 	}
 	return (0);
 }

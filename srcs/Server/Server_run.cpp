@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 16:18:29 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 21:40:27 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,15 +52,20 @@ int	WebServer::new_connection(int server_fd)
 
 int WebServer::buildResponse(int client_fd, Request *request, Setup const &setup)
 {
+	struct epoll_event	event;
 	(void)client_fd;
 	(void)request;
 	(void)setup;
+
+	std::memset(&event, 0, sizeof(event));
+	event.data.fd = client_fd;
+ 	event.events = EPOLLOUT;
+ 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event);
 	return (0);
 }
 
 int	WebServer::setResponse(int client_fd, Request *request)
 {
-	struct epoll_event	event;
 	int					ret;
 	Setup				setup;
 
@@ -73,11 +78,13 @@ int	WebServer::setResponse(int client_fd, Request *request)
 	ret = request->getLocation(&setup);
 	if (ret != 0)
 		return (this->buildResponse(client_fd, request, setup));
-	// std::memset(&event, 0, sizeof(event));
-	// event.data.fd = client_fd;
- 	// event.events = EPOLLOUT;
- 	// epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event); pas necessairement
+	ret = request->setUri(&setup);
+	if (ret != 0)
+		return (this->buildResponse(client_fd, request, setup));
+	//check error
 	
+	return(request->modeChoice(&setup, client_fd));
+
 	return (0);
 }
 

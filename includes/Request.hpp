@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 16:18:16 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 21:20:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 # pragma once
 
 #include <string>
+#include <vector>
 #include <map>
 
 #include "Setup.hpp"
@@ -35,12 +36,15 @@ class Request
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
 
+		/*setUri*/
+		int					setUri(Setup *setup);
+
 		/*getLocation*/
 		int					getLocation(Setup *setup);
 
 		/*getServer*/
 		int					getServer(Setup *setup, std::vector<VirtualServer> const& server_pool);
-
+		
 		/*Parsing*/
 		int					setFirstline(Setup *setup, std::string const& line);
 		int					parsing(Setup *setup);
@@ -61,7 +65,8 @@ class Request
 		std::string							_body;
 		std::map<std::string, std::string>	_fields;
 
-		Location							*_location;
+		Location const 						*_location;
+		std::string 						_location_path;
 		
 };
 

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 16:19:54 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 21:31:21 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,16 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 	return (0);	
 }
 
+int	Request::setUri(Setup *setup)
+{
+	if (this->_uri == this->_location->getRoot())
+		this->_uri = this->_location->getIndex();
+	else
+		this->_uri.replace(0, this->_location_path.size(), this->_location->getRoot());
+	this->_uri = setup->getServer().getRoot() + this->_uri;
+	return (0);
+}
+
 int	Request::getLocation(Setup *setup)
 {
 	std::map<std::string, Location> const&	location_pool = setup->getServer().getLocationPool();
@@ -65,17 +75,26 @@ int	Request::getLocation(Setup *setup)
 	
 	tmp = this->_uri;
 	pos = tmp.find_last_of("/");
-	while (pos != std::string::npos)
+	while (1)
 	{
+		pos = tmp.find_last_of("/");
+		if (pos == std::string::npos)
+			break ;
+		if (pos == tmp.size() - 1)
+			tmp.erase(pos);
+		else
+			tmp.erase(pos + 1);
+		std::cout << tmp << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
-			this->_location = location_pool.find(tmp)->second;
-			this->_uri.erase(0, tmp.size());
+			std::cerr << "[ location: " << location_pool.find(tmp)->first << " ]" << std::endl;
+			this->_location = &location_pool.find(tmp)->second;
+			this->_location_path = tmp;
 			return (0);
 		}
-		tmp.erase(pos);
-		pos = tmp.find_last_of("/");
 	}
+	this->_location = &location_pool.find("/")->second;
+	this->_location_path = "/";
 	return (0);
 }
 
