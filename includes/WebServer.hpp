@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 20:51:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 15:06:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,7 +37,7 @@ class WebServer
 		/*Accesseurs*/
 		std::vector<VirtualServer>				const& getVirtualServers() const;
 		std::multimap<std::string, std::string>	const& getMimeTypes() const;
-		VirtualServer							const& getEntryServer(int fd) const;
+		std::vector<VirtualServer>				const& getAccessibleServer(int client_fd) const;
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);
@@ -46,8 +46,8 @@ class WebServer
 
 		/*Run*/
 		int	send_response(int fd);
-		int build_response(int fd, Request *request, Setup const &setup);
-		int	set_response(int fd, Request *request, VirtualServer const &entry_server);
+		int buildResponse(int fd, Request *request, Setup const &setup);
+		int	setResponse(int fd, Request *request);
 		int	get_request(int fd);
 		int	new_connection(int fd);
 		int	event_loop(struct epoll_event *events, int nb_events);
@@ -59,14 +59,16 @@ class WebServer
 		int		is_server(int fd);
 		
 	private:
-		int										_epoll_fd;
-		std::vector<VirtualServer>				_virtual_servers;
-		std::vector<Request>					_all_request;
-		std::vector<Response>					_all_response;
-		std::multimap<std::string, std::string>	_mimetypes;
-		std::map<int, std::string>				_status_codes;
-		std::map<int, int>						_duoCS;
-		char									_buffer[BUFFER_SIZE + 1];
+		int													_epoll_fd;
+		std::vector<VirtualServer>							_virtual_servers;
+		std::vector<Request>								_all_request;
+		std::vector<Response>								_all_response;
+		std::multimap<std::string, std::string>				_mimetypes;
+		std::map<int, std::string>							_status_codes;
+		std::map<std::string, std::vector<VirtualServer> >	_duoIVS;
+		std::map<int, std::string>							_duoSI;
+		std::map<int, int>									_duoCS;
+		char												_buffer[BUFFER_SIZE + 1];
 };
 
 #endif

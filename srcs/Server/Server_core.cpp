@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 20:51:17 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 15:09:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ WebServer::WebServer(Configure const& config)
 	map = &this->_status_codes;
 	#include "status_codes"
 	
+	this->_duoIVS = config.getDuoIVS();
 	if (DEBUG)
 	{
 		for (std::multimap<std::string, std::string>::iterator it = multimap->begin(); it != multimap->end(); it++)
@@ -52,14 +53,10 @@ std::multimap<std::string, std::string> const& WebServer::getMimeTypes() const
 	return (this->_mimetypes);
 }
 
-VirtualServer const& WebServer::getEntryServer(int fd) const
+std::vector<VirtualServer> const& WebServer::getAccessibleServer(int client_fd) const
 {
-	int fd = this->_duoCS.find(fd)->second;
-	
-	for (std::vector<VirtualServer>::const_iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
-	{
-		if (it->getFd() == fd)
-			return (*it);
-	}
-	return (*this->_virtual_servers.begin());
+	int server_fd = this->_duoCS.find(client_fd)->second;
+	std::string interface = this->_duoSI.find(server_fd)->second;
+	std::vector<VirtualServer> const& servers = this->_duoIVS.find(interface)->second;
+	return (servers);
 }

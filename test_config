@@ -1,7 +1,7 @@
 server:
   listen: 127.0.0.1:8080
   server_name: coucou
-  root: /ono/ok
+  root: /ono/ok 
 
 server:
   listen: 0.0.0.0:8080

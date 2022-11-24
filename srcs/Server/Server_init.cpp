@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 16:49:04 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 14:54:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,6 +84,7 @@ int	WebServer::init(void)
 		}
 		else
 		{
+			this->_duoSI.insert(std::pair<int, std::string>(it->getFd(), it->getHost() + ":" + it->getPort()));
 			event.data.fd = it->getFd();
 			event.events = EPOLLIN;
 			epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, it->getFd(), &event);

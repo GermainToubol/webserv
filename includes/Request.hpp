@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 20:53:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 16:18:16 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <map>
 
 #include "Setup.hpp"
+#include "Location.hpp"
 
 class Request
 {
@@ -34,8 +35,11 @@ class Request
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
 
-		/*Methodes*/
-		
+		/*getLocation*/
+		int					getLocation(Setup *setup);
+
+		/*getServer*/
+		int					getServer(Setup *setup, std::vector<VirtualServer> const& server_pool);
 
 		/*Parsing*/
 		int					setFirstline(Setup *setup, std::string const& line);
@@ -52,9 +56,13 @@ class Request
 
 		std::string							_method;
 		std::string							_uri;
+		std::string							_query;
 		std::string							_version;
 		std::string							_body;
 		std::map<std::string, std::string>	_fields;
+
+		Location							*_location;
+		
 };
 
 #endif

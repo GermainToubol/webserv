@@ -6,12 +6,13 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 20:28:01 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 16:19:54 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
 #include <iostream>
+#include <vector>
 
 #include <stdio.h>
 
@@ -44,10 +45,57 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 	if (pos2 == std::string::npos)
 		return (perror("/!\\ No Uri"), setup->setCode(400), 400);
 	this->_uri = line.substr(pos + 1, pos2 - pos - 1);
+	pos = this->_uri.find("?");
+	if (pos != std::string::npos)
+	{
+		this->_query = this->_uri.substr(pos + 1);
+		this->_uri.erase(pos);
+	}
 	this->_version = line.substr(pos2 + 1, line.size() - pos2 - 1);
 	if (this->_version != "HTTP/1.1")
 		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	return (0);	
+}
+
+int	Request::getLocation(Setup *setup)
+{
+	std::map<std::string, Location> const&	location_pool = setup->getServer().getLocationPool();
+	std::string				tmp;
+	std::string::size_type	pos = 0;
+	
+	tmp = this->_uri;
+	pos = tmp.find_last_of("/");
+	while (pos != std::string::npos)
+	{
+		if (location_pool.find(tmp) != location_pool.end())
+		{
+			this->_location = location_pool.find(tmp)->second;
+			this->_uri.erase(0, tmp.size());
+			return (0);
+		}
+		tmp.erase(pos);
+		pos = tmp.find_last_of("/");
+	}
+	return (0);
+}
+
+int	Request::getServer(Setup *setup, std::vector<VirtualServer> const& server_pool)
+{
+	std::string	host;
+	
+	if (this->_fields.find("Host") == this->_fields.end())
+		return (perror("/!\\ No Host"), setup->setCode(400), 400);
+	host = this->_fields["Host"];
+	if (host.find(":") != std::string::npos)
+		host = host.substr(0, host.find(":"));
+	for (std::vector<VirtualServer>::const_iterator it = server_pool.begin(); it != server_pool.end(); ++it)
+	{
+		if (it->getServerName() == host)
+			return (setup->setServer(*it), 0);
+	}
+	if (server_pool.size() < 1)
+		return (setup->setServer(server_pool[0]), setup->setCode(400), 400);
+	return (setup->setServer(server_pool[0]), 0);
 }
 
 int	Request::parsing(Setup *setup)

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 20:57:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 16:18:29 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ extern int running;
 /*
 * Take the connection from the server socket and add it to the epoll
 */
-int	WebServer::new_connection(int fd)
+int	WebServer::new_connection(int server_fd)
 {
 	int					client_socket;
 	struct epoll_event	event;
 
-	std::cerr << "[ New connection on server " << fd << " ]" << std::endl;
-	client_socket = accept(fd, NULL, NULL);
+	std::cerr << "[ New connection on server " << server_fd << " ]" << std::endl;
+	client_socket = accept(server_fd, NULL, NULL);
 	if (client_socket == -1 && errno != EWOULDBLOCK)
 		return (perror("/!\\ Accept failed"), -1);
 	else
@@ -44,35 +44,39 @@ int	WebServer::new_connection(int fd)
 		event.data.fd = client_socket;
 		event.events = EPOLLIN;
 		epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
-		this->addDuoCS(client_socket, fd);
+		this->addDuoCS(client_socket, server_fd);
 	}
 	std::cout << "[ New client connected on " << client_socket << " ]" << std::endl;
 	return (0);
 }
 
-int WebServer::build_response(int fd, Request *request, Setup const &setup)
+int WebServer::buildResponse(int client_fd, Request *request, Setup const &setup)
 {
-	(void)fd;
+	(void)client_fd;
 	(void)request;
 	(void)setup;
 	return (0);
 }
 
-int	WebServer::set_response(int fd, Request *request, VirtualServer const &entry_server)
+int	WebServer::setResponse(int client_fd, Request *request)
 {
 	struct epoll_event	event;
 	int					ret;
 	Setup				setup;
 
-	(void)entry_server;
 	ret = request->parsing(&setup);
 	if (ret != 0)
-		return (this->build_response(fd, request, setup));
-	
+		return (this->buildResponse(client_fd, request, setup));
+	ret = request->getServer(&setup, this->getAccessibleServer(client_fd));
+	if (ret != 0)
+		return (this->buildResponse(client_fd, request, setup));
+	ret = request->getLocation(&setup);
+	if (ret != 0)
+		return (this->buildResponse(client_fd, request, setup));
 	// std::memset(&event, 0, sizeof(event));
-	// event.data.fd = fd;
+	// event.data.fd = client_fd;
  	// event.events = EPOLLOUT;
- 	// epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, fd, &event); pas necessairement
+ 	// epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event); pas necessairement
 	
 	return (0);
 }
@@ -80,29 +84,29 @@ int	WebServer::set_response(int fd, Request *request, VirtualServer const &entry
 /*
 * Receive the request from the client and and stock it in the request vector
 */
-int	WebServer::get_request(int fd)
+int	WebServer::get_request(int client_fd)
 {
 	int		ret;
 	int		state;
 	Request	*request;
 	
-	ret = recv(fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
 		perror("/!\\ Recv failed");
 	else
 	{
 		this->_buffer[ret] = '\0';
-		request = get_fd_request(fd);
+		request = get_fd_request(client_fd);
 		if (request == NULL)
 			return (perror("/!\\ Request not found"), -1);
 		state = request->addContent(this->_buffer);
 		if (state == 1)
 		{
-			std::cerr << "[ All Request received on " << fd << " ]" << std::endl;
-			this->set_response(fd, request, this->getEntryServer(fd));
-			remove_fd_request(fd);
+			std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+			this->setResponse(client_fd, request);
+			remove_fd_request(client_fd);
 		}
-		// this->add_request(fd, ret);
+		// this->add_request(client_fd, ret);
 		// if (std::strstr(this->get_request(events[i].data.fd, 0).c_str(), "\r\n\r\n") || ret != BUFFER_SIZE)
 		// {
 		// 	std::cout << "All request receive" << std::endl;
@@ -113,9 +117,9 @@ int	WebServer::get_request(int fd)
 	return (0);
 }
 
-int	WebServer::send_response(int fd)
+int	WebServer::send_response(int client_fd)
 {
-	(void)fd;
+	(void)client_fd;
 	return (0);
 }
 

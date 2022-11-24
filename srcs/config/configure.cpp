@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/23 12:14:04 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 14:51:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,7 @@
 #include <arpa/inet.h>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <new>
 #include <string>
@@ -51,6 +52,11 @@ Configure::Configure(std::string const& file):
 std::vector<VirtualServer> const& Configure::getServers(void) const
 {
 	return (this->server_list);
+}
+
+std::map<std::string, std::vector<VirtualServer> > const& Configure::getDuoIVS(void) const
+{
+	return (this->duoIVS);
 }
 
 int Configure::isGood(void) const

@@ -6,12 +6,15 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 16:03:52 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/23 11:40:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/24 16:10:34 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
+#include <vector>
+
 #include "VirtualServer.hpp"
+#include "Location.hpp"
 
 VirtualServer::VirtualServer(void):
 	server_name(""),
@@ -24,27 +27,32 @@ VirtualServer::VirtualServer(void):
 
 std::string const& VirtualServer::getServerName() const
 {
-	return (server_name);
+	return (this->server_name);
 }
 
 std::string const& VirtualServer::getRoot() const
 {
-	return (root);
+	return (this->root);
 }
 
 std::string const& VirtualServer::getHost() const
 {
-	return (host);
+	return (this->host);
 }
 
 std::string const& VirtualServer::getPort() const
 {
-	return (port);
+	return (this->port);
 }
 
 int const& VirtualServer::getFd() const
 {
-	return (fd);
+	return (this->fd);
+}
+
+std::map<std::string, Location> const& VirtualServer::getLocationPool() const
+{
+	return (this->location_pool);
 }
 
 void VirtualServer::setServerName(std::string const& name)
