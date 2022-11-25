@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:46:41 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 12:03:51 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 17:04:56 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,7 +34,8 @@ class Location
 		std::string							const&	getIndex() const;
 		std::string							const&	getRedirect() const;
 		std::map<std::string, std::string>	const&	getCgiPerm() const;
-		
+		bool								const&	getAutoindex() const;
+		std::string							const&	getDefaultFile() const;		
 
 	private:
 		int									_permissions;
