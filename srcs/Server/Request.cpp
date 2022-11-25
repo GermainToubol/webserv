@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 21:31:21 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 15:02:10 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,7 @@
 #include <stdio.h>
 
 #include "Request.hpp"
+#include "utils.hpp"
 
 Request::Request(int fd):	_fd(fd), _boundary(""), _content(""),
 							_method(""), _uri(""),
@@ -46,34 +47,44 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 		return (perror("/!\\ No Uri"), setup->setCode(400), 400);
 	this->_uri = line.substr(pos + 1, pos2 - pos - 1);
 	pos = this->_uri.find("?");
+	setup->setUri(this->_uri.substr(0, pos));
 	if (pos != std::string::npos)
-	{
-		this->_query = this->_uri.substr(pos + 1);
-		this->_uri.erase(pos);
-	}
+		setup->setQuery(setup->getUri().substr(pos + 1));
+	setup->setExtension();
 	this->_version = line.substr(pos2 + 1, line.size() - pos2 - 1);
 	if (this->_version != "HTTP/1.1")
 		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	return (0);	
 }
 
-int	Request::setUri(Setup *setup)
+int	Request::basicCheck(Setup *setup)
 {
-	if (this->_uri == this->_location->getRoot())
-		this->_uri = this->_location->getIndex();
-	else
-		this->_uri.replace(0, this->_location_path.size(), this->_location->getRoot());
-	this->_uri = setup->getServer().getRoot() + this->_uri;
+	if (this->_version != "HTTP/1.1")
+		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
+	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
+		return (perror("/!\\ Bad Method"), setup->setCode(405), 405);
 	return (0);
 }
 
-int	Request::getLocation(Setup *setup)
+int	Request::setUri(Setup *setup)
 {
-	std::map<std::string, Location> const&	location_pool = setup->getServer().getLocationPool();
+	std::string::size_type	pos = 0;
+
+	if (setup->getUri() == this->_location->getRoot())
+		setup->setUri(this->_location->getIndex()); //else if is a directory and autoindex = default_file(1/0?)
+	else
+		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
+	setup->setUri(setup->getServer()->getRoot() + setup->getUri());
+	return (0);
+}
+
+int	Request::setLocation(Setup *setup)
+{
+	std::map<std::string, Location>	const&	location_pool = setup->getServer()->getLocationPool();
 	std::string				tmp;
 	std::string::size_type	pos = 0;
 	
-	tmp = this->_uri;
+	tmp = setup->getUri();
 	pos = tmp.find_last_of("/");
 	while (1)
 	{
@@ -98,7 +109,7 @@ int	Request::getLocation(Setup *setup)
 	return (0);
 }
 
-int	Request::getServer(Setup *setup, std::vector<VirtualServer> const& server_pool)
+int	Request::setServer(Setup *setup, std::vector<VirtualServer> const& server_pool)
 {
 	std::string	host;
 	
@@ -170,6 +181,21 @@ std::string const&	Request::getContent() const
 int	const&	Request::getFd() const
 {
 	return (this->_fd);
+}
+
+Location const	*Request::getLocation() const
+{
+	return (this->_location);
+}
+
+std::string const&	Request::getMethod() const
+{
+	return (this->_method);
+}
+
+std::string const&	Request::getExtension() const
+{
+	return (this->_extension);
 }
 
 void	Request::setBoundary(std::string const& boundary)

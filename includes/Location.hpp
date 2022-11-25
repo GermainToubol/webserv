@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:46:41 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 21:27:10 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 12:03:51 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,6 +18,10 @@
 # include <string>
 # include <map>
 
+# define GET_PERM 1
+# define POST_PERM 2
+# define DEL_PERM 4
+
 class Location
 {
 	public:
@@ -25,20 +29,22 @@ class Location
 		~Location();
 
 		/*Accesseurs*/
-		std::string		getRoot() const;
-		std::string		getIndex() const;
-
+		int									const&	getPermission() const;
+		std::string							const&	getRoot() const;
+		std::string							const&	getIndex() const;
+		std::string							const&	getRedirect() const;
+		std::map<std::string, std::string>	const&	getCgiPerm() const;
+		
 
 	private:
+		int									_permissions;
 		bool								_autoindex;
 		std::string							_default_file;
 		std::string							_root;
 		std::string							_index;
 		std::string							_post_dir;
-		std::string							_permissions;
 		std::string							_max_body_size;
 		std::string							_redirect;
-		std::string							_cgi_permissions;
 		std::map<std::string, std::string>	_cgi_path;
 		
 };

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 15:06:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 14:44:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,9 +44,18 @@ class WebServer
 		int	create_socket(std::string port, std::string ip);
 		int	init(void);
 
+		/*Mode*/
+		int					cgiMode(Request *request, Setup *setup);
+		int					redirectMode(Request *request, Setup *setup, int client_fd);
+		int					getMode(Request *request, Setup *setup, int client_fd);
+		int					postMode(Request *request, Setup *setup, int client_fd);
+		int					deleteMode(Request *request, Setup *setup, int client_fd);
+		int					modeChoice(Request *request, Setup *setup, int client_fd);
+
 		/*Run*/
 		int	send_response(int fd);
-		int buildResponse(int fd, Request *request, Setup const &setup);
+		
+		int buildResponseDefault(int fd, Request *request, Setup *setup);
 		int	setResponse(int fd, Request *request);
 		int	get_request(int fd);
 		int	new_connection(int fd);
