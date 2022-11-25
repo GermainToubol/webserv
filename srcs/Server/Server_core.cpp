@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 15:09:28 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:35:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,10 +53,10 @@ std::multimap<std::string, std::string> const& WebServer::getMimeTypes() const
 	return (this->_mimetypes);
 }
 
-std::vector<VirtualServer> const& WebServer::getAccessibleServer(int client_fd) const
+std::vector<VirtualServer*> const& WebServer::getAccessibleServer(int client_fd) const
 {
 	int server_fd = this->_duoCS.find(client_fd)->second;
 	std::string interface = this->_duoSI.find(server_fd)->second;
-	std::vector<VirtualServer> const& servers = this->_duoIVS.find(interface)->second;
+	std::vector<VirtualServer*> const& servers = this->_duoIVS.find(interface)->second;
 	return (servers);
 }

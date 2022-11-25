@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 15:50:31 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 16:01:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:18:06 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,13 @@
 class Cache
 {
 	public:
+		Cache();
+		~Cache();
+
 		size_t			const& getSize() const;
 		size_t			const& getUsers() const;
 		std::string		const& getUri() const;
-		std::ifstream*			getStream() const;
+		std::ifstream*		   getStream() const;
 
 		void			setSize(size_t const& size);
 		void			setUsers(size_t const& users);

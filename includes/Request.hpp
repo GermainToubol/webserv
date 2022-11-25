@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 12:23:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:37:15 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ class Request
 		int					setLocation(Setup *setup);
 
 		/*getServer*/
-		int					setServer(Setup *setup, std::vector<VirtualServer> const& server_pool);
+		int					setServer(Setup *setup, std::vector<VirtualServer*> const& server_pool);
 		
 		/*Parsing*/
 		int					setFirstline(Setup *setup, std::string const& line);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 15:02:10 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:36:46 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -109,7 +109,7 @@ int	Request::setLocation(Setup *setup)
 	return (0);
 }
 
-int	Request::setServer(Setup *setup, std::vector<VirtualServer> const& server_pool)
+int	Request::setServer(Setup *setup, std::vector<VirtualServer*> const& server_pool)
 {
 	std::string	host;
 	
@@ -118,9 +118,9 @@ int	Request::setServer(Setup *setup, std::vector<VirtualServer> const& server_po
 	host = this->_fields["Host"];
 	if (host.find(":") != std::string::npos)
 		host = host.substr(0, host.find(":"));
-	for (std::vector<VirtualServer>::const_iterator it = server_pool.begin(); it != server_pool.end(); ++it)
+	for (std::vector<VirtualServer *>::const_iterator it = server_pool.begin(); it != server_pool.end(); ++it)
 	{
-		if (it->getServerName() == host)
+		if ((*it)->getServerName() == host)
 			return (setup->setServer(*it), 0);
 	}
 	if (server_pool.size() < 1)

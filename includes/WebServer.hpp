@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 14:44:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:35:14 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@
 #include "Request.hpp"
 #include "Response.hpp"
 #include "Configure.hpp"
+#include "Cache.hpp"
 
 # define MAX_LISTEN 100
 # define MAX_CLIENTS 100
@@ -37,7 +38,7 @@ class WebServer
 		/*Accesseurs*/
 		std::vector<VirtualServer>				const& getVirtualServers() const;
 		std::multimap<std::string, std::string>	const& getMimeTypes() const;
-		std::vector<VirtualServer>				const& getAccessibleServer(int client_fd) const;
+		std::vector<VirtualServer*>				const& getAccessibleServer(int client_fd) const;
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);
@@ -54,7 +55,7 @@ class WebServer
 
 		/*Run*/
 		int	send_response(int fd);
-		
+		int	openFile(Setup *setup, Response *response);
 		int buildResponseDefault(int fd, Request *request, Setup *setup);
 		int	setResponse(int fd, Request *request);
 		int	get_request(int fd);
@@ -72,9 +73,10 @@ class WebServer
 		std::vector<VirtualServer>							_virtual_servers;
 		std::vector<Request>								_all_request;
 		std::vector<Response>								_all_response;
+		std::vector<Cache>									_all_cache;
 		std::multimap<std::string, std::string>				_mimetypes;
 		std::map<int, std::string>							_status_codes;
-		std::map<std::string, std::vector<VirtualServer> >	_duoIVS;
+		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
 		char												_buffer[BUFFER_SIZE + 1];
