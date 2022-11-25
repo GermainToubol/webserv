@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/23 22:02:22 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/25 15:50:58 by gtoubol          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,16 @@ SRCS =		$(addprefix config/,											\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
 				ConfigTree.cpp												\
-			)
+			)																\
+			$(addprefix Server/,											\
+				Server_core.cpp												\
+				Server_init.cpp												\
+				Server_run.cpp												\
+				Server_utils.cpp											\
+				Request.cpp													\
+				Response.cpp												\
+			)																\
+			main.cpp \
 
 # List of test sources (.cpp)
 # -------------------------------------------------------------------------

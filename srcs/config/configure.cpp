@@ -1,14 +1,15 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   configure.cpp                                      :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/23 22:01:52 by gtoubol          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   configure.cpp                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
+//   Updated: 2022/11/25 15:52:17 by gtoubol          ###   ########.fr       //
+/*                                                                            */
+/* ************************************************************************** */
+
 
 /**
  * @file configure.cpp
@@ -18,11 +19,12 @@
 #include <arpa/inet.h>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <netinet/in.h>
 #include <new>
 #include <string>
 #include <sys/socket.h>
-#include "configure.hpp"
+#include "Configure.hpp"
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
 
@@ -51,6 +53,16 @@ Configure::Configure(std::string const& file):
 	_ifs.close();
 	this->tree->print("");
 	this->tree = NULL;
+}
+
+std::vector<VirtualServer> const& Configure::getServers(void) const
+{
+	return (this->server_list);
+}
+
+std::map<std::string, std::vector<VirtualServer> > const& Configure::getDuoIVS(void) const
+{
+	return (this->duoIVS);
 }
 
 int Configure::isGood(void) const
