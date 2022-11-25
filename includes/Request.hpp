@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 21:20:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 12:23:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,18 +32,25 @@ class Request
 		std::string const&	getBoundary() const;
 		std::string const&	getContent() const;
 		int			const&	getFd() const;
+		Location	const	*getLocation() const;
+		std::string const&	getMethod() const;
+		std::string const&	getExtension() const;
+		
 		void				setBoundary(std::string const& boundary);
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
+	
+		/*basicCheck*/
+		int					basicCheck(Setup *setup);
 
 		/*setUri*/
 		int					setUri(Setup *setup);
 
 		/*getLocation*/
-		int					getLocation(Setup *setup);
+		int					setLocation(Setup *setup);
 
 		/*getServer*/
-		int					getServer(Setup *setup, std::vector<VirtualServer> const& server_pool);
+		int					setServer(Setup *setup, std::vector<VirtualServer> const& server_pool);
 		
 		/*Parsing*/
 		int					setFirstline(Setup *setup, std::string const& line);
@@ -60,6 +67,7 @@ class Request
 
 		std::string							_method;
 		std::string							_uri;
+		std::string							_extension;
 		std::string							_query;
 		std::string							_version;
 		std::string							_body;

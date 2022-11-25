@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 16:03:52 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/24 16:10:34 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 14:57:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,11 @@ int const& VirtualServer::getFd() const
 std::map<std::string, Location> const& VirtualServer::getLocationPool() const
 {
 	return (this->location_pool);
+}
+
+std::map<int, std::string> const& VirtualServer::getErrorPage() const
+{
+	return (this->error_page);
 }
 
 void VirtualServer::setServerName(std::string const& name)

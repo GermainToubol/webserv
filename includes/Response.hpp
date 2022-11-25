@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:39:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 13:48:06 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 14:49:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,9 @@
 
 #include <string>
 #include <vector>
+#include <map>
+
+#include "Setup.hpp"
 
 class Response
 {
@@ -35,20 +38,24 @@ class Response
 		
 		void					setFilename(std::string const& filename);
 		void					setHeader(std::string const& header);
+		void					setHeader(Setup *setup, std::map<int, std::string> const& status_code, std::multimap<std::string, std::string> const& mime_type, size_t body_size);
 		void					setBody(std::string const& body);
+		void					setBody(int code, std::string const& type);
 		void					setBodySize(std::string::size_type const& body_size);
 		void					setPosition(std::string::size_type const& position);
 		void					setFd(int const& fd);
 		void					setStatus(int const& status);
 
 	private:
-		std::string				_filename;
+		int						_fd;
+		int						_send_status;
 		std::string				_header;
-		std::string				_body;
 		std::string::size_type	_body_size;
 		std::string::size_type	_position;
-		int						_fd;
-		int						_status;
+		
+		std::string				_body;
+		
+		std::string				_filename;
 };
 
 #endif
