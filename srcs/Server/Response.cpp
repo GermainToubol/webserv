@@ -6,9 +6,11 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 14:50:05 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 21:52:06 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <dirent.h>
 
 #include "Response.hpp"
 #include "utils.hpp"
@@ -106,6 +108,30 @@ void	Response::setBody(int code, std::string const& type)
 </body>\
 </html>";
 	this->_body_size = this->_body.size();
+}
+
+int	Response::setListingBody(std::string uri, std::string const& root)
+{
+	DIR				*dir;
+	struct dirent	*ent;
+
+	uri.replace(0, root.size(), "");
+	if (uri[0] != '/')
+		uri.insert(0, "/");
+	if (*(uri.end() - 1) != '/')
+		uri += '/';
+	this->_body = "<!DOCTYPE html>\n\
+<html>\n<head>\n<title>Index of " + uri + "</title>\n</head>\n\
+<body>\n<h1 style=\"font-size:30px\">Index of " + uri + "</h1>\n<br><br><hr>\n";
+	dir = opendir(uri.c_str());
+	if (dir == NULL)
+		return (500);
+	while ((ent = readdir(dir)) != NULL)
+		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + path + ent->d_name + "\">" + ent->d_name + "</a><br><hr>\n";
+	this->_body += "</body>\n</html>";
+	closedir(dir);
+	this->_body_size = this->_body.size();
+	return (0);
 }
 
 void	Response::setBodySize(std::string::size_type const& body_size)

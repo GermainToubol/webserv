@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:39:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 14:49:55 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 21:50:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,9 @@ class Response
 		void					setPosition(std::string::size_type const& position);
 		void					setFd(int const& fd);
 		void					setStatus(int const& status);
+
+		/*Fonctions*/
+		int	setListingBody(std::string uri, std::string const& root);
 
 	private:
 		int						_fd;

@@ -6,12 +6,56 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 17:12:16 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 20:23:58 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "WebServer.hpp"
 #include "Request.hpp"
+
+#include <sys/stat.h>
+
+bool	WebServer::doesPathExist(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	return (true);
+}
+
+bool	WebServer::isPathReadable(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (buf.st_mode & S_IRUSR)
+		return (true);
+	return (false);
+}
+
+bool	WebServer::isDirectory(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (S_ISDIR(buf.st_mode))
+		return (true);
+	return (false);
+}
+
+bool	WebServer::isFile(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (S_ISREG(buf.st_mode))
+		return (true);
+	return (false);
+}
 
 int	WebServer::is_server(int fd)
 {

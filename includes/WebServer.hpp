@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 16:35:14 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 20:30:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,12 @@ class WebServer
 		int	create_socket(std::string port, std::string ip);
 		int	init(void);
 
+		/*BuildResponse*/
+		int	openFile(Setup *setup, Response *response);
+		int buildResponseDefault(int fd, Request *request, Setup *setup);
+		int buildResponseListing(Request *request, Setup *setup, int client_fd);
+		int buildResponseGet(Request *request, Setup *setup, int client_fd);
+
 		/*Mode*/
 		int					cgiMode(Request *request, Setup *setup);
 		int					redirectMode(Request *request, Setup *setup, int client_fd);
@@ -55,8 +61,6 @@ class WebServer
 
 		/*Run*/
 		int	send_response(int fd);
-		int	openFile(Setup *setup, Response *response);
-		int buildResponseDefault(int fd, Request *request, Setup *setup);
 		int	setResponse(int fd, Request *request);
 		int	get_request(int fd);
 		int	new_connection(int fd);
@@ -64,6 +68,10 @@ class WebServer
 		int	run(void);
 
 		/*Utils*/
+		bool	doesPathExist(std::string const& path);
+		bool	isPathReadable(std::string const& path);
+		bool	isDirectory(std::string const& path);
+		bool	isFile(std::string const& path);
 		void	remove_fd_request(int fd);
 		Request	*get_fd_request(int fd);
 		int		is_server(int fd);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 17:18:31 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 20:29:51 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,11 +49,10 @@ int	WebServer::cgiMode(Request *request, Setup *setup)
 int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 {
 	struct epoll_event	event;
-	Response			response;
 
 	if (!this->doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathAllowed(setup->getUri()))
+	if (!this->isPathReadable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	if (this->isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == false)
 	{
@@ -64,7 +63,7 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 			// peut etre que je peux recuperer le path de la root de location dans l'uri, erase la fin et ajouter le default file
 	}
 	if (this->isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == true)
-		return (setup->setCode(200), this->buildResponseListing(setup, client_fd));
+		return (setup->setCode(200), this->buildResponseListing(request, setup, client_fd));
 	if (this->isFile(setup->getUri()))
 		return (setup->setCode(200), this->buildResponseGet(request, setup, client_fd));
 	return (setup->setCode(403), 403);
