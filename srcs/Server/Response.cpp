@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 21:53:45 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 21:54:32 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -127,7 +127,7 @@ int	Response::setListingBody(std::string uri, std::string const& root)
 	if (dir == NULL)
 		return (500);
 	while ((ent = readdir(dir)) != NULL)
-		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + path + ent->d_name + "\">" + ent->d_name + "</a><br><hr>\n";
+		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + uri + ent->d_name + "\">" + ent->d_name + "</a><br><hr>\n";
 	this->_body += "</body>\n</html>";
 	closedir(dir);
 	this->_body_size = this->_body.size();
