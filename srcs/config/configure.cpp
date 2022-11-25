@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/25 16:05:17 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/26 00:04:34 by gtoubol          ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,15 @@
 #include <fstream>
 #include <iostream>
 #include <map>
-#include <netinet/in.h>
+#include <netdb.h>
 #include <new>
 #include <string>
 #include <sys/socket.h>
+#include <sys/types.h>
 #include "Configure.hpp"
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
+
 
 #define MAX_LINE_SIZE 8192
 
@@ -63,9 +65,9 @@ std::vector<VirtualServer> const& Configure::getServers(void) const
 /**
  * @brief Extract the list of virtual servers related to their full interface description
  *
- *
+ * The string describes the interface as "IPV4:IP"
  */
-std::map<std::string, std::vector<VirtualServer> > const& Configure::getDuoIVS(void) const
+std::map<std::string, std::vector<VirtualServer*> > const& Configure::getDuoIVS(void) const
 {
 	return (this->duoIVS);
 }
@@ -85,21 +87,19 @@ int Configure::readFile(void)
 {
 	std::string current_line;
 
-	try
+	current_line.reserve(8192);
+	while (this->readLine(current_line))
 	{
-		// Allow sufficient amount of memory at one
-		current_line.reserve(8192);
-	} catch (std::bad_alloc const& e)
-	{
-		_status = 128;
-		std::cerr << "Error: memory allocation error.\n";
-		return (-1);
+		;
 	}
-	while (this->readLine(current_line));
 	if (_ifs.fail() && _ifs.bad())
 	{
 		_status = 1;
 		std::cerr << "Error: " << this->filename << ": unreadable.\n";
+	}
+	if (this->isGood())
+	{
+		this->TreeToServers();
 	}
 	return (0);
 }
@@ -120,14 +120,13 @@ bool	Configure::readLine(std::string &current_line)
 		++this->n_line;
 		current_line.append(buffer);
 		this->parse(current_line);
-		current_line.clear(); // clear content but not allocated memory
+		current_line.clear();
 	}
 	return (_ifs.good());
 }
 
-void	Configure::parse(std::string const& line)
+void	Configure::addEntryToTree(ConfigEntry const& entry)
 {
-	ConfigEntry	entry(line);
 	ConfigTree	*current_level;
 	size_t		i;
 
@@ -149,23 +148,13 @@ void	Configure::parse(std::string const& line)
 	{
 		this->parseError("invalid entry");
 	}
+}
 
-	if (entry.getKey() == "server")
-	{
-		this->addServer(entry);
-	}
-	if (entry.getKey() == "listen")
-	{
-		this->addListen(entry);
-	}
-	if (entry.getKey() == "root")
-	{
-		this->addRoot(entry);
-	}
-	if (entry.getKey() == "server_name")
-	{
-		this->addServerName(entry);
-	}
+void	Configure::parse(std::string const& line)
+{
+	ConfigEntry	entry(line);
+
+	this->addEntryToTree(entry);
 }
 
 void	Configure::addServer(ConfigEntry const& entry)
@@ -185,77 +174,128 @@ void	Configure::addServer(ConfigEntry const& entry)
 	this->server_list.push_back(VirtualServer());
 }
 
-void	Configure::addListen(ConfigEntry const& entry)
+///////////////////////////////////////////////////////////////////////////////
+//                         Listen-related properties                         //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addListen(ConfigTree const& node, VirtualServer& server)
 {
 	std::string port = "";
-	std::string address = "";
-	std::string::const_reverse_iterator rit;
-
-	if (this->server_list.size() == 0)
+	std::string host = "";
+	if (not node.getLeaves().empty())
 	{
-		return (this->parseError("listen block should be in server block"));
+		this->putError("listen block don't have son properties");
+		return ;
 	}
-	if (entry.getLevel() / 2 != 1)
+	if (not node.hasDelimiter())
 	{
-		return (this->parseError("listen level needs to be 1"));
+		this->putError("listen: bad format");
+		return ;
 	}
-	if (!entry.hasDelimiter())
+	if (not this->setPort(node.getValue(), server))
 	{
-		return (this->parseError("missing delimiter"));
+		return ;
 	}
-	if (this->server_list.back().getPort() != "")
-	{
-		return (this->parseError("server blocks have only one listen"));
-	}
-	rit = entry.getValue().rbegin();
-	while (rit !=  entry.getValue().rend() and isspace(*rit))
-	{
-		++rit;
-	}
-	while (rit != entry.getValue().rend() and isdigit(*rit))
-	{
-		port.push_back(*rit);
-		++rit;
-	}
-	if (rit != entry.getValue().rend() and *rit == ':')
-	{
-		++rit;
-		while (rit != entry.getValue().rend() and (*rit == '.' or isdigit(*rit)))
-		{
-			address.push_back(*rit);
-			++rit;
-		}
-	}
-	while (rit != entry.getValue().rend() and isspace(*rit))
-	{
-		++rit;
-	}
-	if (rit != entry.getValue().rend() or port == "")
-	{
-		return (this->parseError("listen block values must match the format [IPV4:]PORT"));
-	}
-	std::reverse(port.begin(), port.end());
-	if (address != "")
-	{
-		std::reverse(address.begin(), address.end());
-		if (!this->validHost(address))
-		{
-			return (this->parseError("listen block values must match the format [IPV4:]PORT"));
-		}
-		this->server_list.back().setHost(address);
-	}
-	this->server_list.back().setPort(port);
+	this->setHost(node.getValue(), server);
 }
 
-bool Configure::validHost(std::string const& address)
+bool	Configure::setPort(std::string const& value, VirtualServer& server)
 {
-	in_addr_t	ip;
+	std::string port_str;
+	std::string::const_reverse_iterator rit;
+	std::string::const_iterator it;
+	long int port_nbr;
+	char *end;
 
-	ip = inet_addr(address.c_str());
-	if (ip == 0xffffffff && address != "255.255.255.255")
+	// Skip all terminating spaces
+	for (rit = value.rbegin(); rit != value.rend(); ++rit)
 	{
+		if (not isspace(*rit))
+			break;
+	}
+	it = rit.base();
+	for (; rit != value.rend(); ++rit)
+	{
+		if (not isdigit(*rit))
+			break ;
+	}
+	port_str.assign(rit.base(), it);
+	if (port_str != "")
+	{
+		port_nbr = strtol(port_str.c_str(), &end, 10);
+		if (*end == '\0' && port_nbr >= 0 && port_nbr < 65536)
+		{
+			server.setPort(port_str);
+			return (true);
+		}
+	}
+	this->putError("listen: bad port format");
+	return (false);
+}
+
+void Configure::setHost(std::string const& value, VirtualServer& server)
+{
+	std::string host_str;
+	std::string::const_reverse_iterator rit;
+	std::string::const_iterator it;
+
+	for (rit = value.rbegin(); rit != value.rend(); ++rit)
+	{
+		if (not isspace(*rit))
+			break ;
+	}
+	for (; rit != value.rend(); ++rit)
+	{
+		if (not isdigit(*rit))
+			break;
+	}
+	for (it = value.begin(); it != rit.base(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	if (*rit != ':' && rit.base() != it)
+	{
+		this->putError("listen: bad format");
+		return ;
+	}
+	else if (*rit == ':')
+		++rit;
+	host_str.assign(it, rit.base());
+	if (host_str == "")
+	{
+		host_str = "0.0.0.0";
+	}
+	if (this->validHost(host_str, server))
+	{
+		server.setHost(host_str);
+	}
+}
+
+bool Configure::validHost(std::string const& address, VirtualServer& server)
+{
+	const struct addrinfo hint = {
+		AI_PASSIVE | AI_CANONNAME,
+		AF_UNSPEC,
+		SOCK_STREAM,
+		0,
+		0,
+		NULL,
+		NULL,
+		NULL
+	};
+	struct addrinfo *res;
+	char buffer[INET6_ADDRSTRLEN];
+
+	(void)server;
+	(void)hint;
+	if (getaddrinfo(address.c_str(), server.getPort().c_str(), &hint, &res))
+	{
+		this->putError("listen: could not resolve `" + address + "`");
 		return (false);
 	}
+	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET6_ADDRSTRLEN);
+	freeaddrinfo(res);
+	server.setHost(buffer);
 	return (true);
 }
 
@@ -299,10 +339,19 @@ void	Configure::addRoot(ConfigEntry const& entry)
 	this->server_list.back().setRoot(root);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+//                          Error-related functions                          //
+///////////////////////////////////////////////////////////////////////////////
 void	Configure::parseError(std::string const& msg)
 {
 	std::cerr << "Bad config: line " << this->n_line
 			  << ": " << msg << std::endl;
+	_status = 1;
+}
+
+void	Configure::putError(std::string const& msg)
+{
+	std::cerr << "Bad config: " << msg << std::endl;
 	_status = 1;
 }
 
@@ -325,4 +374,34 @@ void	Configure::addServerName(ConfigEntry const& entry)
 		return (this->parseError("server blocks have only one server_name"));
 	}
 	this->server_list.back().setServerName(entry.getValue());
+}
+
+void	Configure::TreeToServers(void)
+{
+	// We go through each server and set each properties
+	for (std::vector<ConfigTree>::const_iterator it_server = this->tree->getLeaves().begin(); it_server != this->tree->getLeaves().end(); ++it_server)
+	{
+		VirtualServer	current_server;
+		if (it_server->getKey() != "server")
+		{
+			this->putError("`" + it_server->getKey() + "`: bad key level");
+			continue ;
+		}
+		this->setServerProperties(*it_server, current_server);
+		this->server_list.push_back(current_server);
+	}
+}
+
+void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
+{
+	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
+		 server_prop != node.getLeaves().end();
+		 ++server_prop
+		)
+	{
+		if (server_prop->getKey() == "listen")
+		{
+			this->addListen(*server_prop, server);
+		}
+	}
 }

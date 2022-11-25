@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/25 15:57:09 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 20:39:27 by gtoubol          ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,9 @@
 #pragma once
 
 #include <fstream>
+#include <map>
 #include <string>
 #include <vector>
-#include <map>
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
 #include "VirtualServer.hpp"
@@ -38,7 +38,7 @@ public:
 
 	int	isGood(void) const;
 	std::vector<VirtualServer>							const& getServers(void) const;
-	std::map<std::string, std::vector<VirtualServer> >	const& getDuoIVS(void) const;
+	std::map<std::string, std::vector<VirtualServer*> >	const& getDuoIVS(void) const;
 
 private:
 	int		readFile(void);
@@ -46,16 +46,24 @@ private:
 	void	parse(std::string const&);
 	void	addServer(ConfigEntry const&);
 	void	addServerName(ConfigEntry const&);
-	void	addListen(ConfigEntry const&);
 	void	addRoot(ConfigEntry const&);
-	bool	validHost(std::string const&);
 	void	parseError(std::string const&);
+	void	putError(std::string const&);
+	void	addEntryToTree(ConfigEntry const&);
+	void	TreeToServers(void);
+	void	setServerProperties(ConfigTree const&, VirtualServer&);
+
+	// List of all properties addition to a single VirtualServer
+	void	addListen(ConfigTree const&, VirtualServer&);
+	bool	setPort(std::string const&, VirtualServer&);
+	void	setHost(std::string const&, VirtualServer&);
+	bool	validHost(std::string const&, VirtualServer&);
 
 	std::string											filename;
 	std::ifstream										_ifs;
 	int													_status;
 	std::vector<VirtualServer>							server_list;
-	std::map<std::string, std::vector<VirtualServer> >	duoIVS;
+	std::map<std::string, std::vector<VirtualServer*> >	duoIVS;
 	size_t												n_line;
 	ConfigTree											*tree;
 };

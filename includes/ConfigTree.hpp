@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/23 11:17:36 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/25 17:49:31 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 18:10:37 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -28,6 +28,10 @@ public:
 	void	print(std::string const&) const;
 	std::vector<ConfigTree>& getLeaves();
 	std::vector<ConfigTree> const& getLeaves() const;
+
+	std::string const& getKey() const;
+	std::string const& getValue() const;
+	bool		hasDelimiter() const;
 
 private:
 	std::string	key;

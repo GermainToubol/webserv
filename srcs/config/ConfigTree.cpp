@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/23 11:34:12 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/25 17:50:14 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 18:12:41 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -45,4 +45,19 @@ void	ConfigTree::print(std::string const& spacer) const
 	{
 		it->print(spacer + "  ");
 	}
+}
+
+
+std::string const& ConfigTree::getKey() const
+{
+	return (this->key);
+}
+std::string const& ConfigTree::getValue() const
+{
+	return (this->value);
+}
+
+bool		ConfigTree::hasDelimiter() const
+{
+	return (this->delimiter);
 }
