@@ -6,12 +6,12 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 13:16:58 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/16 10:27:37 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 15:55:25 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
 #include <exception>
-#include "configure.hpp"
+#include "Configure.hpp"
 
 
 int main(int argc, char **argv) {

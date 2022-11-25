@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/24 14:51:31 by lgiband          ###   ########.fr       */
+//   Updated: 2022/11/25 15:57:09 by gtoubol          ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 #include <vector>
 #include <map>
 #include "ConfigEntry.hpp"
+#include "ConfigTree.hpp"
 #include "VirtualServer.hpp"
 
 /**
@@ -56,7 +57,7 @@ private:
 	std::vector<VirtualServer>							server_list;
 	std::map<std::string, std::vector<VirtualServer> >	duoIVS;
 	size_t												n_line;
+	ConfigTree											*tree;
 };
 
 #endif
- 

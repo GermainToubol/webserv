@@ -6,7 +6,11 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             */
+//   Updated: 2022/11/25 16:07:28 by gtoubol          ###   ########.fr       //
 /*   Updated: 2022/11/25 14:57:15 by lgiband          ###   ########.fr       */
+=======
+//   Updated: 2022/11/25 15:58:30 by gtoubol          ###   ########.fr       //
+>>>>>>> Stashed changes
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +18,7 @@
 # define VIRTUALSERVER_HPP
 #pragma once
 
+#include <map>
 #include <string>
 #include <map>
 #include <vector>
