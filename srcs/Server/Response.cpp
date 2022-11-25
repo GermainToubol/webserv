@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 21:52:06 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 21:53:45 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -151,5 +151,5 @@ void	Response::setFd(int const& fd)
 
 void	Response::setStatus(int const& status)
 {
-	this->_status = status;
+	this->_send_status = status;
 }
