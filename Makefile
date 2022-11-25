@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/25 15:50:58 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/25 17:10:21 by gtoubol          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ SRCS =		$(addprefix config/,											\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
 				ConfigTree.cpp												\
+				Location.cpp\
 			)																\
 			$(addprefix Server/,											\
 				Server_core.cpp												\
@@ -28,7 +29,7 @@ SRCS =		$(addprefix config/,											\
 				Request.cpp													\
 				Response.cpp												\
 			)																\
-			main.cpp \
+			main.cpp
 
 # List of test sources (.cpp)
 # -------------------------------------------------------------------------
@@ -117,7 +118,7 @@ doc:
 test:		$(TEST_EXE)
 			pytest
 
-$(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out main.cpp,$(OBJS))
+$(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out %main.o objs/Server%,$(OBJS))
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 re:			fclean all
