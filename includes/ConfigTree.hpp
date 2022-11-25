@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/23 11:17:36 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/23 11:17:36 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/23 21:22:13 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -25,6 +25,7 @@ public:
 	ConfigTree(ConfigEntry const&);
 	virtual ~ConfigTree() {}
 
+	void	print(std::string const&) const;
 	std::vector<ConfigTree>& getLeaves();
 
 private:

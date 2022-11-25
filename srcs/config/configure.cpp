@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/21 09:44:23 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/23 22:01:52 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -49,6 +49,7 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
+	this->tree->print("");
 	this->tree = NULL;
 }
 
@@ -109,7 +110,28 @@ bool	Configure::readLine(std::string &current_line)
 
 void	Configure::parse(std::string const& line)
 {
-	ConfigEntry entry(line);
+	ConfigEntry	entry(line);
+	ConfigTree	*current_level;
+	size_t		i;
+
+	current_level = this->tree;
+	for (i = 0; i < entry.getLevel() / 2; ++i)
+	{
+		if (current_level->getLeaves().empty())
+			break;
+		current_level = &(current_level->getLeaves().back());
+	}
+	if (entry.getKey() != "")
+	{
+		if (entry.getLevel() / 2 == i && entry.getLevel() % 2 == 0)
+			current_level->getLeaves().push_back(ConfigTree(entry));
+		else
+			this->parseError("bad block level");
+	}
+	else if (entry.hasDelimiter() || (entry.getValue() != "" && entry.getValue()[0] != '#'))
+	{
+		this->parseError("invalid entry");
+	}
 
 	if (entry.getKey() == "server")
 	{
@@ -131,7 +153,7 @@ void	Configure::parse(std::string const& line)
 
 void	Configure::addServer(ConfigEntry const& entry)
 {
-	if (entry.getLevel() != 0)
+	if (entry.getLevel() / 2 != 0)
 	{
 		return (this->parseError("server level needs to be 0"));
 	}
@@ -156,7 +178,7 @@ void	Configure::addListen(ConfigEntry const& entry)
 	{
 		return (this->parseError("listen block should be in server block"));
 	}
-	if (entry.getLevel() != 2)
+	if (entry.getLevel() / 2 != 1)
 	{
 		return (this->parseError("listen level needs to be 1"));
 	}
@@ -229,7 +251,7 @@ void	Configure::addRoot(ConfigEntry const& entry)
 	{
 		return (this->parseError("root block should be in server block"));
 	}
-	if (entry.getLevel() != 2)
+	if (entry.getLevel() / 2 != 1)
 	{
 		return (this->parseError("root level needs to be 1"));
 	}
@@ -273,7 +295,7 @@ void	Configure::addServerName(ConfigEntry const& entry)
 	{
 		return (this->parseError("server_name block should be in server block"));
 	}
-	if (entry.getLevel() != 2)
+	if (entry.getLevel() / 2 != 1)
 	{
 		return (this->parseError("server_name level should be 1"));
 	}

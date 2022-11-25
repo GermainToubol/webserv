@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/21 09:45:16 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/23 21:54:44 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -99,7 +99,8 @@ server: test
 
         self.run_error(
             tmp,
-            """Bad config: line 1: server level needs to be 0
+            """Bad config: line 1: bad block level
+Bad config: line 1: server level needs to be 0
 Bad config: line 3: missing delimiter
 Bad config: line 4: missing delimiter
 Bad config: line 9: configuration file error
@@ -134,6 +135,7 @@ server:
         self.run_error(
             tmp,
         """Bad config: line 2: listen block should be in server block
+Bad config: line 5: bad block level
 Bad config: line 5: listen level needs to be 1
 Bad config: line 7: server blocks have only one listen
 Bad config: line 10: listen block values must match the format [IPV4:]PORT
@@ -162,6 +164,7 @@ server:
         self.run_error(
             tmp,
             """Bad config: line 2: root block should be in server block
+Bad config: line 4: bad block level
 Bad config: line 4: root level needs to be 1
 Bad config: line 5: missing delimiter
 Bad config: line 6: missing delimiter
@@ -180,6 +183,10 @@ server:
   server_name test123
   server_name: test
   server_name: test
+server:
+   server_name: test
+# coucou
+   # coucou
 """)
         self.run_error(
             tmp,
@@ -187,5 +194,6 @@ server:
 Bad config: line 4: server_name level should be 1
 Bad config: line 6: missing delimiter
 Bad config: line 8: server blocks have only one server_name
+Bad config: line 10: bad block level
 """,
             1)

@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/23 10:46:31 by lgiband          ###   ########.fr        #
+#    Updated: 2022/11/23 22:02:22 by gtoubol          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -43,7 +43,7 @@ TPP_DIR =	templates
 # List of all compilation options
 # -------------------------------------------------------------------------
 CXX = 		c++
-CXXFLAGS =	-Wall -Wextra -Werror --std=c++98 -g
+CXXFLAGS =	-Wall -Wextra -Werror --std=c++98
 
 # Description of the final target
 # -------------------------------------------------------------------------
