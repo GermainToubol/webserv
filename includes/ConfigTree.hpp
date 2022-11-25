@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/23 11:17:36 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/23 21:22:13 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 17:49:31 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -27,6 +27,7 @@ public:
 
 	void	print(std::string const&) const;
 	std::vector<ConfigTree>& getLeaves();
+	std::vector<ConfigTree> const& getLeaves() const;
 
 private:
 	std::string	key;

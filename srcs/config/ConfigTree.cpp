@@ -6,7 +6,7 @@
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
 //   Created: 2022/11/23 11:34:12 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/23 21:38:02 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/25 17:50:14 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
@@ -30,6 +30,12 @@ std::vector<ConfigTree>& ConfigTree::getLeaves()
 {
 	return (leaves);
 }
+
+std::vector<ConfigTree> const& ConfigTree::getLeaves() const
+{
+	return (leaves);
+}
+
 
 void	ConfigTree::print(std::string const& spacer) const
 {
