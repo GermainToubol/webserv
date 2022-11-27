@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 20:29:51 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/27 11:41:21 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,7 +40,7 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 	return (0);
 }
 
-int	WebServer::cgiMode(Request *request, Setup *setup)
+int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
 	(void)setup;
 	return (0);
@@ -59,14 +59,38 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 		if (request->getLocation()->getDefaultFile() == "" || request->getLocation()->getDefaultFile() == setup->getUri())
 			return (setup->setCode(404), 404);
 		else
-			return (setup->setUri(request->getLocation()->getDefaultFile()), getMode(request, setup, client_fd)); // ca va probablement pas marcher parce que le file va dependre de la root de location et de la root generale
+		{
+			// ca va probablement pas marcher parce que le file va dependre de la root de location et de la root generale
 			// peut etre que je peux recuperer le path de la root de location dans l'uri, erase la fin et ajouter le default file
+			setup->setUri(request->getLocation()->getDefaultFile());
+			setup->setExtension();
+			if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
+				return (this->cgiMode(request, setup, client_fd));
+			else
+				return (this->getMode(request, setup, client_fd));
+		}
 	}
 	if (this->isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == true)
 		return (setup->setCode(200), this->buildResponseListing(request, setup, client_fd));
 	if (this->isFile(setup->getUri()))
 		return (setup->setCode(200), this->buildResponseGet(request, setup, client_fd));
 	return (setup->setCode(403), 403);
+}
+
+int	WebServer::postMode(Request *request, Setup *setup, int client_fd)
+{
+	(void)request;
+	(void)setup;
+	(void)client_fd;
+	return (perror("/!\\ Not Implemented"), setup->setCode(501), 501);
+}
+
+int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
+{
+	(void)request;
+	(void)setup;
+	(void)client_fd;
+	return (perror("/!\\ Not Implemented"), setup->setCode(501), 501);
 }
 
 int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
@@ -82,7 +106,7 @@ int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 		return (perror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
 	
 	if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
-		return (this->cgiMode(request, setup));
+		return (this->cgiMode(request, setup, client_fd));
 	
 	if (request->getMethod() == "GET")
 		return (this->getMode(request, setup, client_fd));
@@ -90,5 +114,5 @@ int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 		return (this->postMode(request, setup, client_fd));
 	if (request->getMethod() == "DELETE")
 		return (this->deleteMode(request, setup, client_fd));
-	return (perror("/!\\ Method not allowed"), setup->setCode(405), 405);
+	return (perror("/!\\ Not Implemented"), setup->setCode(501), 501);
 }

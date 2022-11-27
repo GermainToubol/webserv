@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 20:30:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/27 11:26:10 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ class WebServer
 		int buildResponseGet(Request *request, Setup *setup, int client_fd);
 
 		/*Mode*/
-		int					cgiMode(Request *request, Setup *setup);
+		int					cgiMode(Request *request, Setup *setup, int client_fd);
 		int					redirectMode(Request *request, Setup *setup, int client_fd);
 		int					getMode(Request *request, Setup *setup, int client_fd);
 		int					postMode(Request *request, Setup *setup, int client_fd);
