@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:06:50 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 15:00:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 14:38:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ class Setup
 		void				setServer(VirtualServer *server);
 
 		/*Fonctions*/
+		void	addUri(std::string const& uri);
 		int	addField(std::string const& key, std::string const& value);
 		int	eraseUri(std::string::size_type pos);
 		int	replaceUri(std::string::size_type pos, std::string::size_type size, std::string const& str);

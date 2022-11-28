@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:44:18 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 11:44:42 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:24:34 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,7 @@ std::string to_string ( T Number )
 	ss << Number;
 	return ss.str();
 }
+
+void	derror(std::string const& msg);
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 16:36:46 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:24:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ Request::~Request() {}
 int	Request::addContent(std::string const& content)
 {
 	this->_content += content;
-	if (content.find("\r\n\r\n") != std::string::npos)
+	if (this->_content.find("\r\n\r\n") != std::string::npos || content.size() == 0)
 		return (1);
 	return (0);
 }
@@ -40,11 +40,11 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 
 	pos = line.find(" ");
 	if (pos == std::string::npos)
-		return (perror("/!\\ No Method"), setup->setCode(400), 400);
+		return (derror("/!\\ No Method"), setup->setCode(400), 400);
 	this->_method = line.substr(0, pos);
 	pos2 = line.find(" ", pos + 1);
 	if (pos2 == std::string::npos)
-		return (perror("/!\\ No Uri"), setup->setCode(400), 400);
+		return (derror("/!\\ No Uri"), setup->setCode(400), 400);
 	this->_uri = line.substr(pos + 1, pos2 - pos - 1);
 	pos = this->_uri.find("?");
 	setup->setUri(this->_uri.substr(0, pos));
@@ -53,27 +53,27 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 	setup->setExtension();
 	this->_version = line.substr(pos2 + 1, line.size() - pos2 - 1);
 	if (this->_version != "HTTP/1.1")
-		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
+		return (derror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	return (0);	
 }
 
 int	Request::basicCheck(Setup *setup)
 {
 	if (this->_version != "HTTP/1.1")
-		return (perror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
+		return (derror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
-		return (perror("/!\\ Bad Method"), setup->setCode(405), 405);
+		return (derror("/!\\ Bad Method"), setup->setCode(405), 405);
 	return (0);
 }
 
 int	Request::setUri(Setup *setup)
 {
-	std::string::size_type	pos = 0;
-
 	if (setup->getUri() == this->_location->getRoot())
-		setup->setUri(this->_location->getIndex()); //else if is a directory and autoindex = default_file(1/0?)
+		setup->setUri(this->_location->getIndex());
 	else
 		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
+	if (*setup->getUri().begin() == '/')
+		setup->replaceUri(0, 1, "");
 	setup->setUri(setup->getServer()->getRoot() + setup->getUri());
 	return (0);
 }
@@ -82,7 +82,7 @@ int	Request::setLocation(Setup *setup)
 {
 	std::map<std::string, Location>	const&	location_pool = setup->getServer()->getLocationPool();
 	std::string				tmp;
-	std::string::size_type	pos = 0;
+	std::string::size_type	pos;
 	
 	tmp = setup->getUri();
 	pos = tmp.find_last_of("/");
@@ -95,7 +95,6 @@ int	Request::setLocation(Setup *setup)
 			tmp.erase(pos);
 		else
 			tmp.erase(pos + 1);
-		std::cout << tmp << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
 			std::cerr << "[ location: " << location_pool.find(tmp)->first << " ]" << std::endl;
@@ -109,23 +108,25 @@ int	Request::setLocation(Setup *setup)
 	return (0);
 }
 
-int	Request::setServer(Setup *setup, std::vector<VirtualServer*> const& server_pool)
+int	Request::setServer(Setup *setup, std::vector<VirtualServer*> const* server_pool)
 {
 	std::string	host;
-	
+
+	if (!server_pool)
+		return (derror("/!\\ No Server"), setup->setCode(500), 500);
 	if (this->_fields.find("Host") == this->_fields.end())
-		return (perror("/!\\ No Host"), setup->setCode(400), 400);
+		return (derror("/!\\ No Host"), setup->setCode(400), 400);
 	host = this->_fields["Host"];
 	if (host.find(":") != std::string::npos)
 		host = host.substr(0, host.find(":"));
-	for (std::vector<VirtualServer *>::const_iterator it = server_pool.begin(); it != server_pool.end(); ++it)
+	for (std::vector<VirtualServer *>::const_iterator it = server_pool->begin(); it != server_pool->end(); ++it)
 	{
-		if ((*it)->getServerName() == host)
+		if (*it && (*it)->getServerName() == host)
 			return (setup->setServer(*it), 0);
 	}
-	if (server_pool.size() < 1)
-		return (setup->setServer(server_pool[0]), setup->setCode(400), 400);
-	return (setup->setServer(server_pool[0]), 0);
+	if (server_pool->size() < 1)
+		return (setup->setServer(NULL), setup->setCode(400), 400);
+	return (setup->setServer(*server_pool->begin()), 0);
 }
 
 int	Request::parsing(Setup *setup)
@@ -142,7 +143,7 @@ int	Request::parsing(Setup *setup)
 	}
 	pos = this->_content.find("\r\n");
 	if (pos == std::string::npos)
-		return (perror("/!\\ Empty header"), setup->setCode(400), 400);
+		return (derror("/!\\ Empty header"), setup->setCode(400), 400);
 	line = this->_content.substr(0, this->_content.find("\r\n"));
 	this->_content.erase(0, this->_content.find("\r\n") + 2);
 	ret = this->setFirstline(setup, line);
@@ -153,7 +154,7 @@ int	Request::parsing(Setup *setup)
 		line = this->_content.substr(0, pos);
 		this->_content.erase(0, pos + 2);
 		if (line.find(": ") == std::string::npos)
-			return (perror("/!\\ bad syntax on header field"), setup->setCode(400), 400);
+			return (derror("/!\\ bad syntax on header field"), setup->setCode(400), 400);
 		this->_fields[line.substr(0, line.find(": "))] = line.substr(line.find(": ") + 2);
 	}
 	std::cerr << "[ Parsed request ]" << std::endl;
@@ -196,6 +197,11 @@ std::string const&	Request::getMethod() const
 std::string const&	Request::getExtension() const
 {
 	return (this->_extension);
+}
+
+std::string const&	Request::getUri() const
+{
+	return (this->_uri);
 }
 
 void	Request::setBoundary(std::string const& boundary)

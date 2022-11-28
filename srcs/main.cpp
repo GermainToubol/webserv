@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/23 21:00:19 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:24:25 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,9 +40,27 @@ struct sigaction	init_sig(void handler(int), int sig)
 	return (act);
 }
 
+void	derror(std::string const& msg)
+{
+	std::cerr << msg << std::endl;
+}
+
 int	main(void)
 {
 	Configure config("test_config");
+
+	VirtualServer	vs = config.getServers()[0];
+	Location		loc;
+
+
+
+	vs.addLocation("/", loc);
+	std::vector<VirtualServer *> vec;
+
+	vec.push_back(&vs);
+
+	config.addDuoIVS(vs.getHost() + ":" + vs.getPort(), vec);
+	std::cerr << vs.getRoot() << std::endl;
 
 	init_sig(get_sig, SIGINT);
 	
@@ -52,10 +70,7 @@ int	main(void)
 	WebServer server(config);
 	if (server.init())
 		return (1);
-	
-	Request request(4);
-
-	request.addContent("GET / HTTP/1.1\r\nHost: localhost:8080\r\nAccept: */*\r\n\r\nAlelouia");
+	server.run();
 	
 	return (0);
 }

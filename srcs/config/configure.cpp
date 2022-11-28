@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/25 16:34:05 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 11:28:52 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,7 @@ Configure::Configure(std::string const& file):
 	_ifs(),
 	_status(1),
 	server_list(),
+	duoIVS(),
 	n_line(0)
 {
 	_ifs.open(filename.c_str());
@@ -47,6 +48,8 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
+	duoIVS.clear();
+	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -293,4 +296,10 @@ void	Configure::addServerName(ConfigEntry const& entry)
 		return (this->parseError("server blocks have only one server_name"));
 	}
 	this->server_list.back().setServerName(entry.getValue());
+}
+
+//addDuoIVS
+void	Configure::addDuoIVS(std::string name, std::vector<VirtualServer*> list)
+{
+	this->duoIVS[name] = list;
 }

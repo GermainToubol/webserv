@@ -1,2 +1,3 @@
 LEO:
 -> Changer inet_addr to getaddrinfo
+-> sort la listing page (ondiraitque c'estsort mais sur d'autres env ca ne l'est pas)

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 20:27:01 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:45:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,13 +20,14 @@
 
 #include "WebServer.hpp"
 #include "Setup.hpp"
+#include "utils.hpp"
 
 extern int running;
 
 /*
 * Take the connection from the server socket and add it to the epoll
 */
-int	WebServer::new_connection(int server_fd)
+int	WebServer::newConnection(int server_fd)
 {
 	int					client_socket;
 	struct epoll_event	event;
@@ -34,11 +35,11 @@ int	WebServer::new_connection(int server_fd)
 	std::cerr << "[ New connection on server " << server_fd << " ]" << std::endl;
 	client_socket = accept(server_fd, NULL, NULL);
 	if (client_socket == -1 && errno != EWOULDBLOCK)
-		return (perror("/!\\ Accept failed"), -1);
+		return (derror("/!\\ Accept failed"), -1);
 	else
 	{
 		if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
-			return (close(client_socket), perror("/!\\ Fcntl failed"), 1);
+			return (close(client_socket), derror("/!\\ Fcntl failed"), 1);
 		
 		std::memset(&event, 0, sizeof(event));
 		event.data.fd = client_socket;
@@ -55,21 +56,27 @@ int	WebServer::setResponse(int client_fd, Request *request)
 	int					ret;
 	Setup				setup;
 
+	std::cerr << "[ Set response ]" << std::endl;
 	ret = request->parsing(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Parsing OK ]" << std::endl;
 	ret = request->setServer(&setup, this->getAccessibleServer(client_fd));
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Set server OK ]" << std::endl;
 	ret = request->setLocation(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Set location OK ]" << std::endl;
 	ret = request->setUri(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Set uri OK ]" << std::endl;
 	ret = request->basicCheck(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Basic check OK ]" << std::endl;
 	ret = this->modeChoice(request, &setup, client_fd);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
@@ -80,7 +87,7 @@ int	WebServer::setResponse(int client_fd, Request *request)
 /*
 * Receive the request from the client and and stock it in the request vector
 */
-int	WebServer::get_request(int client_fd)
+int	WebServer::getRequest(int client_fd)
 {
 	int		ret;
 	int		state;
@@ -88,15 +95,17 @@ int	WebServer::get_request(int client_fd)
 	
 	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
-		perror("/!\\ Recv failed");
+		derror("/!\\ Recv failed");
 	else
 	{
 		this->_buffer[ret] = '\0';
+		std::cerr << "[ Recv " << ret << " bytes ]" << std::endl;
+		std::cerr << "[ Recv : " << this->_buffer << " ]" << std::endl;
 		request = get_fd_request(client_fd);
 		if (request == NULL)
-			return (perror("/!\\ Request not found"), -1);
+			return (derror("/!\\ Request not found"), -1);
 		state = request->addContent(this->_buffer);
-		if (state == 1)
+		if (state == 1 )
 		{
 			std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
 			this->setResponse(client_fd, request);
@@ -106,9 +115,19 @@ int	WebServer::get_request(int client_fd)
 	return (0);
 }
 
-int	WebServer::send_response(int client_fd)
+int	WebServer::sendResponse(int client_fd)
 {
-	(void)client_fd;
+	Response *response;
+
+	response = this->getResponse(client_fd);
+	if (response == NULL)
+		return (derror("/!\\ Response not found"), close(client_fd), 1);
+	if (response->getStatus() == 0)
+		this->sendHeader(client_fd, response);
+	if (response->getStatus() == 1 && response->getBody() != "")
+		this->sendBody(client_fd, response);
+	else if (response->getStatus() == 1 && response->getFilename() != "")
+		this->sendFile(client_fd, response);
 	return (0);
 }
 
@@ -120,13 +139,16 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 	{
 		listen_sock = this->is_server(events[i].data.fd);
 		if (listen_sock != -1)
-			this->new_connection(listen_sock);
+			this->newConnection(listen_sock);
 		else if (events[i].events & EPOLLIN)
-			this->get_request(events[i].data.fd);
+			this->getRequest(events[i].data.fd);
 		else if (events[i].events & EPOLLOUT)
-			this->send_response(events[i].data.fd);
+			this->sendResponse(events[i].data.fd);
 		else
+		{
+			close(events[i].data.fd);
 			epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+		}
 	}
 	return (0);
 }
@@ -145,19 +167,19 @@ int	WebServer::run(void)
 		std::memset(events, 0, sizeof(events));
 		nb_events = epoll_wait(this->_epoll_fd, events, MAX_CLIENTS, TIMEOUT);
 		if (nb_events == -1)
-			perror("Epoll_wait failed");
+			derror("Epoll_wait failed");
 		else if (nb_events == 0)
 		{
 			std::cout  << "\33[2K\r" << wait[++frame % 6] << "\033[0;32m" << " Waiting for Connection... " << "\033[0m" << std::flush;
 			if (frame >= 6)
 				frame = 0;
-			// this->clear_cache();
 		}
 		else
 		{
 			if (this->event_loop(events, nb_events) == -1)
 				std::cout << "Error in requests" << std::endl;
 		}
+		this->clearCache();
 	}
 	return (0);
 }

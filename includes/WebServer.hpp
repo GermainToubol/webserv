@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/27 11:26:10 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:37:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,6 +28,7 @@
 # define MAX_CLIENTS 100
 # define TIMEOUT 200
 # define BUFFER_SIZE 4096
+# define SEND_SIZE 1048575
 
 class WebServer
 {
@@ -38,7 +39,9 @@ class WebServer
 		/*Accesseurs*/
 		std::vector<VirtualServer>				const& getVirtualServers() const;
 		std::multimap<std::string, std::string>	const& getMimeTypes() const;
-		std::vector<VirtualServer*>				const& getAccessibleServer(int client_fd) const;
+		std::vector<VirtualServer*>				const*	getAccessibleServer(int client_fd) const;
+		Response 										*getResponse(int client_fd) const;
+		Cache											*getCache(std::string const& filename) const;
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);
@@ -52,18 +55,24 @@ class WebServer
 		int buildResponseGet(Request *request, Setup *setup, int client_fd);
 
 		/*Mode*/
-		int					cgiMode(Request *request, Setup *setup, int client_fd);
-		int					redirectMode(Request *request, Setup *setup, int client_fd);
-		int					getMode(Request *request, Setup *setup, int client_fd);
-		int					postMode(Request *request, Setup *setup, int client_fd);
-		int					deleteMode(Request *request, Setup *setup, int client_fd);
-		int					modeChoice(Request *request, Setup *setup, int client_fd);
+		int	cgiMode(Request *request, Setup *setup, int client_fd);
+		int	redirectMode(Request *request, Setup *setup, int client_fd);
+		int	getMode(Request *request, Setup *setup, int client_fd);
+		int	postMode(Request *request, Setup *setup, int client_fd);
+		int	deleteMode(Request *request, Setup *setup, int client_fd);
+		int	modeChoice(Request *request, Setup *setup, int client_fd);
+
+		/*SendResponse*/
+		int	removeResponse(int client_fd);
+		int	sendHeader(int client_fd, Response *response);
+		int	sendBody(int client_fd, Response *response);
+		int	sendFile(int client_fd, Response *response);
 
 		/*Run*/
-		int	send_response(int fd);
+		int	sendResponse(int fd);
 		int	setResponse(int fd, Request *request);
-		int	get_request(int fd);
-		int	new_connection(int fd);
+		int	getRequest(int fd);
+		int	newConnection(int fd);
 		int	event_loop(struct epoll_event *events, int nb_events);
 		int	run(void);
 
@@ -75,6 +84,8 @@ class WebServer
 		void	remove_fd_request(int fd);
 		Request	*get_fd_request(int fd);
 		int		is_server(int fd);
+		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
+		void	clearCache(void);
 		
 	private:
 		int													_epoll_fd;
@@ -88,6 +99,7 @@ class WebServer
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
 		char												_buffer[BUFFER_SIZE + 1];
+		char												_send_buffer[SEND_SIZE + 1];
 };
 
 #endif

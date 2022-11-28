@@ -1,19 +1,7 @@
 server:
   listen: 127.0.0.1:8080
   server_name: coucou
-  root: /ono/ok 
-
-server:
-  listen: 0.0.0.0:8080
-  server_name: coucou
-  root: /ono/ok
-
-server:
-  listen: 98.54.62.5:8080
-  server_name: coucou
-  root: /ono/ok
-
-server:
-  listen: 10.12.2.9:8080
-  server_name: coucou
-  root: /ono/ok
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
+  index: index.h\ tml\
+dgsdfg
+  index: 

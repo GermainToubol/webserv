@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/25 16:34:00 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 11:28:59 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,8 @@ public:
 	int	isGood(void) const;
 	std::vector<VirtualServer>							const& getServers(void) const;
 	std::map<std::string, std::vector<VirtualServer*> >	const& getDuoIVS(void) const;
+	
+	void	addDuoIVS(std::string, std::vector<VirtualServer*>);
 
 private:
 	int		readFile(void);

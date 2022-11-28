@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 16:03:52 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/25 14:57:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 11:24:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,4 +83,9 @@ void VirtualServer::setPort(std::string const& port)
 void VirtualServer::setFd(int const& fd)
 {
 	this->fd = fd;
+}
+
+void VirtualServer::addLocation(std::string path, Location location)
+{
+	this->location_pool[path] = location;
 }
