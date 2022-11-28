@@ -102,12 +102,10 @@ Bad config: line 3: bad block level
 
     def test_inputfile_server(self, tmp_path):
         tmp = tmp_path / str(uuid.uuid4())
-        tmp.write_text("""  server
-server:
+        tmp.write_text("""server:
 server coucou
 server : coucou
 server:
-
 
 server:
 server: test
@@ -115,7 +113,9 @@ server: test
 
         self.run_error(
             tmp,
-            """Bad config: line 1: bad block level
+            """Bad config: server: missing delimiter
+Bad config: server: missing delimiter
+Bad config: server: unexpected value
 """
             , 1)
 
@@ -146,7 +146,7 @@ server:
   listen: 18446744073709551616
 
 # bad host
-server
+server:
   listen: 1sdf23
   listen: aze123
   listen: 127..0.0:80
@@ -156,7 +156,7 @@ server
 server:
   listen: 127.0.0.2:80
   listen: 80
-  listen: ::1:80
+  # listen: ::1:80
   listen: localhost:80
 
 server:
@@ -166,7 +166,7 @@ server:
 """)
         self.run_error(
             tmp,
-        """Bad config: `listen`: bad key level
+        """Bad config: listen: bad key level
 Bad config: listen block don't have son properties
 Bad config: listen: bad port format
 Bad config: listen: bad port format
@@ -185,7 +185,9 @@ Bad config: listen: bad format
         tmp.write_text("""
 root: test
 server:
-    root
+  root:
+    root:
+    listen: 12.12.12.12:80
   root
   root /test
   root: /test
@@ -197,7 +199,11 @@ server:
 
         self.run_error(
             tmp,
-            """Bad config: line 4: bad block level
+            """Bad config: root: bad key level
+Bad config: root block don't have son properties
+Bad config: root: missing delimiter
+Bad config: root: missing delimiter
+Bad config: root: expect absolut path
 """,
             1)
 

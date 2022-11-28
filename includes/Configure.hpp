@@ -44,9 +44,7 @@ private:
 	int		readFile(void);
 	bool	readLine(std::string &);
 	void	parse(std::string const&);
-	void	addServer(ConfigEntry const&);
 	void	addServerName(ConfigEntry const&);
-	void	addRoot(ConfigEntry const&);
 	void	parseError(std::string const&);
 	void	putError(std::string const&);
 	void	addEntryToTree(ConfigEntry const&);
@@ -58,6 +56,9 @@ private:
 	bool	setPort(std::string const&, VirtualServer&);
 	void	setHost(std::string const&, VirtualServer&);
 	bool	validHost(std::string const&, VirtualServer&);
+
+	void	addRoot(ConfigTree const&, VirtualServer&);
+
 
 	std::string											filename;
 	std::ifstream										_ifs;

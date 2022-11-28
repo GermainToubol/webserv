@@ -157,21 +157,49 @@ void	Configure::parse(std::string const& line)
 	this->addEntryToTree(entry);
 }
 
-void	Configure::addServer(ConfigEntry const& entry)
+void	Configure::TreeToServers(void)
 {
-	if (entry.getLevel() / 2 != 0)
+	// We go through each server and set each properties
+	for (std::vector<ConfigTree>::const_iterator it_server = this->tree->getLeaves().begin();
+		 it_server != this->tree->getLeaves().end(); ++it_server)
 	{
-		return (this->parseError("server level needs to be 0"));
+		VirtualServer	current_server;
+		if (it_server->getKey() != "server")
+		{
+			this->putError(it_server->getKey() + ": bad key level");
+			continue ;
+		}
+		if (not it_server->hasDelimiter())
+		{
+			this->putError(it_server->getKey() + ": missing delimiter");
+			continue ;
+		}
+		if (it_server->getValue() != "")
+		{
+			this->putError("server: unexpected value");
+			continue ;
+		}
+		this->setServerProperties(*it_server, current_server);
+		this->server_list.push_back(current_server);
 	}
-	if (!entry.hasDelimiter())
+}
+
+void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
+{
+	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
+		 server_prop != node.getLeaves().end();
+		 ++server_prop
+		)
 	{
-		return (this->parseError("missing delimiter"));
+		if (server_prop->getKey() == "listen")
+		{
+			this->addListen(*server_prop, server);
+		}
+		if (server_prop->getKey() == "root")
+		{
+			this->addRoot(*server_prop, server);
+		}
 	}
-	if (!entry.isValueEmpty())
-	{
-		return (this->parseError("configuration file error"));
-	}
-	this->server_list.push_back(VirtualServer());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -275,7 +303,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server)
 {
 	const struct addrinfo hint = {
 		AI_PASSIVE | AI_CANONNAME,
-		AF_UNSPEC,
+		AF_INET,
 		SOCK_STREAM,
 		0,
 		0,
@@ -299,44 +327,41 @@ bool Configure::validHost(std::string const& address, VirtualServer& server)
 	return (true);
 }
 
-void	Configure::addRoot(ConfigEntry const& entry)
+///////////////////////////////////////////////////////////////////////////////
+//                                    Root                                   //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
 {
 	std::string::const_iterator it;
 	std::string ::const_reverse_iterator rit;
 
-	if (this->server_list.size() == 0)
+	if (not node.getLeaves().empty())
 	{
-		return (this->parseError("root block should be in server block"));
+		this->putError("root block don't have son properties");
+		return ;
 	}
-	if (entry.getLevel() / 2 != 1)
+	if (!node.hasDelimiter())
 	{
-		return (this->parseError("root level needs to be 1"));
+		this->putError("root: missing delimiter");
+		return ;
 	}
-	if (!entry.hasDelimiter())
-	{
-		return (this->parseError("missing delimiter"));
-	}
-	if (this->server_list.back().getRoot() != "")
-	{
-		return (this->parseError("server blocks have only one root"));
-	}
-	for (it = entry.getValue().begin(); it != entry.getValue().end(); ++it)
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
 	{
 		if (not isspace(*it))
 			break ;
 	}
-	for (rit = entry.getValue().rbegin(); rit != entry.getValue().rend(); ++rit)
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
 	{
 		if (not isspace(*rit))
 			break ;
 	}
 	std::string root;
 	root.assign(it, rit.base());
-	if (root[0] != '/')
+	if (root == "" or root[0] != '/')
 	{
-		return (this->parseError("root should be absolut path"));
+		return (this->putError("root: expect absolut path"));
 	}
-	this->server_list.back().setRoot(root);
+	server.setRoot(root);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -374,34 +399,4 @@ void	Configure::addServerName(ConfigEntry const& entry)
 		return (this->parseError("server blocks have only one server_name"));
 	}
 	this->server_list.back().setServerName(entry.getValue());
-}
-
-void	Configure::TreeToServers(void)
-{
-	// We go through each server and set each properties
-	for (std::vector<ConfigTree>::const_iterator it_server = this->tree->getLeaves().begin(); it_server != this->tree->getLeaves().end(); ++it_server)
-	{
-		VirtualServer	current_server;
-		if (it_server->getKey() != "server")
-		{
-			this->putError("`" + it_server->getKey() + "`: bad key level");
-			continue ;
-		}
-		this->setServerProperties(*it_server, current_server);
-		this->server_list.push_back(current_server);
-	}
-}
-
-void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
-{
-	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
-		 server_prop != node.getLeaves().end();
-		 ++server_prop
-		)
-	{
-		if (server_prop->getKey() == "listen")
-		{
-			this->addListen(*server_prop, server);
-		}
-	}
 }
