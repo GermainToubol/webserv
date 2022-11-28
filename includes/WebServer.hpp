@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:37:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 20:20:18 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,9 @@ class WebServer
 		std::vector<VirtualServer*>				const*	getAccessibleServer(int client_fd) const;
 		Response 										*getResponse(int client_fd) const;
 		Cache											*getCache(std::string const& filename) const;
+		
+		/*End*/
+		int	end(void);
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);

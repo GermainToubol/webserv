@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 12:45:38 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 20:12:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,6 +131,8 @@ int	Response::setListingBody(std::string uri, std::string const& root)
 	(void)root;
 	relative_path = uri;
 	relative_path.replace(0, root.size(), "");
+	if (relative_path[0] != '/')
+		relative_path.insert(0, "/");
 	if (uri[0] != '/')
 		uri.insert(0, "/");
 	if (*(relative_path.end() - 1) != '/')

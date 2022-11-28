@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:41:42 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 19:57:31 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,6 +120,7 @@ void	WebServer::clearCache(void)
 		if (it->getUsers() == 0)
 		{
 			it->getStream()->close();
+			delete it->getStream();
 			this->_all_cache.erase(it);
 			return ;
 		}
