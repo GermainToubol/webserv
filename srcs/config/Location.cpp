@@ -11,10 +11,39 @@
 /* ************************************************************************** */
 
 #include "Location.hpp"
+#include "VirtualServer.hpp"
 
 Location::Location() {}
 
+Location::Location(VirtualServer const& server):
+	_permissions(GET_PERM),
+	_autoindex(false),
+	_default_file(""),
+	_root(server.getRoot()),
+	_index(""),
+	_post_dir(""),
+	_max_body_size(""),
+	_redirect(""),
+	_cgi_path()
+{
+	return ;
+}
+
 Location::~Location() {}
+
+Location &Location::operator=(Location const& other)
+{
+	_permissions = other._permissions;
+	_autoindex = other._autoindex;
+	_default_file = other._default_file;
+	_root = other._root;
+	_index = other._index;
+	_post_dir = other._post_dir;
+	_max_body_size = other._max_body_size;
+	_redirect = other._redirect;
+	_cgi_path = other._cgi_path;
+	return (*this);
+}
 
 std::string	const& Location::getRoot() const
 {

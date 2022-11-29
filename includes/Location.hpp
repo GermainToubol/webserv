@@ -18,35 +18,39 @@
 # include <string>
 # include <map>
 
+class VirtualServer;
+
 # define GET_PERM 1
 # define POST_PERM 2
 # define DEL_PERM 4
 
 class Location
 {
-	public:
-		Location();
-		~Location();
+public:
+	Location();
+	Location(VirtualServer const&);
+	~Location();
 
-		/*Accesseurs*/
-		int									const&	getPermission() const;
-		std::string							const&	getRoot() const;
-		std::string							const&	getIndex() const;
-		std::string							const&	getRedirect() const;
-		std::map<std::string, std::string>	const&	getCgiPerm() const;
-		
+	Location& operator=(Location const&);
 
-	private:
-		int									_permissions;
-		bool								_autoindex;
-		std::string							_default_file;
-		std::string							_root;
-		std::string							_index;
-		std::string							_post_dir;
-		std::string							_max_body_size;
-		std::string							_redirect;
-		std::map<std::string, std::string>	_cgi_path;
-		
+	/*Accesseurs*/
+	int									const&	getPermission() const;
+	std::string							const&	getRoot() const;
+	std::string							const&	getIndex() const;
+	std::string							const&	getRedirect() const;
+	std::map<std::string, std::string>	const&	getCgiPerm() const;
+
+
+private:
+	int									_permissions;
+	bool								_autoindex;
+	std::string							_default_file;
+	std::string							_root;
+	std::string							_index;
+	std::string							_post_dir;
+	std::string							_max_body_size;
+	std::string							_redirect;
+	std::map<std::string, std::string>	_cgi_path;
 };
 
 #endif
