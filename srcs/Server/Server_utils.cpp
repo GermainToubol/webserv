@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 19:57:31 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 12:46:46 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,6 +33,17 @@ bool	WebServer::isPathReadable(std::string const& path)
 	if (stat(path.c_str(), &buf) == -1)
 		return (false);
 	if (buf.st_mode & S_IRUSR)
+		return (true);
+	return (false);
+}
+
+bool	WebServer::isPathWriteable(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (buf.st_mode & S_IWUSR)
 		return (true);
 	return (false);
 }

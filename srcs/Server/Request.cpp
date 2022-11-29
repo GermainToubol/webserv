@@ -6,11 +6,12 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:24:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 15:38:13 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <string>
+#include <cstdlib>
 #include <iostream>
 #include <vector>
 
@@ -19,17 +20,42 @@
 #include "Request.hpp"
 #include "utils.hpp"
 
-Request::Request(int fd):	_fd(fd), _boundary(""), _content(""),
+Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1),
 							_method(""), _uri(""),
-							_version(""), _body("") {}
+							_version(""), _body(""), _empty("") {}
 
 Request::~Request() {}
 
-int	Request::addContent(std::string const& content)
+int	Request::addContent(char *buf, int ret)
 {
-	this->_content += content;
-	if (this->_content.find("\r\n\r\n") != std::string::npos || content.size() == 0)
+	std::string::size_type	pos;
+	std::string::size_type	pos2;
+
+	this->_content += std::string(buf, ret);
+	std::cerr << "[ Ret: " << ret << " ]" << std::endl;
+	std::cerr << "[ end header: " << this->_content.find("\r\n\r\n") << " ]" << std::endl;
+	if (ret == 0)
 		return (1);
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size == -1)
+	{
+		pos = this->_content.find("Content-Length: ");
+		if (pos == std::string::npos)
+			return (derror("no C length"), 1);
+		pos2 = this->_content.find("\r\n", pos); //check overflow
+		this->_content_size = std::atoi(this->_content.substr(pos + 16, pos2 - pos - 16).c_str());
+		std::cerr << "content size: " << this->_content_size << std::endl;
+		if (this->_content_size <= 0)
+			return (derror("no body"), 1);
+	}
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size != -1)
+	{
+		std::cerr << "content size after: " << this->_content_size << std::endl;
+		pos = this->_content.find("\r\n\r\n");
+		pos2 = this->_content.size() - pos - 4;
+		std::cerr << "pos2: " << pos2 << " max: " << this->_content_size << std::endl;
+		if (pos2 >= (unsigned int)this->_content_size)
+			return (derror("normal end"), 1);
+	}
 	return (0);
 }
 
@@ -68,7 +94,7 @@ int	Request::basicCheck(Setup *setup)
 
 int	Request::setUri(Setup *setup)
 {
-	if (setup->getUri() == this->_location->getRoot())
+	if (setup->getUri() == this->_location->getRoot() && this->_method == "GET")
 		setup->setUri(this->_location->getIndex());
 	else
 		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
@@ -168,6 +194,14 @@ int	Request::parsing(Setup *setup)
 	return (0);
 }
 
+void	Request::replaceAllBody(std::string const& from, std::string const& to)
+{
+	std::string::size_type	pos;
+
+	while ((pos = this->_body.find(from)) != std::string::npos)
+		this->_body.replace(pos, from.size(), to);
+}
+
 /*Accesseurs*/
 std::string const&	Request::getBoundary() const
 {
@@ -204,6 +238,19 @@ std::string const&	Request::getUri() const
 	return (this->_uri);
 }
 
+std::string const&	Request::getField(std::string key) const
+{
+
+	if (this->_fields.find(key) != this->_fields.end())
+		return (this->_fields.find(key)->second);
+	return (this->_empty);
+}
+
+std::string const& Request::getBody() const
+{
+	return (this->_body);
+}
+
 void	Request::setBoundary(std::string const& boundary)
 {
 	this->_boundary = boundary;
@@ -217,4 +264,9 @@ void	Request::setContent(std::string const& content)
 void	Request::setFd(int const& fd)
 {
 	this->_fd = fd;
+}
+
+void	Request::addBody(char *buffer, int size)
+{
+	this->_body += std::string(buffer, size);
 }

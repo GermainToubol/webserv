@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 13:43:47 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 15:01:53 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,7 @@
 
 #include "Setup.hpp"
 #include "Location.hpp"
+#include "utils.hpp"
 
 class Request
 {
@@ -36,10 +37,15 @@ class Request
 		std::string const&	getMethod() const;
 		std::string const&	getExtension() const;
 		std::string const&	getUri() const;
+		std::string const&	getField(std::string) const;
+		std::string const&	getBody() const;
 		
 		void				setBoundary(std::string const& boundary);
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
+		void				addBody(char *buffer, int size);
+	
+		void				replaceAllBody(std::string const&, std::string const&);
 	
 		/*basicCheck*/
 		int					basicCheck(Setup *setup);
@@ -58,13 +64,14 @@ class Request
 		int					parsing(Setup *setup);
 
 		/*Fonctions*/
-		int					addContent(std::string const& content);
+		int					addContent(char *buf, int ret);
 
 	private:
 		int									_fd;
 
 		std::string							_boundary;
 		std::string							_content;
+		int									_content_size;
 
 		std::string							_method;
 		std::string							_uri;
@@ -76,7 +83,7 @@ class Request
 
 		Location const 						*_location;
 		std::string 						_location_path;
-		
-};
 
+		std::string							_empty;		
+};
 #endif

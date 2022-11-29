@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:45:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 15:05:38 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,12 +100,11 @@ int	WebServer::getRequest(int client_fd)
 	{
 		this->_buffer[ret] = '\0';
 		std::cerr << "[ Recv " << ret << " bytes ]" << std::endl;
-		std::cerr << "[ Recv : " << this->_buffer << " ]" << std::endl;
 		request = get_fd_request(client_fd);
 		if (request == NULL)
 			return (derror("/!\\ Request not found"), -1);
-		state = request->addContent(this->_buffer);
-		if (state == 1 )
+		state = request->addContent(this->_buffer, ret);
+		if (state == 1)
 		{
 			std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
 			this->setResponse(client_fd, request);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 20:20:18 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 16:04:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,7 +27,6 @@
 # define MAX_LISTEN 100
 # define MAX_CLIENTS 100
 # define TIMEOUT 200
-# define BUFFER_SIZE 4096
 # define SEND_SIZE 1048575
 
 class WebServer
@@ -71,6 +70,17 @@ class WebServer
 		int	sendBody(int client_fd, Response *response);
 		int	sendFile(int client_fd, Response *response);
 
+		/*Post*/
+	
+		int	sendPostResponse(Request *request, Setup *setup, int client_fd);
+		int	setPostUri(Request *request, Setup *setup);
+		int	checkPostRequest(Request *request, Setup *setup);
+
+		std::string	parseChamp(Setup *setup, Request *request, std::string const& str);
+		int			urlEncodedPost(Request *request, Setup *setup);
+		int			multipartPost(Request *request, Setup *setup);
+		int			plainTextPost(Request *request, Setup *setup);
+	
 		/*Run*/
 		int	sendResponse(int fd);
 		int	setResponse(int fd, Request *request);
@@ -82,6 +92,8 @@ class WebServer
 		/*Utils*/
 		bool	doesPathExist(std::string const& path);
 		bool	isPathReadable(std::string const& path);
+		bool	isPathWriteable(std::string const& path);
+
 		bool	isDirectory(std::string const& path);
 		bool	isFile(std::string const& path);
 		void	remove_fd_request(int fd);
@@ -89,6 +101,9 @@ class WebServer
 		int		is_server(int fd);
 		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
 		void	clearCache(void);
+
+		std::vector<std::string>	splitFormdata(std::string const& file, std::string const& boundary);
+
 		
 	private:
 		int													_epoll_fd;

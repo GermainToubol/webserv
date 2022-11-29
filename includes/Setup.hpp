@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:06:50 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 14:38:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 12:57:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,6 @@ class Setup
 		std::string		const&	getFields() const;
 		VirtualServer	const	*getServer() const;
 		
-
 		void				setCode(int const& code);
 		void				setUri(std::string const& uri);
 		void				setUri(int code);

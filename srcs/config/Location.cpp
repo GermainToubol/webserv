@@ -6,15 +6,15 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:50:42 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:22:07 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:58:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
 Location::Location(): _permissions(7), _autoindex(1), _default_file(""),
-					_root("/"), _index("index.html"), _post_dir("/"),
-					 _redirect("")  {}
+					_root("/"), _index("index.html"), _post_dir("/upload"),
+					 _redirect(""), _max_body_size(32000000)  {}
 
 Location::~Location() {}
 
@@ -51,4 +51,14 @@ bool	const& Location::getAutoindex() const
 std::string	const& Location::getDefaultFile() const
 {
 	return (this->_default_file);
+}
+
+std::string	const& Location::getPostDir() const
+{
+	return (this->_post_dir);
+}
+
+std::string::size_type	const& Location::getMaxBodySize() const
+{
+	return (this->_max_body_size);
 }

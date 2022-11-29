@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:34:43 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 14:15:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,8 @@
 #include <cstring>
 
 #include <sys/epoll.h>
+#include <sys/socket.h>
+#include <unistd.h>
 
 #include "WebServer.hpp"
 #include "utils.hpp"
@@ -89,10 +91,30 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 
 int	WebServer::postMode(Request *request, Setup *setup, int client_fd)
 {
-	(void)request;
-	(void)setup;
-	(void)client_fd;
-	return (derror("/!\\ Not Implemented"), setup->setCode(501), 501);
+	Response			response;
+	int					ret;
+	std::string			field;
+
+	std::cerr << "[ Post Mode ]" << std::endl;
+
+	ret = this->setPostUri(request, setup);
+	if (ret)
+		return (this->sendPostResponse(request, setup, client_fd));
+	ret = this->checkPostRequest(request, setup);
+	if (ret)
+		return (this->sendPostResponse(request, setup, client_fd));
+
+	field = request->getField("Content-Type");
+
+	if (field == "application/x-www-form-urlencoded")
+		this->urlEncodedPost(request, setup);
+	else if (field.find("multipart/form-data") != std::string::npos && field.find("boundary=") != std::string::npos)
+		this->multipartPost(request, setup);
+	else
+		this->plainTextPost(request, setup);
+
+	this->sendPostResponse(request, setup, client_fd);
+	return (0);
 }
 
 int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)

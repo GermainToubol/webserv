@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:46:41 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 11:32:45 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:05:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,8 @@ class Location
 		std::map<std::string, std::string>	const&	getCgiPerm() const;
 		bool								const&	getAutoindex() const;
 		std::string							const&	getDefaultFile() const;		
+		std::string							const&	getPostDir() const;	
+		std::string::size_type				const&	getMaxBodySize() const;
 
 	private:
 		int									_permissions;
@@ -45,7 +47,7 @@ class Location
 		std::string							_index;
 		std::string							_post_dir;
 		std::string							_redirect;
-		//std::string::size_type				_max_body_size;
+		std::string::size_type				_max_body_size;
 		std::map<std::string, std::string>	_cgi_path;
 		
 };

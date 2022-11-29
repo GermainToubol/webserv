@@ -10,11 +10,20 @@
 		<h2>My Page</h2>
 		<p><a href="https://youtube.com">youtube</a></p>
 		<img src="monster.webp"/>
-		<form method="POST">
+		<form action="/" method="POST" enctype="multipart/form-data">
 			<div>
 				<label for="msg" style="color:red;">Message :</label>
 				<textarea id="msg" name="user_message"></textarea>
 			</div>
+			<div>
+				<label for="msg" style="color:red;">Message :</label>
+				<textarea id="msg" name="userlife"></textarea>
+			</div>
+			<div>
+				<label for="msg" style="color:red;">Message :</label>
+				<textarea id="msg" name="username"></textarea>
+			</div>
+			<input type="file" name="filename" />
 			<input type="submit" value="OK!">
 		</form>
 		<audio src="audio.mp3" controls>
