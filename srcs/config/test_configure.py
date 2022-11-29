@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/26 00:04:43 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/28 17:46:19 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -167,7 +167,7 @@ server:
         self.run_error(
             tmp,
         """Bad config: listen: bad key level
-Bad config: listen block don't have son properties
+Bad config: listen: unexpected properties
 Bad config: listen: bad port format
 Bad config: listen: bad port format
 Bad config: listen: bad port format
@@ -200,7 +200,7 @@ server:
         self.run_error(
             tmp,
             """Bad config: root: bad key level
-Bad config: root block don't have son properties
+Bad config: root: unexpected properties
 Bad config: root: missing delimiter
 Bad config: root: missing delimiter
 Bad config: root: expect absolut path
@@ -212,18 +212,24 @@ Bad config: root: expect absolut path
         tmp.write_text("""
 server_name: coucou
 server:
-server_name: coucou
+  server_name:
+    root: coucou
+    server_name: test
 server:
   server_name test123
   server_name: test
-  server_name: test
+  server_name: test aaa
 server:
-   server_name: test
-# coucou
-   # coucou
+  server_name: test
+  server_name: sekl_dsdf
+  server_name:
 """)
         self.run_error(
             tmp,
-            """Bad config: line 10: bad block level
+            """Bad config: server_name: bad key level
+Bad config: server_name: unexpected properties
+Bad config: server_name: missing delimiter
+Bad config: server_name: invalid character
+Bad config: server_name: invalid value
 """,
             1)

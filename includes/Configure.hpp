@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/25 20:39:27 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/28 12:01:26 by gtoubol          ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
 #include "VirtualServer.hpp"
+
+// number of available ports
+#define MAX_PORT_NBR 65536
 
 /**
  * @class Configure
@@ -44,7 +47,6 @@ private:
 	int		readFile(void);
 	bool	readLine(std::string &);
 	void	parse(std::string const&);
-	void	addServerName(ConfigEntry const&);
 	void	parseError(std::string const&);
 	void	putError(std::string const&);
 	void	addEntryToTree(ConfigEntry const&);
@@ -58,7 +60,7 @@ private:
 	bool	validHost(std::string const&, VirtualServer&);
 
 	void	addRoot(ConfigTree const&, VirtualServer&);
-
+	void	addServerName(ConfigTree const&, VirtualServer&);
 
 	std::string											filename;
 	std::ifstream										_ifs;

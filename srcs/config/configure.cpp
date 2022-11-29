@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/26 00:04:34 by gtoubol          ###   ########.fr       //
+//   Updated: 2022/11/28 17:50:13 by gtoubol          ###   ########.fr       //
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -194,10 +194,17 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		if (server_prop->getKey() == "listen")
 		{
 			this->addListen(*server_prop, server);
+			continue ;
 		}
 		if (server_prop->getKey() == "root")
 		{
 			this->addRoot(*server_prop, server);
+			continue ;
+		}
+		if (server_prop->getKey() == "server_name")
+		{
+			this->addServerName(*server_prop, server);
+			continue ;
 		}
 	}
 }
@@ -211,7 +218,7 @@ void	Configure::addListen(ConfigTree const& node, VirtualServer& server)
 	std::string host = "";
 	if (not node.getLeaves().empty())
 	{
-		this->putError("listen block don't have son properties");
+		this->putError("listen: unexpected properties");
 		return ;
 	}
 	if (not node.hasDelimiter())
@@ -250,7 +257,7 @@ bool	Configure::setPort(std::string const& value, VirtualServer& server)
 	if (port_str != "")
 	{
 		port_nbr = strtol(port_str.c_str(), &end, 10);
-		if (*end == '\0' && port_nbr >= 0 && port_nbr < 65536)
+		if (*end == '\0' and port_nbr >= 0 and port_nbr < MAX_PORT_NBR)
 		{
 			server.setPort(port_str);
 			return (true);
@@ -334,13 +341,14 @@ void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
 {
 	std::string::const_iterator it;
 	std::string ::const_reverse_iterator rit;
+	std::string root;
 
 	if (not node.getLeaves().empty())
 	{
-		this->putError("root block don't have son properties");
+		this->putError("root: unexpected properties");
 		return ;
 	}
-	if (!node.hasDelimiter())
+	if (not node.hasDelimiter())
 	{
 		this->putError("root: missing delimiter");
 		return ;
@@ -355,13 +363,61 @@ void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
 		if (not isspace(*rit))
 			break ;
 	}
-	std::string root;
 	root.assign(it, rit.base());
 	if (root == "" or root[0] != '/')
 	{
 		return (this->putError("root: expect absolut path"));
 	}
 	server.setRoot(root);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                Server_name                                //
+///////////////////////////////////////////////////////////////////////////////
+// For now: only one name per server-block
+
+void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
+{
+	std::string::const_iterator it;
+	// std::string::const_reverse_iterator rit;
+	std::string server_name;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("server_name: unexpected properties");
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("server_name: missing delimiter");
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (; it != node.getValue().end(); ++it)
+	{
+		if (isalnum(*it) or (*it == '.') or (*it == '-') or (*it == '_'))
+			server_name.push_back(tolower(*it));
+		else
+			break ;
+	}
+	for (; it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+		{
+			this->putError("server_name: invalid character");
+			return ;
+		}
+	}
+	if (server_name == "")
+	{
+		this->putError("server_name: invalid value");
+		return ;
+	}
+	server.setServerName(server_name);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -378,25 +434,4 @@ void	Configure::putError(std::string const& msg)
 {
 	std::cerr << "Bad config: " << msg << std::endl;
 	_status = 1;
-}
-
-void	Configure::addServerName(ConfigEntry const& entry)
-{
-	if (this->server_list.size() == 0)
-	{
-		return (this->parseError("server_name block should be in server block"));
-	}
-	if (entry.getLevel() / 2 != 1)
-	{
-		return (this->parseError("server_name level should be 1"));
-	}
-	if (!entry.hasDelimiter())
-	{
-		return (this->parseError("missing delimiter"));
-	}
-	if (this->server_list.back().getServerName() != "")
-	{
-		return (this->parseError("server blocks have only one server_name"));
-	}
-	this->server_list.back().setServerName(entry.getValue());
 }
