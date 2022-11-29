@@ -37,7 +37,6 @@ class TestConfigure:
         assert errorlog == expected_log
         assert returncode == expected_returncode
 
-
     def test_inputfile_file_no_exist(self):
         filename = "does_not_exist"
         self.run_error(filename, f"Error: {filename}: cannot read the file.\n", 1)

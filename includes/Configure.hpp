@@ -62,6 +62,9 @@ private:
 	void	addRoot(ConfigTree const&, VirtualServer&);
 	void	addServerName(ConfigTree const&, VirtualServer&);
 
+	// Location related properties
+	void	addLocation(ConfigTree const&, VirtualServer&);
+
 	std::string											filename;
 	std::ifstream										_ifs;
 	int													_status;

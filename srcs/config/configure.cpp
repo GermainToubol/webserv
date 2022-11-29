@@ -206,6 +206,12 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 			this->addServerName(*server_prop, server);
 			continue ;
 		}
+		if (server_prop->getKey() == "location")
+		{
+			this->addLocation(*server_prop, server);
+			continue ;
+		}
+		this->putError(server_prop->getKey() + ": unknown property");
 	}
 }
 
@@ -418,6 +424,49 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 		return ;
 	}
 	server.setServerName(server_name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  Location                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
+{
+	std::string::const_iterator it;
+	std::string value;
+	if (not node.hasDelimiter())
+	{
+		this->putError("location: missing delimiter");
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (; it != node.getValue().end(); ++it)
+	{
+		if (isalnum(*it) or (*it == '/') or (*it == '.') or (*it == '-') or (*it == '_'))
+		{
+			value.push_back(*it);
+			continue ;
+		}
+		break ;
+	}
+	for (; it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+		{
+			this->putError("location: invalid value");
+			return ;
+		}
+	}
+	if (value == "")
+	{
+		this->putError("location: invalid value");
+		return ;
+	}
+	(void)node;
+	(void)server;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
