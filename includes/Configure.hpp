@@ -16,6 +16,7 @@
 #define CONFIGURE_HPP
 #pragma once
 
+#include <cstddef>
 #include <fstream>
 #include <map>
 #include <string>
@@ -48,22 +49,25 @@ private:
 	bool	readLine(std::string &);
 	void	parse(std::string const&);
 	void	parseError(std::string const&);
-	void	putError(std::string const&);
+	void	putError(std::string const&, size_t);
 	void	addEntryToTree(ConfigEntry const&);
 	void	TreeToServers(void);
 	void	setServerProperties(ConfigTree const&, VirtualServer&);
 
 	// List of all properties addition to a single VirtualServer
 	void	addListen(ConfigTree const&, VirtualServer&);
-	bool	setPort(std::string const&, VirtualServer&);
-	void	setHost(std::string const&, VirtualServer&);
-	bool	validHost(std::string const&, VirtualServer&);
+	bool	setPort(std::string const&, VirtualServer&, size_t);
+	void	setHost(std::string const&, VirtualServer&, size_t);
+	bool	validHost(std::string const&, VirtualServer&, size_t);
 
-	void	addRoot(ConfigTree const&, VirtualServer&);
+	template<class T>
+	void	addRoot(ConfigTree const&, T&);
+	template<class T>
+	void	addIndex(ConfigTree const&, T&);
+
 	void	addServerName(ConfigTree const&, VirtualServer&);
-
-	// Location related properties
 	void	addLocation(ConfigTree const&, VirtualServer&);
+	void	setLocation(ConfigTree const&, Location&);
 
 	std::string											filename;
 	std::ifstream										_ifs;

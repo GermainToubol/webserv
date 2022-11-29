@@ -152,7 +152,7 @@ void	Configure::addEntryToTree(ConfigEntry const& entry)
 
 void	Configure::parse(std::string const& line)
 {
-	ConfigEntry	entry(line);
+	ConfigEntry	entry(line, this->n_line);
 
 	this->addEntryToTree(entry);
 }
@@ -166,17 +166,17 @@ void	Configure::TreeToServers(void)
 		VirtualServer	current_server;
 		if (it_server->getKey() != "server")
 		{
-			this->putError(it_server->getKey() + ": bad key level");
+			this->putError(it_server->getKey() + ": bad key level", it_server->getLineNumber());
 			continue ;
 		}
 		if (not it_server->hasDelimiter())
 		{
-			this->putError(it_server->getKey() + ": missing delimiter");
+			this->putError(it_server->getKey() + ": missing delimiter", it_server->getLineNumber());
 			continue ;
 		}
 		if (it_server->getValue() != "")
 		{
-			this->putError("server: unexpected value");
+			this->putError("server: unexpected value", it_server->getLineNumber());
 			continue ;
 		}
 		this->setServerProperties(*it_server, current_server);
@@ -211,7 +211,7 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 			this->addLocation(*server_prop, server);
 			continue ;
 		}
-		this->putError(server_prop->getKey() + ": unknown property");
+		this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
 }
 
@@ -224,22 +224,22 @@ void	Configure::addListen(ConfigTree const& node, VirtualServer& server)
 	std::string host = "";
 	if (not node.getLeaves().empty())
 	{
-		this->putError("listen: unexpected properties");
+		this->putError("listen: unexpected properties", node.getLineNumber());
 		return ;
 	}
 	if (not node.hasDelimiter())
 	{
-		this->putError("listen: bad format");
+		this->putError("listen: bad format", node.getLineNumber());
 		return ;
 	}
-	if (not this->setPort(node.getValue(), server))
+	if (not this->setPort(node.getValue(), server, node.getLineNumber()))
 	{
 		return ;
 	}
-	this->setHost(node.getValue(), server);
+	this->setHost(node.getValue(), server, node.getLineNumber());
 }
 
-bool	Configure::setPort(std::string const& value, VirtualServer& server)
+bool	Configure::setPort(std::string const& value, VirtualServer& server, size_t line_nb)
 {
 	std::string port_str;
 	std::string::const_reverse_iterator rit;
@@ -269,11 +269,11 @@ bool	Configure::setPort(std::string const& value, VirtualServer& server)
 			return (true);
 		}
 	}
-	this->putError("listen: bad port format");
+	this->putError("listen: bad port format", line_nb);
 	return (false);
 }
 
-void Configure::setHost(std::string const& value, VirtualServer& server)
+void Configure::setHost(std::string const& value, VirtualServer& server, size_t line_nb)
 {
 	std::string host_str;
 	std::string::const_reverse_iterator rit;
@@ -296,7 +296,7 @@ void Configure::setHost(std::string const& value, VirtualServer& server)
 	}
 	if (*rit != ':' && rit.base() != it)
 	{
-		this->putError("listen: bad format");
+		this->putError("listen: bad format", line_nb);
 		return ;
 	}
 	else if (*rit == ':')
@@ -306,13 +306,13 @@ void Configure::setHost(std::string const& value, VirtualServer& server)
 	{
 		host_str = "0.0.0.0";
 	}
-	if (this->validHost(host_str, server))
+	if (this->validHost(host_str, server, line_nb))
 	{
 		server.setHost(host_str);
 	}
 }
 
-bool Configure::validHost(std::string const& address, VirtualServer& server)
+bool Configure::validHost(std::string const& address, VirtualServer& server, size_t line_nb)
 {
 	const struct addrinfo hint = {
 		AI_PASSIVE | AI_CANONNAME,
@@ -331,7 +331,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server)
 	(void)hint;
 	if (getaddrinfo(address.c_str(), server.getPort().c_str(), &hint, &res))
 	{
-		this->putError("listen: could not resolve `" + address + "`");
+		this->putError("listen: could not resolve `" + address + "`", line_nb);
 		return (false);
 	}
 	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET6_ADDRSTRLEN);
@@ -343,7 +343,8 @@ bool Configure::validHost(std::string const& address, VirtualServer& server)
 ///////////////////////////////////////////////////////////////////////////////
 //                                    Root                                   //
 ///////////////////////////////////////////////////////////////////////////////
-void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
+template<class T>
+void	Configure::addRoot(ConfigTree const& node, T &server)
 {
 	std::string::const_iterator it;
 	std::string ::const_reverse_iterator rit;
@@ -351,12 +352,12 @@ void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
 
 	if (not node.getLeaves().empty())
 	{
-		this->putError("root: unexpected properties");
+		this->putError("root: unexpected properties", node.getLineNumber());
 		return ;
 	}
 	if (not node.hasDelimiter())
 	{
-		this->putError("root: missing delimiter");
+		this->putError("root: missing delimiter", node.getLineNumber());
 		return ;
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
@@ -372,7 +373,7 @@ void	Configure::addRoot(ConfigTree const& node, VirtualServer &server)
 	root.assign(it, rit.base());
 	if (root == "" or root[0] != '/')
 	{
-		return (this->putError("root: expect absolut path"));
+		return (this->putError("root: expect absolut path", node.getLineNumber()));
 	}
 	server.setRoot(root);
 }
@@ -390,12 +391,12 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 
 	if (not node.getLeaves().empty())
 	{
-		this->putError("server_name: unexpected properties");
+		this->putError("server_name: unexpected properties", node.getLineNumber());
 		return ;
 	}
 	if (not node.hasDelimiter())
 	{
-		this->putError("server_name: missing delimiter");
+		this->putError("server_name: missing delimiter", node.getLineNumber());
 		return ;
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
@@ -414,13 +415,13 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 	{
 		if (not isspace(*it))
 		{
-			this->putError("server_name: invalid character");
+			this->putError("server_name: invalid character", node.getLineNumber());
 			return ;
 		}
 	}
 	if (server_name == "")
 	{
-		this->putError("server_name: invalid value");
+		this->putError("server_name: invalid value", node.getLineNumber());
 		return ;
 	}
 	server.setServerName(server_name);
@@ -433,9 +434,11 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 {
 	std::string::const_iterator it;
 	std::string value;
+	Location	location(server);
+
 	if (not node.hasDelimiter())
 	{
-		this->putError("location: missing delimiter");
+		this->putError("location: missing delimiter", node.getLineNumber());
 		return ;
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
@@ -456,17 +459,48 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 	{
 		if (not isspace(*it))
 		{
-			this->putError("location: invalid value");
+			this->putError("location: invalid value", node.getLineNumber());
 			return ;
 		}
 	}
 	if (value == "")
 	{
-		this->putError("location: invalid value");
+		this->putError("location: invalid value", node.getLineNumber());
 		return ;
 	}
-	(void)node;
-	(void)server;
+	if (value[0] != '/')
+	{
+		this->putError("location: location needs to start with a `/`", node.getLineNumber());
+		return ;
+	}
+	// Add reformat value: /../test/./coucou -> /test/coucou/
+	if (value[value.size() - 1] != '/')
+	{
+		value.push_back('/');
+	}
+	if (server.getLocationPool().find(value) != server.getLocationPool().end())
+	{
+		this->putError("location: `" + value + "` is already defined", node.getLineNumber());
+		return ;
+	}
+	this->setLocation(node, location);
+	server.getLocationPool()[value] = location;
+}
+
+void	Configure::setLocation(ConfigTree const& node, Location& location)
+{
+	for (std::vector<ConfigTree>::const_iterator location_prop = node.getLeaves().begin();
+		 location_prop != node.getLeaves().end();
+		 ++location_prop
+		)
+	{
+		if (location_prop->getKey() == "root")
+		{
+			this->addRoot(*location_prop, location);
+			continue ;
+		}
+		this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -479,8 +513,8 @@ void	Configure::parseError(std::string const& msg)
 	_status = 1;
 }
 
-void	Configure::putError(std::string const& msg)
+void	Configure::putError(std::string const& msg, size_t n_line)
 {
-	std::cerr << "Bad config: " << msg << std::endl;
+	std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
 	_status = 1;
 }

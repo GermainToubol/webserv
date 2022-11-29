@@ -10,6 +10,7 @@
 //                                                                            //
 // ************************************************************************** //
 
+#include <cstddef>
 #include <iostream>
 #include <string>
 #include <vector>
@@ -21,7 +22,7 @@ ConfigTree::ConfigTree()
 
 }
 
-ConfigTree::ConfigTree(ConfigEntry const& entry): key(entry.getKey()), value(entry.getValue()), delimiter(entry.hasDelimiter())
+ConfigTree::ConfigTree(ConfigEntry const& entry): line(entry.getLineNumber()), key(entry.getKey()), value(entry.getValue()), delimiter(entry.hasDelimiter())
 {
 
 }
@@ -57,7 +58,12 @@ std::string const& ConfigTree::getValue() const
 	return (this->value);
 }
 
-bool		ConfigTree::hasDelimiter() const
+bool	ConfigTree::hasDelimiter() const
 {
 	return (this->delimiter);
+}
+
+size_t	ConfigTree::getLineNumber() const
+{
+	return (this->line);
 }

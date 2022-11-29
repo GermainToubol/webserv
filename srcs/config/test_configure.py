@@ -112,9 +112,9 @@ server: test
 
         self.run_error(
             tmp,
-            """Bad config: server: missing delimiter
-Bad config: server: missing delimiter
-Bad config: server: unexpected value
+            """Bad config: line 2: server: missing delimiter
+Bad config: line 3: server: missing delimiter
+Bad config: line 7: server: unexpected value
 """
             , 1)
 
@@ -165,17 +165,17 @@ server:
 """)
         self.run_error(
             tmp,
-        """Bad config: listen: bad key level
-Bad config: listen: unexpected properties
-Bad config: listen: bad port format
-Bad config: listen: bad port format
-Bad config: listen: bad port format
-Bad config: listen: bad port format
-Bad config: listen: bad format
-Bad config: listen: bad format
-Bad config: listen: could not resolve `127..0.0`
-Bad config: listen: could not resolve `etaset`
-Bad config: listen: bad format
+        """Bad config: line 3: listen: bad key level
+Bad config: line 7: listen: unexpected properties
+Bad config: line 15: listen: bad port format
+Bad config: line 17: listen: bad port format
+Bad config: line 21: listen: bad port format
+Bad config: line 22: listen: bad port format
+Bad config: line 26: listen: bad format
+Bad config: line 27: listen: bad format
+Bad config: line 28: listen: could not resolve `127..0.0`
+Bad config: line 29: listen: could not resolve `etaset`
+Bad config: line 39: listen: bad format
 """,
             1)
 
@@ -190,7 +190,6 @@ server:
   root
   root /test
   root: /test
-  root: /test
 
 server:
   root: test/test
@@ -198,11 +197,11 @@ server:
 
         self.run_error(
             tmp,
-            """Bad config: root: bad key level
-Bad config: root: unexpected properties
-Bad config: root: missing delimiter
-Bad config: root: missing delimiter
-Bad config: root: expect absolut path
+            """Bad config: line 2: root: bad key level
+Bad config: line 4: root: unexpected properties
+Bad config: line 7: root: missing delimiter
+Bad config: line 8: root: missing delimiter
+Bad config: line 12: root: expect absolut path
 """,
             1)
 
@@ -225,10 +224,10 @@ server:
 """)
         self.run_error(
             tmp,
-            """Bad config: server_name: bad key level
-Bad config: server_name: unexpected properties
-Bad config: server_name: missing delimiter
-Bad config: server_name: invalid character
-Bad config: server_name: invalid value
+            """Bad config: line 2: server_name: bad key level
+Bad config: line 4: server_name: unexpected properties
+Bad config: line 8: server_name: missing delimiter
+Bad config: line 10: server_name: invalid character
+Bad config: line 14: server_name: invalid value
 """,
             1)

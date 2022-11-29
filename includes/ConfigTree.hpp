@@ -14,6 +14,7 @@
 #define CONFIGTREE_H
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <vector>
 #include "ConfigEntry.hpp"
@@ -32,8 +33,10 @@ public:
 	std::string const& getKey() const;
 	std::string const& getValue() const;
 	bool		hasDelimiter() const;
+	size_t		getLineNumber() const;
 
 private:
+	size_t		line;
 	std::string	key;
 	std::string	value;
 	bool		delimiter;

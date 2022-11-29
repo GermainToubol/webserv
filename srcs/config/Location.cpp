@@ -69,3 +69,8 @@ std::map<std::string, std::string>	const& Location::getCgiPerm() const
 {
 	return (this->_cgi_path);
 }
+
+void	Location::setRoot(std::string const& str)
+{
+	this->_root = str;
+}

@@ -43,11 +43,26 @@ class TestConfigure:
 server:
   location
   location:
+  location: test test
+  location: test
+  location: /dsff-___-asdf-/
+
+server:
+  location: /coucou
+  location: /test
+  location: /coucou/ici/
+  location: /coucou/
+  location: /test/
+#  location: /../test/../../test/coucou./..
 """)
 
         self.run_error(
         tmp,
-        """Bad config: location: missing delimiter
-Bad config: location: invalid value
+        """Bad config: line 3: location: missing delimiter
+Bad config: line 4: location: invalid value
+Bad config: line 5: location: invalid value
+Bad config: line 6: location: location needs to start with a `/`
+Bad config: line 13: location: `/coucou/` is already defined
+Bad config: line 14: location: `/test/` is already defined
 """,
         1)

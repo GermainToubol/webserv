@@ -21,7 +21,7 @@
 class ConfigEntry
 {
 public:
-	ConfigEntry(std::string const&);
+	ConfigEntry(std::string const&, size_t);
 	virtual ~ConfigEntry(void) {}
 
 	size_t		getLevel(void) const;
@@ -29,6 +29,7 @@ public:
 	std::string const& getValue(void) const;
 	bool		hasDelimiter() const;
 	bool		isValueEmpty(void) const;
+	size_t		getLineNumber() const;
 
 protected:
 	bool	isLevelChar(const char) const;
@@ -39,6 +40,7 @@ protected:
 	std::string	key;
 	std::string value;
 	bool		hasdelimiter;
+	size_t		line_nb;
 };
 
 #endif /* CONFIGENTRY_H */

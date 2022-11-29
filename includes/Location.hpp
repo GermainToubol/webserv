@@ -15,8 +15,9 @@
 
 # pragma once
 
-# include <string>
+#include <cstring>
 # include <map>
+# include <string>
 
 class VirtualServer;
 
@@ -39,6 +40,8 @@ public:
 	std::string							const&	getIndex() const;
 	std::string							const&	getRedirect() const;
 	std::map<std::string, std::string>	const&	getCgiPerm() const;
+
+	void	setRoot(std::string const&);
 
 
 private:
