@@ -1,2 +1,5 @@
 LEO:
 -> Changer inet_addr to getaddrinfo
+-> sort la listing page (ondiraitque c'estsort mais sur d'autres env ca ne l'est pas)
+x -> faire la reception de la requete en 2 etapes 1 header 2 body apres avoir lu content lenght
+-> tester comment est check l'exteensions des fichier d'upload, si via le nom du fichier : on fais rien, si via le contenu: faut modifier le nom du filename avec de le post

@@ -6,12 +6,18 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 15:59:22 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 16:02:08 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/25 16:18:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cache.hpp"
 
+
+Cache::Cache(): _size(0), _active_users(0), _path(""), _stream(NULL) {}
+
+Cache::~Cache() {}
+
+/*Accesseurs*/
 size_t const& Cache::getSize() const
 {
 	return (this->_size);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/24 14:54:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 15:27:37 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 #include <unistd.h>
 
 #include "WebServer.hpp"
+#include "utils.hpp"
 
 int	WebServer::addDuoCS(int client, int server)
 {
@@ -92,6 +93,6 @@ int	WebServer::init(void)
 	}
 	std::cerr << "[ " << this->getVirtualServers().size() << "/" << max << " servers created" << " ]" << std::endl;
 	if (this->getVirtualServers().size() == 0)
-		return (perror("/!\\ No server created /!\\"), 1);
+		return (derror("/!\\ No server created /!\\"), 1);
 	return (0);
 }

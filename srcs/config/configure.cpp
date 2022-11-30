@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/28 17:50:13 by gtoubol          ###   ########.fr       //
+/*   Updated: 2022/11/28 11:28:52 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,7 @@ Configure::Configure(std::string const& file):
 	_ifs(),
 	_status(1),
 	server_list(),
+	duoIVS(),
 	n_line(0)
 {
 	ConfigTree parse_tree;
@@ -53,8 +54,9 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
-	this->tree->print("");
 	this->tree = NULL;
+	duoIVS.clear();
+	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -62,11 +64,6 @@ std::vector<VirtualServer> const& Configure::getServers(void) const
 	return (this->server_list);
 }
 
-/**
- * @brief Extract the list of virtual servers related to their full interface description
- *
- * The string describes the interface as "IPV4:IP"
- */
 std::map<std::string, std::vector<VirtualServer*> > const& Configure::getDuoIVS(void) const
 {
 	return (this->duoIVS);
@@ -622,4 +619,10 @@ void	Configure::putError(std::string const& msg, size_t n_line)
 {
 	std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
 	_status = 1;
+}
+
+//addDuoIVS
+void	Configure::addDuoIVS(std::string name, std::vector<VirtualServer*> list)
+{
+	this->duoIVS[name] = list;
 }
