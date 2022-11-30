@@ -6,13 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 12:46:46 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:46:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "Request.hpp"
 #include "WebServer.hpp"
@@ -138,3 +139,26 @@ void	WebServer::clearCache(void)
 	}
 }
 
+void	WebServer::clearTimeout(void)
+{
+	std::map<int, std::pair<int, int> >::iterator itdel;
+
+	for (std::map<int, std::pair<int, int> > ::iterator it = this->_timeout.begin(); it != this->_timeout.end(); it++)
+	{
+		if (time(NULL) - it->second.first < REQUEST_TIMEOUT)
+		{
+			itdel = it;
+			it--;
+			if (itdel->second.second == 0)
+				close(itdel->first);
+			else if (it->second.second == 1)
+			{
+				this->remove_fd_request(itdel->first);
+				close(itdel->first);
+			}
+			else if (it->second.second == 2)
+				this->removeResponse(itdel->first);
+			this->_timeout.erase(itdel);
+		}
+	}
+}

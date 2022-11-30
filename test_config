@@ -2,6 +2,4 @@ server:
   listen: 127.0.0.1:8080
   server_name: coucou
   root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
-  index: index.h\ tml\
-dgsdfg
-  index: 
+  index: index.html

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:01:18 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:29:54 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -152,7 +152,9 @@ int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
+	this->_timeout.erase(client_fd);
 	close(client_fd);
+	
 	
 	return (0);
 }

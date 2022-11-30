@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 13:12:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:45:23 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	WebServer::newConnection(int server_fd)
 		event.events = EPOLLIN;
 		epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
 		this->addDuoCS(client_socket, server_fd);
-		this->_timeout[client_socket] = std::pair<time(NULL), 0>;
+		this->_timeout[client_socket] = std::pair<int, int> (time(NULL), 0);
 	}
 	std::cout << "[ New client connected on " << client_socket << " ]" << std::endl;
 	return (0);
@@ -112,7 +112,7 @@ int	WebServer::getRequest(int client_fd)
 			this->remove_fd_request(client_fd);
 		}
 		this->_timeout[client_fd].first = time(NULL);
-		
+		this->_timeout[client_fd].second = 1;
 	}
 	return (0);
 }
@@ -123,13 +123,20 @@ int	WebServer::sendResponse(int client_fd)
 
 	response = this->getResponse(client_fd);
 	if (response == NULL)
+	{
+		this->_timeout.erase(client_fd);
 		return (derror("/!\\ Response not found"), close(client_fd), 1);
+	}
 	if (response->getStatus() == 0)
 		this->sendHeader(client_fd, response);
 	if (response->getStatus() == 1 && response->getBody() != "")
 		this->sendBody(client_fd, response);
 	else if (response->getStatus() == 1 && response->getFilename() != "")
 		this->sendFile(client_fd, response);
+
+	this->_timeout[client_fd].first = time(NULL);
+	this->_timeout[client_fd].second = 2;
+	
 	return (0);
 }
 
@@ -150,6 +157,7 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 		{
 			close(events[i].data.fd);
 			epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, events[i].data.fd, NULL);
+			this->_timeout.erase(events[i].data.fd);
 		}
 	}
 	return (0);
@@ -180,6 +188,7 @@ int	WebServer::run(void)
 		{
 			if (this->event_loop(events, nb_events) == -1)
 				std::cout << "Error in requests" << std::endl;
+			this->clearTimeout();		
 		}
 		this->clearCache();
 	}

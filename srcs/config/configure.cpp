@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 13:14:38 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:54:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,6 @@ Configure::Configure(std::string const& file):
 	}
 	_ifs.close();
 	duoIVS.clear();
-	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
 	this->tree->print("");
 	this->tree = NULL;
 }

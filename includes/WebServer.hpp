@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:52:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:44:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,6 +102,7 @@ class WebServer
 		int		is_server(int fd);
 		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
 		void	clearCache(void);
+		void	clearTimeout(void);
 
 		std::vector<std::string>	splitFormdata(std::string const& file, std::string const& boundary);
 
@@ -117,7 +118,7 @@ class WebServer
 		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
-		std::map<int fd, std::pair<int time, int state> >	_timeout;
+		std::map<int, std::pair<int, int> >	_timeout;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };

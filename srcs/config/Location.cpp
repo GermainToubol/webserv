@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:50:42 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 13:15:59 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:44:09 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,8 +24,8 @@ Location::Location(VirtualServer const& server):
 	_root(server.getRoot()),
 	_index(""),
 	_post_dir(""),
-	_max_body_size(""),
 	_redirect(""),
+	_max_body_size(32000000),
 	_cgi_path()
 {
 	return ;
@@ -90,6 +90,8 @@ std::string	const& Location::getPostDir() const
 std::string::size_type	const& Location::getMaxBodySize() const
 {
 	return (this->_max_body_size);
+}
+
 void	Location::setRoot(std::string const& str)
 {
 	this->_root = str;

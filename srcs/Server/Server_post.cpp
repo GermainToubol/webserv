@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:00:23 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:30:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,6 +50,7 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 	
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
+	this->_timeout.erase(client_fd);
 	close(client_fd);
 	return (0);
 }

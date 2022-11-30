@@ -1,27 +1,17 @@
 #include <queue>
+#include <vector>
+#include <map>
 #include  <utility>
 #include  <iostream>
+#include  <cstdlib>
 
 
 int	main(int argc, char *argv[])
 {
-	std::pair <int, int> p1(1, 456);
-	std::pair <int, int> p2(2, 422);
-	std::pair <int, int> p3(3, 874);
-	std::pair <int, int> p4(4, 32);
+	std::map<int, int> map;
 
-	std::priority_queue <std::pair<int, int> > pq;
+	map[1] = 2;
 
-	pq.push(p1);
-	pq.push(p3);
-	pq.push(p4);
-	pq.push(p2);
-
-	while (!pq.empty())
-	{
-		pq[p1].first = 0;
-		std::cout << pq.top().first << " " << pq.top().second << std::endl;
-
-		pq.pop();
-	}
+	map.erase(2);
+	std::cout << time(NULL) << std::endl;
 }
