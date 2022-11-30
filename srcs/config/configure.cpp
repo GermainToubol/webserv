@@ -338,10 +338,7 @@ void Configure::setHost(std::string const& value, VirtualServer& server, size_t 
 	{
 		host_str = "0.0.0.0";
 	}
-	if (this->validHost(host_str, server, line_nb))
-	{
-		server.setHost(host_str);
-	}
+	this->validHost(host_str, server, line_nb);
 }
 
 bool Configure::validHost(std::string const& address, VirtualServer& server, size_t line_nb)
