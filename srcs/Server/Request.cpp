@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 17:22:36 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 18:18:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,13 +95,18 @@ int	Request::basicCheck(Setup *setup)
 
 int	Request::setUri(Setup *setup)
 {
-	if (setup->getUri() == this->_location->getRoot() && this->_method == "GET")
-		setup->setUri(this->_location->getIndex());
-	else
-		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
-	if (*setup->getUri().begin() == '/')
-		setup->replaceUri(0, 1, "");
-	setup->setUri(setup->getServer()->getRoot() + reformatUri(setup->getUri()));
+	
+	if (setup->getUri() == "/" && this->_method == "GET")
+	{std::cerr << "uri: " << this->_location->getIndex() << std::endl;
+		setup->setUri(this->_location->getIndex());}
+	
+	std::cerr << "uri: " << setup->getUri() << std::endl;
+	
+	setup->setUri(reformatUri(setup->getUri()));
+	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
+	//if (*setup->getUri().begin() == '/')
+	//	setup->replaceUri(0, 1, "");
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 	return (0);
 }
 

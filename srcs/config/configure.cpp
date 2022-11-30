@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 17:43:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 18:03:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,7 +63,6 @@ Configure::Configure(std::string const& file):
 	}
 	_ifs.close();
 	this->tree = NULL;
-	duoIVS.clear();
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -883,7 +882,7 @@ bool	str_endswith(std::string const& str, std::string const& suffix)
 	if (str.length() < suffix.length())
 		return (false);
 	else
-		return (std::equal(str.rbegin(), suffix.rbegin(), suffix.rend()));
+		return (std::equal(suffix.rbegin(), suffix.rend(), str.rbegin()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -912,12 +911,14 @@ void	Configure::setDuoIVS(void)
 			if (str_endswith(inter_it->first, suffix))
 			{
 				if (inter_it->first == fullname or server_it->getHost() == "0.0.0.0")
+				{
 					inter_it->second.push_back(&(*server_it));
+				}
 			}
 		}
 	}
 	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
 	{
-		std::cout << " [ duoIVS (config side) ] " << it->first << " " << std::endl;
+		std::cout << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
 	}
 }

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 17:52:05 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 18:04:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,10 +31,10 @@ WebServer::WebServer(Configure const& config)
 	#include "status_codes"
 	
 	this->_duoIVS = config.getDuoIVS();
-	std::cerr << " [ duoIVS (server side) size: " << this->_duoIVS.size() << " ]" << std::endl;
-	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->_duoIVS.begin(); it != this->_duoIVS.end(); it++)
+	std::cerr << " [ duoIVS (server side) size: " << config.getDuoIVS().size() << " ]" << std::endl;
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = config.getDuoIVS().begin(); it != config.getDuoIVS().end(); it++)
 	{
-		std::cout << " [ duoIVS (server side) ] " << it->first << " " << std::endl;
+		std::cout << " [ duoIVS (server side) ] " << it->first << " " <<  std::endl;
 	}
 	if (DEBUG)
 	{
