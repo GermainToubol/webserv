@@ -260,19 +260,12 @@ bool	Configure::setPort(std::string const& value, VirtualServer& server, size_t 
 	long int port_nbr;
 	char *end;
 
-	// Skip all terminating spaces
 	for (rit = value.rbegin(); rit != value.rend(); ++rit)
-	{
-		if (not isspace(*rit))
-			break;
-	}
-	it = rit.base();
-	for (; rit != value.rend(); ++rit)
 	{
 		if (not isdigit(*rit))
 			break ;
 	}
-	port_str.assign(rit.base(), it);
+	port_str.assign(rit.base(), value.end());
 	if (port_str != "")
 	{
 		port_nbr = strtol(port_str.c_str(), &end, 10);
@@ -293,11 +286,6 @@ void Configure::setHost(std::string const& value, VirtualServer& server, size_t 
 	std::string::const_iterator it;
 
 	for (rit = value.rbegin(); rit != value.rend(); ++rit)
-	{
-		if (not isspace(*rit))
-			break ;
-	}
-	for (; rit != value.rend(); ++rit)
 	{
 		if (not isdigit(*rit))
 			break;
@@ -356,8 +344,6 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 template<class T>
 void	Configure::addRoot(ConfigTree const& node, T &server)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string root;
 
 	if (not node.getLeaves().empty())
@@ -370,19 +356,7 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 		this->putError("root: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	root.assign(it, rit.base());
+	root = node.getValue();
 	if (root == "" or root[0] != '/')
 	{
 		return (this->putError("root: expect absolut path", node.getLineNumber()));
@@ -396,8 +370,6 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 template<class T>
 void	Configure::addIndex(ConfigTree const& node, T& server)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string index;
 
 	if (not node.getLeaves().empty())
@@ -410,19 +382,7 @@ void	Configure::addIndex(ConfigTree const& node, T& server)
 		this->putError("index: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	index.assign(it, rit.base());
+	index = node.getValue();
 	if (index == "")
 	{
 		return (this->putError("index: empty value", node.getLineNumber()));
@@ -436,8 +396,6 @@ void	Configure::addIndex(ConfigTree const& node, T& server)
 template<class T>
 void	Configure::addAutoindex(ConfigTree const& node, T& server)
 {
-	std::string::const_iterator it;
-	std::string::const_reverse_iterator rit;
 	std::string value;
 
 	if (not node.getLeaves().empty())
@@ -450,19 +408,7 @@ void	Configure::addAutoindex(ConfigTree const& node, T& server)
 		this->putError("autoindex: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	value.assign(it, rit.base());
+	value = node.getValue();
 	if (value == "on")
 		return (server.setAutoindex(true));
 	if (value == "off")
@@ -492,23 +438,15 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
 	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (; it != node.getValue().end(); ++it)
-	{
 		if (isalnum(*it) or (*it == '.') or (*it == '-') or (*it == '_'))
 			server_name.push_back(tolower(*it));
 		else
 			break ;
 	}
-	for (; it != node.getValue().end(); ++it)
+	if (it != node.getValue().end())
 	{
-		if (not isspace(*it))
-		{
 			this->putError("server_name: invalid character", node.getLineNumber());
 			return ;
-		}
 	}
 	if (server_name == "")
 	{
@@ -524,8 +462,6 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 template<class T>
 void	Configure::addPermission(ConfigTree const& node, T& server)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string permissions;
 	long n;
 	char *pos;
@@ -540,19 +476,7 @@ void	Configure::addPermission(ConfigTree const& node, T& server)
 		this->putError("permissions: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	permissions.assign(it, rit.base());
+	permissions = node.getValue();
 	n = strtol(permissions.c_str(), &pos, 10);
 	if (n < 0 or n >= 8 or *pos != '\0')
 	{
@@ -568,8 +492,6 @@ void	Configure::addPermission(ConfigTree const& node, T& server)
 template<class T>
 void	Configure::addMaxBodySize(ConfigTree const& node, T& server)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string size_str;
 	long n;
 	char *pos;
@@ -584,19 +506,7 @@ void	Configure::addMaxBodySize(ConfigTree const& node, T& server)
 		this->putError("max_body_size: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	size_str.assign(it, rit.base());
+	size_str = node.getValue();
 	n = strtol(size_str.c_str(), &pos, 10);
 	if (size_str == "" or n < 0 or *pos != '\0')
 	{
@@ -611,8 +521,6 @@ void	Configure::addMaxBodySize(ConfigTree const& node, T& server)
 ///////////////////////////////////////////////////////////////////////////////
 void	Configure::addRedirect(ConfigTree const& node, Location& location)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string redirect;
 
 	if (not node.getLeaves().empty())
@@ -625,19 +533,7 @@ void	Configure::addRedirect(ConfigTree const& node, Location& location)
 		this->putError("redirection: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	redirect.assign(it, rit.base());
+	redirect = node.getValue();
 	if (redirect == "")
 	{
 		this->putError("redirection: invalid value", node.getLineNumber());
@@ -665,19 +561,7 @@ void	Configure::addDefaultFile(ConfigTree const& node, Location &location)
 		this->putError("default_file: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	file.assign(it, rit.base());
+	file = node.getValue();
 	if (file == "" or file[0] != '/')
 	{
 		return (this->putError("default_file: expect absolut path", node.getLineNumber()));
@@ -704,19 +588,7 @@ void	Configure::addPostDir(ConfigTree const& node, Location &location)
 		this->putError("post_dir: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-		{
-			break ;
-		}
-	}
-	file.assign(it, rit.base());
+	file = node.getValue();
 	if (file == "" or file[0] != '/')
 	{
 		return (this->putError("post_dir: expect absolut path", node.getLineNumber()));
