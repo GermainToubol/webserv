@@ -35,10 +35,17 @@
 typedef void (Configure::*t_server_func)(ConfigTree const&, VirtualServer&);
 typedef void (Configure::*t_location_func)(ConfigTree const&, Location&);
 
-typedef struct s_server_pair {
+typedef struct s_server_pair
+{
+	std::string		str;
+	t_server_func	fnc;
+}	t_server_pair;
+
+typedef struct s_location_pair
+{
 	std::string str;
-	t_server_func fnc;
-} t_server_pair;
+	t_location_func fnc;
+}	t_location_pair;
 
 Configure::Configure(std::string const& file):
 	filename(file),
@@ -192,56 +199,32 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 	const t_server_pair function_tab[] = {
 		{"listen",		&Configure::addListen},
 		{"root",		&Configure::addRoot},
-		{"server_name",	&Configure::addServerName}
+		{"server_name",	&Configure::addServerName},
+		{"location", &Configure::addLocation},
+		{"index", &Configure::addIndex},
+		{"permissions", &Configure::addPermission},
+		{"max_body_size", &Configure::addMaxBodySize},
+		{"autoindex", &Configure::addAutoindex}
 	};
+	bool executed;
 
-	(void)function_tab;
 	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
 		 server_prop != node.getLeaves().end();
 		 ++server_prop
 		)
 	{
-		if (server_prop->getKey() == "listen")
+		executed = false;
+		for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 		{
-			this->addListen(*server_prop, server);
-			continue ;
+			if (server_prop->getKey() == function_tab[i].str)
+			{
+				(this->*(function_tab[i].fnc))(*server_prop, server);
+				executed = true;
+				break ;
+			}
 		}
-		if (server_prop->getKey() == "root")
-		{
-			this->addRoot(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "server_name")
-		{
-			this->addServerName(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "location")
-		{
-			this->addLocation(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "index")
-		{
-			this->addIndex(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "permissions")
-		{
-			this->addPermission(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "max_body_size")
-		{
-			this->addMaxBodySize(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "autoindex")
-		{
-			this->addAutoindex(*server_prop, server);
-			continue ;
-		}
-		this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
+		if (not executed)
+			this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
 }
 
@@ -803,52 +786,35 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 
 void	Configure::setLocation(ConfigTree const& node, Location& location)
 {
+	const t_location_pair function_tab[] = {
+		{"root",		&Configure::addRoot},
+		{"index", &Configure::addIndex},
+		{"permissions", &Configure::addPermission},
+		{"max_body_size", &Configure::addMaxBodySize},
+		{"autoindex", &Configure::addAutoindex},
+		{"redirect", &Configure::addRedirect},
+		{"default_file", &Configure::addDefaultFile},
+		{"post_dir", &Configure::addPostDir}
+	};
+	bool executed;
+
 	for (std::vector<ConfigTree>::const_iterator location_prop = node.getLeaves().begin();
 		 location_prop != node.getLeaves().end();
 		 ++location_prop
 		)
 	{
-		if (location_prop->getKey() == "root")
+		executed = false;
+		for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 		{
-			this->addRoot(*location_prop, location);
-			continue ;
+			if (location_prop->getKey() == function_tab[i].str)
+			{
+				(this->*(function_tab[i].fnc))(*location_prop, location);
+				executed = true;
+				break ;
+			}
 		}
-		if (location_prop->getKey() == "index")
-		{
-			this->addIndex(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "permissions")
-		{
-			this->addPermission(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "max_body_size")
-		{
-			this->addMaxBodySize(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "autoindex")
-		{
-			this->addAutoindex(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "redirect")
-		{
-			this->addRedirect(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "default_file")
-		{
-			this->addDefaultFile(*location_prop, location);
-			continue ;
-		}
-		if (location_prop->getKey() == "post_dir")
-		{
-			this->addPostDir(*location_prop, location);
-			continue ;
-		}
-		this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
+		if (not executed)
+			this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
 }
 
