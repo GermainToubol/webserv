@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:47:24 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:48:47 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <map>
 
 #include "VirtualServer.hpp"
@@ -28,6 +29,12 @@
 # define MAX_CLIENTS 100
 # define TIMEOUT 200
 # define SEND_SIZE 1048575
+
+typedef struct s_pair
+{
+	int		time;
+	int		state;
+}	t_pair;
 
 class WebServer
 {
@@ -42,6 +49,7 @@ class WebServer
 		Response 										*getResponse(int client_fd) const;
 		Cache											*getCache(std::string const& filename) const;
 		
+		void											setDuoIVS(std::map<std::string, std::vector<VirtualServer*> > const& duoIVS);
 		/*End*/
 		int	end(void);
 		
@@ -101,6 +109,7 @@ class WebServer
 		int		is_server(int fd);
 		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
 		void	clearCache(void);
+		void	clearTimeout(void);
 
 		std::vector<std::string>	splitFormdata(std::string const& file, std::string const& boundary);
 
@@ -116,7 +125,7 @@ class WebServer
 		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
-		std::map<int, int>									_timeout;
+		std::map<int, t_pair>								_timeout;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };

@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/29 11:51:45 by lgiband          ###   ########.fr        #
+#    Updated: 2022/11/30 17:01:15 by lgiband          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ SRCS =		$(addprefix config/,											\
 				Response.cpp												\
 				Setup.cpp													\
 			)																\
+			utils.cpp														\
 			main.cpp
 
 # List of test sources (.cpp)
@@ -60,7 +61,7 @@ TPP_DIR =	templates
 # List of all compilation options
 # -------------------------------------------------------------------------
 CXX = 		c++
-CXXFLAGS =	-Wall -Wextra -Werror --std=c++98
+CXXFLAGS =	-Wall -Wextra -Werror --std=c++98 -g
 
 # Description of the final target
 # -------------------------------------------------------------------------
@@ -139,7 +140,7 @@ re:			fclean all
 
 # General dependences management
 # ------------------------------------------------------------------------
-$(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp
+$(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp Makefile
 	@if [ ! -d $(dir $@) ]; then \
 		mkdir -p $(dir $@); \
 		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \

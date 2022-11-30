@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 09:19:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:36:49 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,19 +48,6 @@ void	derror(std::string const& msg)
 int	main(void)
 {
 	Configure config("test_config");
-
-	VirtualServer	vs = config.getServers()[0];
-	Location		loc;
-
-
-
-	vs.addLocation("/", loc);
-	std::vector<VirtualServer *> vec;
-
-	vec.push_back(&vs);
-
-	config.addDuoIVS(vs.getHost() + ":" + vs.getPort(), vec);
-	std::cerr << vs.getRoot() << std::endl;
 
 	init_sig(get_sig, SIGINT);
 	

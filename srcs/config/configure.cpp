@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/28 11:28:52 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 18:03:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,8 +63,6 @@ Configure::Configure(std::string const& file):
 	}
 	_ifs.close();
 	this->tree = NULL;
-	duoIVS.clear();
-//	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -916,12 +914,8 @@ void	Configure::setDuoIVS(void)
 			}
 		}
 	}
-	for (
-			std::map<std::string, std::vector<VirtualServer*> >::iterator inter_it = this->duoIVS.begin();
-			inter_it != this->duoIVS.end();
-			++inter_it
-			)
-		{
-			std::cout << "configured:" << inter_it->first << " " << inter_it->second.size() <<  std::endl;
-		}
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
+	{
+		std::cout << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
+	}
 }

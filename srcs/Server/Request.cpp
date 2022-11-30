@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 15:38:13 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 18:18:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "Request.hpp"
 #include "utils.hpp"
 
-Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1),
+Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1), _is_header(0),
 							_method(""), _uri(""),
 							_version(""), _body(""), _empty("") {}
 
@@ -36,18 +36,19 @@ int	Request::addContent(char *buf, int ret)
 	std::cerr << "[ end header: " << this->_content.find("\r\n\r\n") << " ]" << std::endl;
 	if (ret == 0)
 		return (1);
-	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size == -1)
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 0)
 	{
 		pos = this->_content.find("Content-Length: ");
 		if (pos == std::string::npos)
-			return (derror("no C length"), 1);
+			return (1);
 		pos2 = this->_content.find("\r\n", pos); //check overflow
-		this->_content_size = std::atoi(this->_content.substr(pos + 16, pos2 - pos - 16).c_str());
+		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str(), NULL, 10);
+		this->_is_header = 1;
 		std::cerr << "content size: " << this->_content_size << std::endl;
 		if (this->_content_size <= 0)
-			return (derror("no body"), 1);
+			return (1);
 	}
-	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size != -1)
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 1)
 	{
 		std::cerr << "content size after: " << this->_content_size << std::endl;
 		pos = this->_content.find("\r\n\r\n");
@@ -94,13 +95,18 @@ int	Request::basicCheck(Setup *setup)
 
 int	Request::setUri(Setup *setup)
 {
-	if (setup->getUri() == this->_location->getRoot() && this->_method == "GET")
-		setup->setUri(this->_location->getIndex());
-	else
-		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
-	if (*setup->getUri().begin() == '/')
-		setup->replaceUri(0, 1, "");
-	setup->setUri(setup->getServer()->getRoot() + setup->getUri());
+	
+	if (setup->getUri() == "/" && this->_method == "GET")
+	{std::cerr << "uri: " << this->_location->getIndex() << std::endl;
+		setup->setUri(this->_location->getIndex());}
+	
+	std::cerr << "uri: " << setup->getUri() << std::endl;
+	
+	setup->setUri(reformatUri(setup->getUri()));
+	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
+	//if (*setup->getUri().begin() == '/')
+	//	setup->replaceUri(0, 1, "");
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 	return (0);
 }
 
@@ -187,7 +193,7 @@ int	Request::parsing(Setup *setup)
 	std::cerr << "Method: " << this->_method << std::endl;
 	std::cerr << "URI: " << this->_uri << std::endl;
 	std::cerr << "Version: " << this->_version << std::endl;
-	std::cerr << "Body: " << this->_body << std::endl;
+	std::cerr << "Body size: " << this->_body.size() << std::endl;
 	for (std::map<std::string, std::string>::iterator it = this->_fields.begin(); it != this->_fields.end(); it++)
 		std::cerr << it->first << ": " << it->second << std::endl;
 	std::cerr << "[ End Parsed request ]" << std::endl;

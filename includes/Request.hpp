@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 15:01:53 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 16:06:19 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,8 @@ class Request
 
 		std::string							_boundary;
 		std::string							_content;
-		int									_content_size;
+		size_t								_content_size;
+		size_t								_is_header;
 
 		std::string							_method;
 		std::string							_uri;

@@ -1,11 +1,19 @@
-#include <queue>
-#include <vector>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.cpp                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
+/*   Updated: 2022/11/30 17:04:26 by lgiband          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include <iostream>
+#include <cstring>
 #include <stack>
 #include <string>
-#include <map>
-#include  <utility>
-#include  <iostream>
-#include  <cstdlib>
 
 std::string	reformatUri(std::string const& uri)
 {
@@ -26,7 +34,6 @@ std::string	reformatUri(std::string const& uri)
 		end = uri.find('/', start);
 		if (end == std::string::npos)
 			end = uri.size();
-		std::cerr << "start: " << start << " end: " << end << std::endl;
 		tmp = uri.substr(start, end - start);
 		if (tmp == "..")
 		{
@@ -51,11 +58,4 @@ std::string	reformatUri(std::string const& uri)
 	if (new_uri.size() == 0)
 		new_uri = "/";
 	return (new_uri);
-}
-
-int	main(int argc, char *argv[])
-{
-	std::string	uri = "/../ono";
-
-	std::cout << reformatUri(uri) << std::endl;
 }
