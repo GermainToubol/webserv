@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/29 11:51:45 by lgiband          ###   ########.fr        #
+#    Updated: 2022/11/30 13:18:39 by lgiband          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,6 +19,7 @@ SRCS =		$(addprefix config/,											\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
 				Location.cpp												\
+				ConfigTree.cpp												\
 			)																\
 			$(addprefix Server/,											\
 				Server_core.cpp												\
@@ -35,21 +36,19 @@ SRCS =		$(addprefix config/,											\
 				Response.cpp												\
 				Setup.cpp													\
 			)																\
-			main.cpp \
+			main.cpp
 
 # List of test sources (.cpp)
 # -------------------------------------------------------------------------
-TEST = 		$(addprefix $(SRCS_DIR)/,										\
-				$(addprefix config/,										\
+TEST =			$(addprefix config/,										\
 					test_configure.cpp										\
-				)															\
-			)
+				)
 
 TEST_DIR =	tests
-TEST_OBJS =	$(TEST:.cpp=.o)
+TEST_OBJS =	$(addprefix $(OBJS_DIR)/,$(TEST:.cpp=.o))
 DOC_FILE = doxygen.conf
 
-TEST_EXE = $(TEST:.cpp=.test)
+TEST_EXE = $(addprefix $(SRCS_DIR)/,$(TEST:.cpp=.test))
 
 # List of the related directories
 # -------------------------------------------------------------------------
@@ -61,7 +60,7 @@ TPP_DIR =	templates
 # List of all compilation options
 # -------------------------------------------------------------------------
 CXX = 		c++
-CXXFLAGS =	-Wall -Wextra -Werror --std=c++98 -g
+CXXFLAGS =	-Wall -Wextra -Werror --std=c++98
 
 # Description of the final target
 # -------------------------------------------------------------------------
@@ -126,7 +125,7 @@ doc:
 test:		$(TEST_EXE)
 			pytest
 
-%.test:		%.o $(filter-out main.cpp,$(OBJS))
+$(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out %main.o objs/Server%,$(OBJS))
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 re:			fclean all

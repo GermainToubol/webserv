@@ -14,6 +14,7 @@
 # define VIRTUALSERVER_HPP
 #pragma once
 
+#include <map>
 #include <string>
 #include <map>
 #include <vector>
@@ -32,6 +33,7 @@ public:
 	std::string 						const& getPort() const;
 	int 								const& getFd()	const;
 	std::map<std::string, Location>		const& getLocationPool() const;
+	std::map<std::string, Location>&	getLocationPool();
 	std::map<int, std::string>			const& getErrorPage() const;
 
 	void	setServerName(std::string const&);

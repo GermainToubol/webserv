@@ -55,6 +55,11 @@ std::map<std::string, Location> const& VirtualServer::getLocationPool() const
 	return (this->location_pool);
 }
 
+std::map<std::string, Location> &VirtualServer::getLocationPool()
+{
+	return (this->location_pool);
+}
+
 std::map<int, std::string> const& VirtualServer::getErrorPage() const
 {
 	return (this->error_page);

@@ -1,46 +1,46 @@
 // ************************************************************************** //
 //                                                                            //
 //                                                        :::      ::::::::   //
-//   ConfigEntry.hpp                                    :+:      :+:    :+:   //
+//   ConfigTree.hpp                                     :+:      :+:    :+:   //
 //                                                    +:+ +:+         +:+     //
 //   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
 //                                                +#+#+#+#+#+   +#+           //
-//   Created: 2022/11/17 10:25:51 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/17 12:30:17 by gtoubol          ###   ########.fr       //
+//   Created: 2022/11/23 11:17:36 by gtoubol           #+#    #+#             //
+//   Updated: 2022/11/25 18:10:37 by gtoubol          ###   ########.fr       //
 //                                                                            //
 // ************************************************************************** //
 
-#ifndef CONFIGENTRY_H
-#define CONFIGENTRY_H
+#ifndef CONFIGTREE_H
+#define CONFIGTREE_H
 #pragma once
 
 #include <cstddef>
-#include <exception>
 #include <string>
+#include <vector>
+#include "ConfigEntry.hpp"
 
-class ConfigEntry
+struct ConfigTree
 {
 public:
-	ConfigEntry(std::string const&, size_t);
-	virtual ~ConfigEntry(void) {}
+	ConfigTree();
+	ConfigTree(ConfigEntry const&);
+	virtual ~ConfigTree() {}
 
-	size_t		getLevel(void) const;
-	std::string const& getKey(void) const;
-	std::string const& getValue(void) const;
+	void	print(std::string const&) const;
+	std::vector<ConfigTree>& getLeaves();
+	std::vector<ConfigTree> const& getLeaves() const;
+
+	std::string const& getKey() const;
+	std::string const& getValue() const;
 	bool		hasDelimiter() const;
-	bool		isValueEmpty(void) const;
 	size_t		getLineNumber() const;
 
-protected:
-	bool	isLevelChar(const char) const;
-	bool	isKeyChar(const char) const;
-	bool	isDelimiter(const char) const;
-
-	size_t		level;
+private:
+	size_t		line;
 	std::string	key;
-	std::string value;
-	bool		hasdelimiter;
-	size_t		line_nb;
+	std::string	value;
+	bool		delimiter;
+	std::vector<ConfigTree>	leaves;
 };
 
-#endif /* CONFIGENTRY_H */
+#endif /* CONFIGTREE_H */

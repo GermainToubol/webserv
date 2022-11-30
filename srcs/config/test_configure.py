@@ -6,7 +6,7 @@
 #    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/11/04 14:59:06 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/21 09:45:16 by gtoubol          ###   ########.fr        #
+#    Updated: 2022/11/28 17:46:19 by gtoubol          ###   ########.fr        #
 #                                                                              #
 #******************************************************************************#
 
@@ -36,7 +36,6 @@ class TestConfigure:
             returncode = proc.wait()
         assert errorlog == expected_log
         assert returncode == expected_returncode
-
 
     def test_inputfile_file_no_exist(self):
         filename = "does_not_exist"
@@ -83,15 +82,29 @@ class TestConfigure:
         tmp.mkdir()
         self.run_error(tmp, f"Error: {tmp}: unreadable.\n", 1)
 
+    def test_inputfile_levelformating(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+ server
+   server
+server
+# Coucou
+  server
+ # test test
+""")
+        self.run_error(
+        tmp,
+        """Bad config: line 2: bad block level
+Bad config: line 3: bad block level
+""",
+        1)
 
     def test_inputfile_server(self, tmp_path):
         tmp = tmp_path / str(uuid.uuid4())
-        tmp.write_text("""  server
-server:
+        tmp.write_text("""server:
 server coucou
 server : coucou
 server:
-
 
 server:
 server: test
@@ -99,10 +112,9 @@ server: test
 
         self.run_error(
             tmp,
-            """Bad config: line 1: server level needs to be 0
-Bad config: line 3: missing delimiter
-Bad config: line 4: missing delimiter
-Bad config: line 9: configuration file error
+            """Bad config: line 2: server: missing delimiter
+Bad config: line 3: server: missing delimiter
+Bad config: line 7: server: unexpected value
 """
             , 1)
 
@@ -110,37 +122,60 @@ Bad config: line 9: configuration file error
     def test_inputfile_listen(self, tmp_path):
         tmp = tmp_path / str(uuid.uuid4())
         tmp.write_text("""
+# listen out of server block
 listen: 127.0.0.2:80
 
 server:
-    listen: 80
+  # listen with options
+  listen: 80
+    bad listen
+    bad listen
   listen: 80
   listen: 80
 
+# bad listen blocks
 server:
   listen: 183  ;
+  # bad to high
+  listen: 65536
+  # last port ok
+  listen: 65535
+  #check overflow
+  listen: 9223372036854775809
+  listen: 18446744073709551616
+
+# bad host
+server:
   listen: 1sdf23
   listen: aze123
+  listen: 127..0.0:80
+  listen: etaset:80
 
+# valid hosts
 server:
   listen: 127.0.0.2:80
+  listen: 80
+  # listen: ::1:80
+  listen: localhost:80
 
 server:
-  listen: 127..0.0:80
   listen
   listen: 255.255.255.255:80
 
 """)
         self.run_error(
             tmp,
-        """Bad config: line 2: listen block should be in server block
-Bad config: line 5: listen level needs to be 1
-Bad config: line 7: server blocks have only one listen
-Bad config: line 10: listen block values must match the format [IPV4:]PORT
-Bad config: line 11: listen block values must match the format [IPV4:]PORT
-Bad config: line 12: listen block values must match the format [IPV4:]PORT
-Bad config: line 18: listen block values must match the format [IPV4:]PORT
-Bad config: line 19: missing delimiter
+        """Bad config: line 3: listen: bad key level
+Bad config: line 7: listen: unexpected properties
+Bad config: line 15: listen: bad port format
+Bad config: line 17: listen: bad port format
+Bad config: line 21: listen: bad port format
+Bad config: line 22: listen: bad port format
+Bad config: line 26: listen: bad format
+Bad config: line 27: listen: bad format
+Bad config: line 28: listen: could not resolve `127..0.0`
+Bad config: line 29: listen: could not resolve `etaset`
+Bad config: line 39: listen: bad format
 """,
             1)
 
@@ -149,10 +184,11 @@ Bad config: line 19: missing delimiter
         tmp.write_text("""
 root: test
 server:
-    root
+  root:
+    root:
+    listen: 12.12.12.12:80
   root
   root /test
-  root: /test
   root: /test
 
 server:
@@ -161,12 +197,11 @@ server:
 
         self.run_error(
             tmp,
-            """Bad config: line 2: root block should be in server block
-Bad config: line 4: root level needs to be 1
-Bad config: line 5: missing delimiter
-Bad config: line 6: missing delimiter
-Bad config: line 8: server blocks have only one root
-Bad config: line 11: root should be absolut path
+            """Bad config: line 2: root: bad key level
+Bad config: line 4: root: unexpected properties
+Bad config: line 7: root: missing delimiter
+Bad config: line 8: root: missing delimiter
+Bad config: line 12: root: expect absolut path
 """,
             1)
 
@@ -175,17 +210,24 @@ Bad config: line 11: root should be absolut path
         tmp.write_text("""
 server_name: coucou
 server:
-server_name: coucou
+  server_name:
+    root: coucou
+    server_name: test
 server:
   server_name test123
   server_name: test
+  server_name: test aaa
+server:
   server_name: test
+  server_name: sekl_dsdf
+  server_name:
 """)
         self.run_error(
             tmp,
-            """Bad config: line 2: server_name block should be in server block
-Bad config: line 4: server_name level should be 1
-Bad config: line 6: missing delimiter
-Bad config: line 8: server blocks have only one server_name
+            """Bad config: line 2: server_name: bad key level
+Bad config: line 4: server_name: unexpected properties
+Bad config: line 8: server_name: missing delimiter
+Bad config: line 10: server_name: invalid character
+Bad config: line 14: server_name: invalid value
 """,
             1)

@@ -6,17 +6,46 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:50:42 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:24:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:15:59 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
+#include "VirtualServer.hpp"
 
 Location::Location(): _permissions(GET_PERM | POST_PERM | DEL_PERM), _autoindex(1), _default_file(""),
 					_root("/"), _index("index.html"), _post_dir("/"),
 					 _redirect(""), _max_body_size(32000000)  {}
 
+Location::Location(VirtualServer const& server):
+	_permissions(GET_PERM),
+	_autoindex(false),
+	_default_file(""),
+	_root(server.getRoot()),
+	_index(""),
+	_post_dir(""),
+	_max_body_size(""),
+	_redirect(""),
+	_cgi_path()
+{
+	return ;
+}
+
 Location::~Location() {}
+
+Location &Location::operator=(Location const& other)
+{
+	_permissions = other._permissions;
+	_autoindex = other._autoindex;
+	_default_file = other._default_file;
+	_root = other._root;
+	_index = other._index;
+	_post_dir = other._post_dir;
+	_max_body_size = other._max_body_size;
+	_redirect = other._redirect;
+	_cgi_path = other._cgi_path;
+	return (*this);
+}
 
 std::string	const& Location::getRoot() const
 {
@@ -61,4 +90,7 @@ std::string	const& Location::getPostDir() const
 std::string::size_type	const& Location::getMaxBodySize() const
 {
 	return (this->_max_body_size);
+void	Location::setRoot(std::string const& str)
+{
+	this->_root = str;
 }

@@ -13,7 +13,7 @@
 #include <string>
 #include "ConfigEntry.hpp"
 
-ConfigEntry::ConfigEntry(std::string const& line): level(0), key(""), value(""), hasdelimiter(false)
+ConfigEntry::ConfigEntry(std::string const& line, size_t ln): level(0), key(""), value(""), hasdelimiter(false), line_nb(ln)
 {
 
 	std::string::const_iterator it;
@@ -90,4 +90,9 @@ bool	ConfigEntry::isValueEmpty(void) const
 bool	ConfigEntry::hasDelimiter(void) const
 {
 	return (this->hasdelimiter);
+}
+
+size_t	ConfigEntry::getLineNumber() const
+{
+	return (this->line_nb);
 }
