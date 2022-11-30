@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 15:05:38 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:12:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,6 +46,7 @@ int	WebServer::newConnection(int server_fd)
 		event.events = EPOLLIN;
 		epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, client_socket, &event);
 		this->addDuoCS(client_socket, server_fd);
+		this->_timeout[client_socket] = std::pair<time(NULL), 0>;
 	}
 	std::cout << "[ New client connected on " << client_socket << " ]" << std::endl;
 	return (0);
@@ -100,7 +101,7 @@ int	WebServer::getRequest(int client_fd)
 	{
 		this->_buffer[ret] = '\0';
 		std::cerr << "[ Recv " << ret << " bytes ]" << std::endl;
-		request = get_fd_request(client_fd);
+		request = this->get_fd_request(client_fd);
 		if (request == NULL)
 			return (derror("/!\\ Request not found"), -1);
 		state = request->addContent(this->_buffer, ret);
@@ -108,8 +109,10 @@ int	WebServer::getRequest(int client_fd)
 		{
 			std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
 			this->setResponse(client_fd, request);
-			remove_fd_request(client_fd);
+			this->remove_fd_request(client_fd);
 		}
+		this->_timeout[client_fd].first = time(NULL);
+		
 	}
 	return (0);
 }

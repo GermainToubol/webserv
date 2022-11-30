@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 12:47:24 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:52:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <map>
 
 #include "VirtualServer.hpp"
@@ -116,7 +117,7 @@ class WebServer
 		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
-		std::map<int, int>									_timeout;
+		std::map<int fd, std::pair<int time, int state> >	_timeout;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };
