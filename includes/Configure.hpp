@@ -64,6 +64,8 @@ private:
 	void	addRoot(ConfigTree const&, T&);
 	template<class T>
 	void	addIndex(ConfigTree const&, T&);
+	template<class T>
+	void	addPermission(ConfigTree const&, T&);
 
 	void	addServerName(ConfigTree const&, VirtualServer&);
 	void	addLocation(ConfigTree const&, VirtualServer&);

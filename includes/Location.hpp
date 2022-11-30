@@ -21,9 +21,9 @@
 
 class VirtualServer;
 
-# define GET_PERM 1
+# define GET_PERM 4
 # define POST_PERM 2
-# define DEL_PERM 4
+# define DEL_PERM 1
 
 class Location
 {
@@ -42,6 +42,8 @@ public:
 	std::map<std::string, std::string>	const&	getCgiPerm() const;
 
 	void	setRoot(std::string const&);
+	void	setIndex(std::string const&);
+	void	setPermissions(int);
 
 
 private:

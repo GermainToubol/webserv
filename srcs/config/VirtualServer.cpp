@@ -20,7 +20,9 @@ VirtualServer::VirtualServer(void):
 	server_name(""),
 	root(""),
 	host("0.0.0.0"),
-	port("")
+	port(""),
+	index(""),
+	permissions(GET_PERM)
 {
 	return ;
 }
@@ -88,4 +90,24 @@ void VirtualServer::setPort(std::string const& port)
 void VirtualServer::setFd(int const& fd)
 {
 	this->fd = fd;
+}
+
+std::string const& VirtualServer::getIndex(void) const
+{
+	return (this->index);
+}
+
+void VirtualServer::setIndex(std::string const& str)
+{
+	this->index = str;
+}
+
+int VirtualServer::getPermissions(void) const
+{
+	return (this->permissions);
+}
+
+void	VirtualServer::setPermissions(int perm)
+{
+	this->permissions = perm;
 }

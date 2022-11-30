@@ -20,7 +20,7 @@ Location::Location(VirtualServer const& server):
 	_autoindex(false),
 	_default_file(""),
 	_root(server.getRoot()),
-	_index(""),
+	_index(server.getIndex()),
 	_post_dir(""),
 	_max_body_size(""),
 	_redirect(""),
@@ -73,4 +73,14 @@ std::map<std::string, std::string>	const& Location::getCgiPerm() const
 void	Location::setRoot(std::string const& str)
 {
 	this->_root = str;
+}
+
+void	Location::setIndex(std::string const& str)
+{
+	this->_index = str;
+}
+
+void	Location::setPermissions(int perm)
+{
+	this->_permissions = perm;
 }
