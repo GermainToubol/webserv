@@ -32,6 +32,14 @@
 
 #define MAX_LINE_SIZE 8192
 
+typedef void (Configure::*t_server_func)(ConfigTree const&, VirtualServer&);
+typedef void (Configure::*t_location_func)(ConfigTree const&, Location&);
+
+typedef struct s_server_pair {
+	std::string str;
+	t_server_func fnc;
+} t_server_pair;
+
 Configure::Configure(std::string const& file):
 	filename(file),
 	_ifs(),
@@ -175,11 +183,20 @@ void	Configure::TreeToServers(void)
 		}
 		this->setServerProperties(*it_server, current_server);
 		this->server_list.push_back(current_server);
+		this->duoIVS[current_server.getHost() + ":" + current_server.getPort()];
 	}
+	this->setDuoIVS();
 }
 
 void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
 {
+	const t_server_pair function_tab[] = {
+		{"listen",		&Configure::addListen},
+		{"root",		&Configure::addRoot},
+		{"server_name",	&Configure::addServerName}
+	};
+
+	(void)function_tab;
 	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
 		 server_prop != node.getLeaves().end();
 		 ++server_prop
@@ -339,7 +356,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 		NULL
 	};
 	struct addrinfo *res;
-	char buffer[INET6_ADDRSTRLEN];
+	char buffer[INET_ADDRSTRLEN];
 
 	(void)server;
 	(void)hint;
@@ -348,7 +365,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 		this->putError("listen: could not resolve `" + address + "`", line_nb);
 		return (false);
 	}
-	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET6_ADDRSTRLEN);
+	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET_ADDRSTRLEN);
 	freeaddrinfo(res);
 	server.setHost(buffer);
 	return (true);
@@ -859,4 +876,44 @@ void	Configure::putError(std::string const& msg, size_t n_line)
 void	Configure::addDuoIVS(std::string name, std::vector<VirtualServer*> list)
 {
 	this->duoIVS[name] = list;
+}
+
+bool	str_endswith(std::string const& str, std::string const& suffix)
+{
+	if (str.length() < suffix.length())
+		return (false);
+	else
+		return (std::equal(str.rbegin(), suffix.rbegin(), suffix.rend()));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                 SetDuoIVS                                 //
+///////////////////////////////////////////////////////////////////////////////
+
+void	Configure::setDuoIVS(void)
+{
+	std::string suffix;
+	std::string fullname;
+
+	for (
+		std::vector<VirtualServer>::iterator server_it = this->server_list.begin();
+		server_it != this->server_list.end();
+		++server_it
+		)
+	{
+		suffix = ":" + server_it->getPort();
+		fullname = server_it->getHost() + suffix;
+		for (
+			std::map<std::string, std::vector<VirtualServer*> >::iterator inter_it = this->duoIVS.begin();
+			inter_it != this->duoIVS.end();
+			++inter_it
+			)
+		{
+			if (str_endswith(inter_it->first, suffix))
+			{
+				if (inter_it->first == fullname or server_it->getHost() == "0.0.0.0")
+					inter_it->second.push_back(&(*server_it));
+			}
+		}
+	}
 }
