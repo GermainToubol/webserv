@@ -79,6 +79,7 @@ private:
 	void	addRedirect(ConfigTree const&, Location&);
 	void	addDefaultFile(ConfigTree const&, Location&);
 	void	addPostDir(ConfigTree const&, Location&);
+	void	setDuoIVS(void);
 
 	std::string											filename;
 	std::ifstream										_ifs;
@@ -88,5 +89,7 @@ private:
 	size_t												n_line;
 	ConfigTree											*tree;
 };
+
+bool	str_endswith(std::string const&, std::string const&);
 
 #endif
