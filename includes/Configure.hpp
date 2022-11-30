@@ -67,10 +67,18 @@ private:
 	void	addIndex(ConfigTree const&, T&);
 	template<class T>
 	void	addPermission(ConfigTree const&, T&);
+	template<class T>
+	void	addMaxBodySize(ConfigTree const&, T&);
+	template<class T>
+	void	addAutoindex(ConfigTree const&, T&);
 
 	void	addServerName(ConfigTree const&, VirtualServer&);
 	void	addLocation(ConfigTree const&, VirtualServer&);
 	void	setLocation(ConfigTree const&, Location&);
+
+	void	addRedirect(ConfigTree const&, Location&);
+	void	addDefaultFile(ConfigTree const&, Location&);
+	void	addPostDir(ConfigTree const&, Location&);
 
 	std::string											filename;
 	std::ifstream										_ifs;

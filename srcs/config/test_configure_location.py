@@ -97,3 +97,42 @@ server:
             """Bad config: line 6: permissions: invalid value
 """,
             1)
+
+    def test_inputfile_location_max_body_size(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+    max_body_size:
+  max_body_size: -25
+
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 6: max_body_size: invalid value
+Bad config: line 7: max_body_size: invalid value
+""",
+            1)
+
+
+    def test_inputfile_location_autoindex(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+    autoindex: on
+  autoindex: off
+  autoindex: test
+
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 8: autoindex: invalid value
+""",
+            1)

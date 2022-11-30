@@ -56,7 +56,7 @@ Configure::Configure(std::string const& file):
 	_ifs.close();
 	this->tree = NULL;
 	duoIVS.clear();
-	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
+//	std::cerr << " [ duoIVS size: " << duoIVS.size() << " ]" << std::endl;
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -86,9 +86,7 @@ int Configure::readFile(void)
 
 	current_line.reserve(8192);
 	while (this->readLine(current_line))
-	{
 		;
-	}
 	if (_ifs.fail() && _ifs.bad())
 	{
 		_status = 1;
@@ -216,6 +214,16 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		if (server_prop->getKey() == "permissions")
 		{
 			this->addPermission(*server_prop, server);
+			continue ;
+		}
+		if (server_prop->getKey() == "max_body_size")
+		{
+			this->addMaxBodySize(*server_prop, server);
+			continue ;
+		}
+		if (server_prop->getKey() == "autoindex")
+		{
+			this->addAutoindex(*server_prop, server);
 			continue ;
 		}
 		this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
@@ -428,6 +436,46 @@ void	Configure::addIndex(ConfigTree const& node, T& server)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//                                 Autoindex                                 //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addAutoindex(ConfigTree const& node, T& server)
+{
+	std::string::const_iterator it;
+	std::string::const_reverse_iterator rit;
+	std::string value;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("autoindex: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("autoindex: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	value.assign(it, rit.base());
+	if (value == "on")
+		return (server.setAutoindex(true));
+	if (value == "off")
+		return (server.setAutoindex(false));
+	return (this->putError("autoindex: invalid value", node.getLineNumber()));
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //                                Server_name                                //
 ///////////////////////////////////////////////////////////////////////////////
 // For now: only one name per server-block
@@ -520,6 +568,168 @@ void	Configure::addPermission(ConfigTree const& node, T& server)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//                               Max Body Size                               //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addMaxBodySize(ConfigTree const& node, T& server)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string size_str;
+	long n;
+	char *pos;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("max_body_size: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("max_body_size: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	size_str.assign(it, rit.base());
+	n = strtol(size_str.c_str(), &pos, 10);
+	if (size_str == "" or n < 0 or *pos != '\0')
+	{
+		this->putError("max_body_size: invalid value", node.getLineNumber());
+		return;
+	}
+	server.setMaxBodySize(static_cast<size_t>(n));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  Redirect                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addRedirect(ConfigTree const& node, Location& location)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string redirect;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("redirection: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("redirection: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	redirect.assign(it, rit.base());
+	if (redirect == "")
+	{
+		this->putError("redirection: invalid value", node.getLineNumber());
+		return;
+	}
+	location.setRedirect(redirect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                 DefautFile                                //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addDefaultFile(ConfigTree const& node, Location &location)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string file;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("default_file: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("default_file: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	file.assign(it, rit.base());
+	if (file == "" or file[0] != '/')
+	{
+		return (this->putError("default_file: expect absolut path", node.getLineNumber()));
+	}
+	location.setDefaultFile(file);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  Post_dir                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addPostDir(ConfigTree const& node, Location &location)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string file;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("post_dir: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("post_dir: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	file.assign(it, rit.base());
+	if (file == "" or file[0] != '/')
+	{
+		return (this->putError("post_dir: expect absolut path", node.getLineNumber()));
+	}
+	location.setPostDir(file);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //                                  Location                                 //
 ///////////////////////////////////////////////////////////////////////////////
 void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
@@ -599,6 +809,31 @@ void	Configure::setLocation(ConfigTree const& node, Location& location)
 		if (location_prop->getKey() == "permissions")
 		{
 			this->addPermission(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "max_body_size")
+		{
+			this->addMaxBodySize(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "autoindex")
+		{
+			this->addAutoindex(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "redirect")
+		{
+			this->addRedirect(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "default_file")
+		{
+			this->addDefaultFile(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "post_dir")
+		{
+			this->addPostDir(*location_prop, location);
 			continue ;
 		}
 		this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());

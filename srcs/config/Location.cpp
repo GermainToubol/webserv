@@ -19,13 +19,13 @@ Location::Location(): _permissions(GET_PERM | POST_PERM | DEL_PERM), _autoindex(
 
 Location::Location(VirtualServer const& server):
 	_permissions(GET_PERM),
-	_autoindex(true),
+	_autoindex(server.getAutoindex()),
 	_default_file(""),
 	_root(server.getRoot()),
 	_index(server.getIndex()),
 	_post_dir("/"),
-	_max_body_size(32000000),
 	_redirect(""),
+	_max_body_size(server.getMaxBodySize()),
 	_cgi_path()
 {
 	return ;
@@ -105,4 +105,29 @@ void	Location::setRoot(std::string const& str)
 void	Location::setIndex(std::string const& str)
 {
 	this->_index = str;
+}
+
+void	Location::setMaxBodySize(size_t size)
+{
+	this->_max_body_size = size;
+}
+
+void	Location::setAutoindex(bool autoindex)
+{
+	this->_autoindex = autoindex;
+}
+
+void	Location::setRedirect(std::string const& redirect)
+{
+	this->_redirect = redirect;
+}
+
+void	Location::setDefaultFile(std::string const& file)
+{
+	this->_default_file = file;
+}
+
+void	Location::setPostDir(std::string const& file)
+{
+	this->_post_dir = file;
 }
