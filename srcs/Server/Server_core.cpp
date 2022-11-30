@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 10:45:18 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:52:05 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,10 @@ WebServer::WebServer(Configure const& config)
 	
 	this->_duoIVS = config.getDuoIVS();
 	std::cerr << " [ duoIVS (server side) size: " << this->_duoIVS.size() << " ]" << std::endl;
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->_duoIVS.begin(); it != this->_duoIVS.end(); it++)
+	{
+		std::cout << " [ duoIVS (server side) ] " << it->first << " " << std::endl;
+	}
 	if (DEBUG)
 	{
 		for (std::multimap<std::string, std::string>::iterator it = multimap->begin(); it != multimap->end(); it++)
@@ -76,6 +80,10 @@ Cache	*WebServer::getCache(std::string const& filename) const
 
 std::vector<VirtualServer*> const* WebServer::getAccessibleServer(int client_fd) const
 {
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->_duoIVS.begin(); it != this->_duoIVS.end(); it++)
+	{
+		std::cout << " [ duoIVS (server side) ] " << it->first << " " << std::endl;
+	}
 	if (this->_duoCS.find(client_fd) == this->_duoCS.end())
 		return (NULL);
 	int server_fd = this->_duoCS.find(client_fd)->second;

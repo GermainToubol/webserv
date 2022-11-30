@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 14:26:00 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:48:47 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ class WebServer
 		Response 										*getResponse(int client_fd) const;
 		Cache											*getCache(std::string const& filename) const;
 		
+		void											setDuoIVS(std::map<std::string, std::vector<VirtualServer*> > const& duoIVS);
 		/*End*/
 		int	end(void);
 		

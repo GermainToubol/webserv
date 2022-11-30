@@ -3,5 +3,12 @@ server:
   server_name: coucou
   root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
   index: index.html
-  permissions: 0
+  permissions: 7
+
+server:
+  listen: 0.0.0.0:8081
+  server_name: coucou2
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
+  index: index.html
+  permissions: 4
 

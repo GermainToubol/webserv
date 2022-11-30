@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 15:59:07 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:43:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -915,5 +915,9 @@ void	Configure::setDuoIVS(void)
 					inter_it->second.push_back(&(*server_it));
 			}
 		}
+	}
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
+	{
+		std::cout << " [ duoIVS (config side) ] " << it->first << " " << std::endl;
 	}
 }
