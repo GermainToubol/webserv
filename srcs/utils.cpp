@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 17:04:26 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 20:45:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,11 @@ std::string	reformatUri(std::string const& uri)
 	std::stack<std::string>	stack;
 	std::string				tmp;
 
+	if (uri.find("/") == std::string::npos)
+	{
+		new_uri = uri;
+		return (new_uri);
+	}
 	while (end != uri.size())
 	{
 		if (start != 0)

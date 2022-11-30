@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:13:01 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 13:23:16 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 20:56:50 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ int	Setup::eraseUri(std::string::size_type pos)
 
 int	Setup::replaceUri(std::string::size_type pos, std::string::size_type size, std::string const& str)
 {
-	this->_uri.replace(pos, size, str);
+	this->_uri.replace(pos, size - 1, str);
 	return (0);
 }
 
@@ -75,6 +75,8 @@ void	Setup::setCode(int const& code)
 void	Setup::setUri(std::string const& uri)
 {
 	this->_uri = uri;
+	if (this->_uri[0] != '/')
+		this->_uri.insert(0, "/");
 }
 
 void	Setup::addUri(std::string const& uri)
