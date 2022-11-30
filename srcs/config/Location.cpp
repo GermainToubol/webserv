@@ -18,7 +18,7 @@ Location::Location(): _permissions(GET_PERM | POST_PERM | DEL_PERM), _autoindex(
 					 _redirect(""), _max_body_size(32000000)  {}
 
 Location::Location(VirtualServer const& server):
-	_permissions(GET_PERM),
+	_permissions(server.getPermissions()),
 	_autoindex(server.getAutoindex()),
 	_default_file(""),
 	_root(server.getRoot()),
