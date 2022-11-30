@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 15:03:27 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 16:07:14 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "Request.hpp"
 #include "utils.hpp"
 
-Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1),
+Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1), _is_header(0),
 							_method(""), _uri(""),
 							_version(""), _body(""), _empty("") {}
 
@@ -36,18 +36,19 @@ int	Request::addContent(char *buf, int ret)
 	std::cerr << "[ end header: " << this->_content.find("\r\n\r\n") << " ]" << std::endl;
 	if (ret == 0)
 		return (1);
-	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size == -1)
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 0)
 	{
 		pos = this->_content.find("Content-Length: ");
 		if (pos == std::string::npos)
 			return (1);
 		pos2 = this->_content.find("\r\n", pos); //check overflow
-		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str());
+		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str(), NULL, 10);
+		this->_is_header = 1;
 		std::cerr << "content size: " << this->_content_size << std::endl;
 		if (this->_content_size <= 0)
 			return (1);
 	}
-	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size != -1)
+	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 1)
 	{
 		std::cerr << "content size after: " << this->_content_size << std::endl;
 		pos = this->_content.find("\r\n\r\n");

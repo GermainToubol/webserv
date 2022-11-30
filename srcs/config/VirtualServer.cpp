@@ -116,3 +116,23 @@ void VirtualServer::addLocation(std::string path, Location location)
 {
 	this->location_pool[path] = location;
 }
+
+size_t VirtualServer::getMaxBodySize(void) const
+{
+	return (this->max_body_size);
+}
+
+void	VirtualServer::setMaxBodySize(size_t size)
+{
+	this->max_body_size = size;
+}
+
+bool	VirtualServer::getAutoindex(void) const
+{
+	return (this->autoindex);
+}
+
+void	VirtualServer::setAutoindex(bool autoindex)
+{
+	this->autoindex = autoindex;
+}

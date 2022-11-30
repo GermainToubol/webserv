@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 09:19:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 16:12:44 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,7 +60,6 @@ int	main(void)
 	vec.push_back(&vs);
 
 	config.addDuoIVS(vs.getHost() + ":" + vs.getPort(), vec);
-	std::cerr << vs.getRoot() << std::endl;
 
 	init_sig(get_sig, SIGINT);
 	

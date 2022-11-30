@@ -46,9 +46,14 @@ public:
 		std::string::size_type				const&	getMaxBodySize() const;
 
 
+	void	setPermissions(int);
+	void	setAutoindex(bool);
 	void	setRoot(std::string const&);
 	void	setIndex(std::string const&);
-	void	setPermissions(int);
+	void	setMaxBodySize(size_t);
+	void	setRedirect(std::string const&);
+	void	setDefaultFile(std::string const&);
+	void	setPostDir(std::string const&);
 
 
 private:
