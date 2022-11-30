@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 13:44:28 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 14:26:00 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,12 @@
 # define MAX_CLIENTS 100
 # define TIMEOUT 200
 # define SEND_SIZE 1048575
+
+typedef struct s_pair
+{
+	int		time;
+	int		state;
+}	t_pair;
 
 class WebServer
 {
@@ -118,7 +124,7 @@ class WebServer
 		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
-		std::map<int, std::pair<int, int> >	_timeout;
+		std::map<int, t_pair>								_timeout;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };

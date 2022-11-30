@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 15:38:13 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 15:03:27 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,12 @@ int	Request::addContent(char *buf, int ret)
 	{
 		pos = this->_content.find("Content-Length: ");
 		if (pos == std::string::npos)
-			return (derror("no C length"), 1);
+			return (1);
 		pos2 = this->_content.find("\r\n", pos); //check overflow
-		this->_content_size = std::atoi(this->_content.substr(pos + 16, pos2 - pos - 16).c_str());
+		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str());
 		std::cerr << "content size: " << this->_content_size << std::endl;
 		if (this->_content_size <= 0)
-			return (derror("no body"), 1);
+			return (1);
 	}
 	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_content_size != -1)
 	{

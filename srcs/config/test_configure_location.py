@@ -66,3 +66,34 @@ Bad config: line 13: location: `/coucou/` is already defined
 Bad config: line 14: location: `/test/` is already defined
 """,
         1)
+
+    def test_inputfile_location_properties(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""server:
+  root: /test
+  index: ls
+  location: /root
+    index: ls- --
+    root: /ls/ls
+""")
+
+        self.run_error(
+            tmp,
+            """""",
+            0)
+
+    def test_inputfile_location_permissions(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+    permissions: 2a
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 6: permissions: invalid value
+""",
+            1)

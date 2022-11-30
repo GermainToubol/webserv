@@ -6,13 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 13:46:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 14:44:00 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
 #include <sys/stat.h>
+#include <sys/epoll.h>
 #include <unistd.h>
 
 #include "Request.hpp"
@@ -141,24 +142,30 @@ void	WebServer::clearCache(void)
 
 void	WebServer::clearTimeout(void)
 {
-	std::map<int, std::pair<int, int> >::iterator itdel;
-
-	for (std::map<int, std::pair<int, int> > ::iterator it = this->_timeout.begin(); it != this->_timeout.end(); it++)
+	std::map<int, t_pair >::iterator itdel;
+	std::map<int, t_pair >::iterator it = this->_timeout.begin();
+	
+	if (this->_timeout.empty())
+		return ;
+	while (it != this->_timeout.end())
 	{
-		if (time(NULL) - it->second.first < REQUEST_TIMEOUT)
+		if (time(NULL) - it->second.time > REQUEST_TIMEOUT)
 		{
 			itdel = it;
-			it--;
-			if (itdel->second.second == 0)
+			it++;
+			if (itdel->second.state == 0)
 				close(itdel->first);
-			else if (it->second.second == 1)
+			else if (itdel->second.state == 1)
 			{
 				this->remove_fd_request(itdel->first);
 				close(itdel->first);
+				epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, itdel->first, NULL);
 			}
-			else if (it->second.second == 2)
+			else if (itdel->second.state == 2)
 				this->removeResponse(itdel->first);
 			this->_timeout.erase(itdel);
 		}
+		else
+			it++;
 	}
 }

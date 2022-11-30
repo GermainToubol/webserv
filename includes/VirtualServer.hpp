@@ -43,16 +43,24 @@ public:
 	void	setFd(int const&);
 	void	addLocation(std::string, Location);
 
+	std::string const& getIndex(void) const;
+	void	setIndex(std::string const&);
+
+	int		getPermissions(void) const;
+	void	setPermissions(int);
+
 private:
 	int			fd;
 	std::string	server_name;
 	std::string	root;
 	std::string	host;
 	std::string	port;
+	std::string index;
+	int			permissions;
+
 
 	std::map<std::string, Location> location_pool;
 	std::map<int, std::string> error_page;
-	//index
 	//permissions -default G
 	//max_body_size
 	//autoindex

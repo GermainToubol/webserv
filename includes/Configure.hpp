@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:42:29 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 13:42:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:58:50 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,8 @@ private:
 	void	addRoot(ConfigTree const&, T&);
 	template<class T>
 	void	addIndex(ConfigTree const&, T&);
+	template<class T>
+	void	addPermission(ConfigTree const&, T&);
 
 	void	addServerName(ConfigTree const&, VirtualServer&);
 	void	addLocation(ConfigTree const&, VirtualServer&);

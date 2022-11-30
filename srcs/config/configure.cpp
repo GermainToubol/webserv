@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 13:54:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 13:59:04 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -54,9 +54,8 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
-	duoIVS.clear();
-	this->tree->print("");
 	this->tree = NULL;
+	duoIVS.clear();
 }
 
 std::vector<VirtualServer> const& Configure::getServers(void) const
@@ -64,11 +63,6 @@ std::vector<VirtualServer> const& Configure::getServers(void) const
 	return (this->server_list);
 }
 
-/**
- * @brief Extract the list of virtual servers related to their full interface description
- *
- * The string describes the interface as "IPV4:IP"
- */
 std::map<std::string, std::vector<VirtualServer*> > const& Configure::getDuoIVS(void) const
 {
 	return (this->duoIVS);
@@ -211,6 +205,16 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		if (server_prop->getKey() == "location")
 		{
 			this->addLocation(*server_prop, server);
+			continue ;
+		}
+		if (server_prop->getKey() == "index")
+		{
+			this->addIndex(*server_prop, server);
+			continue ;
+		}
+		if (server_prop->getKey() == "permissions")
+		{
+			this->addPermission(*server_prop, server);
 			continue ;
 		}
 		this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
@@ -370,7 +374,9 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
 	{
 		if (not isspace(*rit))
+		{
 			break ;
+		}
 	}
 	root.assign(it, rit.base());
 	if (root == "" or root[0] != '/')
@@ -381,6 +387,46 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+//                                   Index                                   //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addIndex(ConfigTree const& node, T& server)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string index;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("index: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("index: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	index.assign(it, rit.base());
+	if (index == "")
+	{
+		return (this->putError("index: empty value", node.getLineNumber()));
+	}
+	server.setIndex(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 //                                Server_name                                //
 ///////////////////////////////////////////////////////////////////////////////
 // For now: only one name per server-block
@@ -388,7 +434,6 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 {
 	std::string::const_iterator it;
-	// std::string::const_reverse_iterator rit;
 	std::string server_name;
 
 	if (not node.getLeaves().empty())
@@ -427,6 +472,50 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 		return ;
 	}
 	server.setServerName(server_name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                Permissions                                //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addPermission(ConfigTree const& node, T& server)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string permissions;
+	long n;
+	char *pos;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("permissions: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("permissions: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
+	{
+		if (not isspace(*rit))
+		{
+			break ;
+		}
+	}
+	permissions.assign(it, rit.base());
+	n = strtol(permissions.c_str(), &pos, 10);
+	if (n < 0 or n >= 8 or *pos != '\0')
+	{
+		this->putError("permissions: invalid value", node.getLineNumber());
+		return;
+	}
+	server.setPermissions(n);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -499,6 +588,16 @@ void	Configure::setLocation(ConfigTree const& node, Location& location)
 		if (location_prop->getKey() == "root")
 		{
 			this->addRoot(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "index")
+		{
+			this->addIndex(*location_prop, location);
+			continue ;
+		}
+		if (location_prop->getKey() == "permissions")
+		{
+			this->addPermission(*location_prop, location);
 			continue ;
 		}
 		this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());

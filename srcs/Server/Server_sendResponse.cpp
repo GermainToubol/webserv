@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 10:07:30 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 11:25:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 14:37:29 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,6 +36,7 @@ int	WebServer::removeResponse(int client_fd)
 			std::cerr << "[ Client disconnected on " << client_fd << " ]" << std::endl;
 			close(client_fd);
 			this->_all_response.erase(it);
+			this->_timeout.erase(client_fd);
 			return (1);
 		}
 	}
