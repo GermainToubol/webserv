@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 14:15:40 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:01:18 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -119,10 +119,42 @@ int	WebServer::postMode(Request *request, Setup *setup, int client_fd)
 
 int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 {
+	Response			 response;
+	int					ret;
+
 	(void)request;
-	(void)setup;
-	(void)client_fd;
-	return (derror("/!\\ Not Implemented"), setup->setCode(501), 501);
+	std::cerr << "[ Delete Mode ]" << std::endl;
+
+	ret = 1;
+	if (this->doesPathExist(setup->getUri()) && this->isFile(setup->getUri()))
+		ret = 0;
+
+	if (ret == 0)
+		ret = remove(setup->getUri().c_str());
+	
+	if (ret == 0)
+	{
+		setup->setCode(200);
+		response.setBody("OK");
+	}
+	else
+	{
+		setup->setCode(400);
+		response.setBody("KO");
+	}
+	response.setFd(client_fd);
+	response.setStatus(0);
+	response.setPosition(0);
+	setup->setExtension("");
+	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBody().size());
+	
+	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL);
+	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
+
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
+	close(client_fd);
+	
+	return (0);
 }
 
 int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)

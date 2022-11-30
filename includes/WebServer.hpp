@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 16:04:55 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:47:24 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,6 +116,7 @@ class WebServer
 		std::map<std::string, std::vector<VirtualServer*> >	_duoIVS;
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
+		std::map<int, int>									_timeout;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:46:41 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 13:05:33 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:46:57 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,9 +18,9 @@
 # include <string>
 # include <map>
 
-# define GET_PERM 1
+# define GET_PERM 4
 # define POST_PERM 2
-# define DEL_PERM 4
+# define DEL_PERM 1
 
 class Location
 {

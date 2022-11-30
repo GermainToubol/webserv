@@ -6,14 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:50:42 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 13:58:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:24:09 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 
-Location::Location(): _permissions(7), _autoindex(1), _default_file(""),
-					_root("/"), _index("index.html"), _post_dir("/upload"),
+Location::Location(): _permissions(GET_PERM | POST_PERM | DEL_PERM), _autoindex(1), _default_file(""),
+					_root("/"), _index("index.html"), _post_dir("/"),
 					 _redirect(""), _max_body_size(32000000)  {}
 
 Location::~Location() {}

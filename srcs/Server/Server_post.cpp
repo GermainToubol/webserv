@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 16:15:30 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 12:00:23 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,7 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	setup->setExtension("");
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
+	
 	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 	
@@ -207,8 +208,10 @@ std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string co
 			return ("");
 		file << body;
 		file.close();
+		return (name + "=" + filename + "\n");
 	}
-	return (name + "=" + body);
+	else
+		return (name + "=" + body + "\n");
 }
 
 int WebServer::multipartPost(Request *request, Setup *setup)
