@@ -884,7 +884,7 @@ bool	str_endswith(std::string const& str, std::string const& suffix)
 	if (str.length() < suffix.length())
 		return (false);
 	else
-		return (std::equal(str.rbegin(), suffix.rbegin(), suffix.rend()));
+		return (std::equal(suffix.rbegin(), suffix.rend(), str.rbegin()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -913,8 +913,18 @@ void	Configure::setDuoIVS(void)
 			if (str_endswith(inter_it->first, suffix))
 			{
 				if (inter_it->first == fullname or server_it->getHost() == "0.0.0.0")
+				{
 					inter_it->second.push_back(&(*server_it));
+				}
 			}
 		}
 	}
+	for (
+			std::map<std::string, std::vector<VirtualServer*> >::iterator inter_it = this->duoIVS.begin();
+			inter_it != this->duoIVS.end();
+			++inter_it
+			)
+		{
+			std::cout << "configured:" << inter_it->first << " " << inter_it->second.size() <<  std::endl;
+		}
 }
