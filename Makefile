@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/30 14:02:46 by lgiband          ###   ########.fr        #
+#    Updated: 2022/11/30 17:01:15 by lgiband          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -36,6 +36,7 @@ SRCS =		$(addprefix config/,											\
 				Response.cpp												\
 				Setup.cpp													\
 			)																\
+			utils.cpp														\
 			main.cpp
 
 # List of test sources (.cpp)

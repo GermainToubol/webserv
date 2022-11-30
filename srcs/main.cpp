@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 16:12:44 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:32:46 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,8 +51,6 @@ int	main(void)
 
 	VirtualServer	vs = config.getServers()[0];
 	Location		loc;
-
-
 
 	vs.addLocation("/", loc);
 	std::vector<VirtualServer *> vec;

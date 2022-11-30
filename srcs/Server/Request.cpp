@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 16:07:14 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:22:36 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -101,7 +101,7 @@ int	Request::setUri(Setup *setup)
 		setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
 	if (*setup->getUri().begin() == '/')
 		setup->replaceUri(0, 1, "");
-	setup->setUri(setup->getServer()->getRoot() + setup->getUri());
+	setup->setUri(setup->getServer()->getRoot() + reformatUri(setup->getUri()));
 	return (0);
 }
 
@@ -188,7 +188,7 @@ int	Request::parsing(Setup *setup)
 	std::cerr << "Method: " << this->_method << std::endl;
 	std::cerr << "URI: " << this->_uri << std::endl;
 	std::cerr << "Version: " << this->_version << std::endl;
-	std::cerr << "Body: " << this->_body << std::endl;
+	std::cerr << "Body size: " << this->_body.size() << std::endl;
 	for (std::map<std::string, std::string>::iterator it = this->_fields.begin(); it != this->_fields.end(); it++)
 		std::cerr << it->first << ": " << it->second << std::endl;
 	std::cerr << "[ End Parsed request ]" << std::endl;

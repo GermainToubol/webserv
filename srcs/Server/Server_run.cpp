@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 14:29:28 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:07:35 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,6 +79,7 @@ int	WebServer::setResponse(int client_fd, Request *request)
 	ret = request->basicCheck(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
+	std::cerr << "[ Uri: " << setup.getUri() << " ]" << std::endl;
 	std::cerr << "[ Basic check OK ]" << std::endl;
 	ret = this->modeChoice(request, &setup, client_fd);
 	if (ret != 0)
