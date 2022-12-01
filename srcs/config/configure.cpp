@@ -196,7 +196,7 @@ void	Configure::TreeToServers(void)
 
 void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
 {
-	const t_server_pair function_tab[] = {
+	const t_server_pair	function_tab[] = {
 		{"listen",		&Configure::addListen},
 		{"root",		&Configure::addRoot},
 		{"server_name",	&Configure::addServerName},
@@ -206,7 +206,25 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		{"max_body_size", &Configure::addMaxBodySize},
 		{"autoindex", &Configure::addAutoindex}
 	};
-	bool executed;
+	bool				executed;
+	bool				has_duplicates;
+
+	has_duplicates = false;
+	for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
+	{
+		if (function_tab[i].str != "location"
+			and std::count(
+				node.getLeaves().begin(),
+				node.getLeaves().end(),
+				function_tab[i].str) > 1)
+		{
+			this->putError("server: " + function_tab[i].str + ": multiple definition", node.getLineNumber());
+			has_duplicates = true;
+		}
+	}
+
+	if (has_duplicates)
+		return ;
 
 	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
 		 server_prop != node.getLeaves().end();
