@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 18:18:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 21:51:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,7 @@
 #include <vector>
 
 #include <stdio.h>
+#include <sys/stat.h>
 
 #include "Request.hpp"
 #include "utils.hpp"
@@ -97,16 +98,13 @@ int	Request::setUri(Setup *setup)
 {
 	
 	if (setup->getUri() == "/" && this->_method == "GET")
-	{std::cerr << "uri: " << this->_location->getIndex() << std::endl;
-		setup->setUri(this->_location->getIndex());}
-	
-	std::cerr << "uri: " << setup->getUri() << std::endl;
+		setup->setUri(this->_location->getIndex());
 	
 	setup->setUri(reformatUri(setup->getUri()));
 	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
-	//if (*setup->getUri().begin() == '/')
-	//	setup->replaceUri(0, 1, "");
-	std::cerr << "uri: " << setup->getUri() << std::endl;
+
+	if (this->isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')
+		setup->addUri("/");
 	return (0);
 }
 
@@ -117,16 +115,9 @@ int	Request::setLocation(Setup *setup)
 	std::string::size_type	pos;
 	
 	tmp = setup->getUri();
-	pos = tmp.find_last_of("/");
 	while (1)
 	{
-		pos = tmp.find_last_of("/");
-		if (pos == std::string::npos)
-			break ;
-		if (pos == tmp.size() - 1)
-			tmp.erase(pos);
-		else
-			tmp.erase(pos + 1);
+		std::cout << "[ tmp: " << tmp << " ]" << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
 			std::cerr << "[ location: " << location_pool.find(tmp)->first << " ]" << std::endl;
@@ -134,6 +125,13 @@ int	Request::setLocation(Setup *setup)
 			this->_location_path = tmp;
 			return (0);
 		}
+		pos = tmp.find_last_of("/");
+		if (pos == std::string::npos)
+			break ;
+		if (pos == tmp.size() - 1)
+			tmp.erase(pos);
+		else
+			tmp.erase(pos + 1);
 	}
 	this->_location = &location_pool.find("/")->second;
 	this->_location_path = "/";
@@ -206,6 +204,17 @@ void	Request::replaceAllBody(std::string const& from, std::string const& to)
 
 	while ((pos = this->_body.find(from)) != std::string::npos)
 		this->_body.replace(pos, from.size(), to);
+}
+
+bool	Request::isDirectory(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (S_ISDIR(buf.st_mode))
+		return (true);
+	return (false);
 }
 
 /*Accesseurs*/

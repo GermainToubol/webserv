@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 13:29:54 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 21:45:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,10 +28,8 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 	std::cerr << "[ Build response Redirect ]" << std::endl;
 	setup->setCode(301);
-	if (request->getLocation()->getRedirect()[0] == '/')
-		setup->addField("Location", request->getLocation()->getRedirect());
-	else
-		setup->addField("Location", "/" + request->getLocation()->getRedirect());
+	
+	setup->addField("Location", request->getLocation()->getRedirect());
 	std::cerr << "[ Redirect to " << request->getLocation()->getRedirect() << " ]" << std::endl;
 	response.setFd(client_fd);
 	response.setStatus(0);
