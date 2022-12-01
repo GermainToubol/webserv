@@ -67,3 +67,9 @@ size_t	ConfigTree::getLineNumber() const
 {
 	return (this->line);
 }
+
+
+bool ConfigTree::operator==(std::string const& other) const
+{
+	return (this->key == other);
+}

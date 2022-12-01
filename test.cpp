@@ -1,37 +1,61 @@
-#include <map>
+#include <queue>
+#include <vector>
+#include <stack>
 #include <string>
-#include <iostream>
+#include <map>
+#include  <utility>
+#include  <iostream>
+#include  <cstdlib>
+
+std::string	reformatUri(std::string const& uri)
+{
+	std::string				new_uri;
+	std::string::size_type	start = 0;
+	std::string::size_type	end = 0;
+	std::stack<std::string>	stack;
+	std::string				tmp;
+
+	while (end != uri.size())
+	{
+		if (start != 0)
+			start = uri.find('/', end);
+		while (uri.find('/', start + 1) == 0)
+			start++;
+		if (uri[start] == '/')
+			start++;
+		end = uri.find('/', start);
+		if (end == std::string::npos)
+			end = uri.size();
+		std::cerr << "start: " << start << " end: " << end << std::endl;
+		tmp = uri.substr(start, end - start);
+		if (tmp == "..")
+		{
+			if (!stack.empty())
+				stack.pop();
+		}
+		else if (tmp != "." && tmp != "")
+			stack.push(tmp);
+		start = end;
+	}
+	while (!stack.empty())
+	{
+		new_uri = stack.top() + "/" + new_uri;
+		stack.pop();
+	}
+	if (uri[0] == '/')
+		new_uri = "/" + new_uri;
+	if (uri[uri.size() - 1] == '/' && new_uri[new_uri.size() - 1] != '/')
+		new_uri = new_uri + "/";
+	else if (uri[uri.size() - 1] != '/' && new_uri[new_uri.size() - 1] == '/')
+		new_uri = new_uri.erase(new_uri.size() - 1);
+	if (new_uri.size() == 0)
+		new_uri = "/";
+	return (new_uri);
+}
 
 int	main(int argc, char *argv[])
 {
-	std::map<std::string, std::string> location_pool;
-	std::string				tmp;
-	std::string::size_type	pos = 0;
-	
-	location_pool["/"] = "root";
-	location_pool["/test"] = "test";
-	location_pool["/test/"] = "test/";
-	location_pool["/test/test"] = "test/test";
-	location_pool["/test/test/"] = "test/test/";
-	location_pool["/test/test/test"] = "test/test/test";
-	location_pool["/test/test/test/"] = "test/test/test/";
+	std::string	uri = "/../ono";
 
-	tmp = argv[argc - 1];
-	while (1)
-	{
-		pos = tmp.find_last_of("/");
-		if (pos == std::string::npos)
-			break ;
-		if (pos == tmp.size() - 1)
-			tmp.erase(pos);
-		else
-			tmp.erase(pos + 1);
-		std::cout << tmp << std::endl;
-		if (location_pool.find(tmp) != location_pool.end())
-		{
-			std::cout << "location: " << location_pool.find(tmp)->second << std::endl;
-			return (0);
-		}
-	}
-	return (0);
+	std::cout << reformatUri(uri) << std::endl;
 }

@@ -6,9 +6,11 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:13:01 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 15:03:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/29 13:23:16 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <iostream>
 
 #include "Setup.hpp"
 
@@ -75,6 +77,14 @@ void	Setup::setUri(std::string const& uri)
 	this->_uri = uri;
 }
 
+void	Setup::addUri(std::string const& uri)
+{
+	if (this->_uri.size() > 0 && this->_uri[this->_uri.size() - 1] != '/' && uri[0] != '/')
+		this->_uri += '/' + uri;
+	else
+		this->_uri += uri;
+}
+
 void	Setup::setUri(int code)
 {
 	if (this->_server->getErrorPage().find(code) != this->_server->getErrorPage().end())
@@ -96,12 +106,14 @@ void	Setup::setExtension(std::string const& extension)
 void	Setup::setExtension(void)
 {
 	std::string::size_type	pos;
-	pos = this->_uri.find_last_of("/");
+	std::string::size_type	pos2;
+
+	pos = this->_uri.find_last_of('/');
 	if (pos != std::string::npos)
 	{
-		pos = this->_uri.find_last_of(".", pos);
-		if (pos != std::string::npos)
-			this->_extension = this->_uri.substr(pos + 1);
+		pos2 = this->_uri.find_last_of('.');
+		if (pos != std::string::npos && pos2 > pos && pos2 != std::string::npos)
+			this->_extension = this->_uri.substr(pos2);
 		else
 			this->_extension = "";
 	}
@@ -117,9 +129,13 @@ void	Setup::setFields(std::string const& fields)
 void	Setup::setServer(VirtualServer server)
 {
 	this->_server = &server;
+	if (this->_server && (this->_server->getRoot().size() == 0 || *(this->_server->getRoot().end() - 1) != '/'))
+		this->_server->setRoot(this->_server->getRoot() + "/");
 }
 
 void	Setup::setServer(VirtualServer *server)
 {
 	this->_server = server;
+	if (this->_server && (this->_server->getRoot().size() == 0 || *(this->_server->getRoot().end() - 1) != '/'))
+		this->_server->setRoot(this->_server->getRoot() + "/");
 }

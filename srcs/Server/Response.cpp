@@ -6,16 +6,30 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 14:50:05 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 20:12:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
+
+#include <iostream>
+
+#include <dirent.h>
 
 #include "Response.hpp"
 #include "utils.hpp"
 
-Response::Response(): _filename(""), _header(""), _body(""), _body_size(0), _position(0), _fd(-1), _send_status(0) {}
+Response::Response(): _fd(-1), _send_status(0), _header(""), _body_size(0), _position(0), _body(""), _filename("") {}
 
 Response::~Response() {}
+
+void	Response::eraseHeader(int start, int end)
+{
+	this->_header.erase(start, end);
+}
+
+void	Response::eraseBody(int start, int end)
+{
+	this->_body.erase(start, end);
+}
 
 /*Accesseurs*/
 std::string const&	Response::getFilename() const
@@ -95,17 +109,49 @@ void	Response::setBody(std::string const& body)
 void	Response::setBody(int code, std::string const& type)
 {
 	this->_body = "\
-<!DOCTYPE html>\
-<html>\
-<head>\
-<meta charset=\"utf-8\">\
-<title>Error " + to_string(code) + "</title>\
-</head>\
-<body>\
-	<h1>Error " + to_string(code) + ": " + type + "</h1>\
-</body>\
+<!DOCTYPE html>\n\
+<html>\n\
+<head>\n\
+<meta charset=\"utf-8\">\n\
+<title>Error " + to_string(code) + "</title>\n\
+</head>\n\
+<body>\n\
+	<h1>Error " + to_string(code) + ": " + type + "</h1>\n\
+</body>\n\
 </html>";
 	this->_body_size = this->_body.size();
+}
+
+int	Response::setListingBody(std::string uri, std::string const& root)
+{
+	DIR				*dir;
+	struct dirent	*ent;
+	std::string		relative_path;
+
+	(void)root;
+	relative_path = uri;
+	relative_path.replace(0, root.size(), "");
+	if (relative_path[0] != '/')
+		relative_path.insert(0, "/");
+	if (uri[0] != '/')
+		uri.insert(0, "/");
+	if (*(relative_path.end() - 1) != '/')
+		relative_path += '/';
+	if (*(uri.end() - 1) != '/')
+		uri += '/';
+	std::cerr << "[ Uri: " << relative_path << " ]" << std::endl;
+	this->_body = "<!DOCTYPE html>\n\
+<html>\n<head>\n<title>Index of " + relative_path + "</title>\n</head>\n\
+<body>\n<h1 style=\"font-size:30px\">Index of " + relative_path + "</h1>\n<br><br><hr>\n";
+	dir = opendir(uri.c_str());
+	if (dir == NULL)
+		return (500);
+	while ((ent = readdir(dir)) != NULL)
+		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + relative_path + to_string(ent->d_name) + "\">" + ent->d_name + "</a><br><hr>\n";
+	this->_body += "</body>\n</html>";
+	closedir(dir);
+	this->_body_size = this->_body.size();
+	return (0);
 }
 
 void	Response::setBodySize(std::string::size_type const& body_size)
@@ -125,5 +171,5 @@ void	Response::setFd(int const& fd)
 
 void	Response::setStatus(int const& status)
 {
-	this->_status = status;
+	this->_send_status = status;
 }

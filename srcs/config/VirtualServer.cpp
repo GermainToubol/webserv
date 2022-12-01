@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 16:03:52 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/25 14:57:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 11:24:40 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,9 @@ VirtualServer::VirtualServer(void):
 	server_name(""),
 	root(""),
 	host("0.0.0.0"),
-	port("")
+	port(""),
+	index(""),
+	permissions(GET_PERM)
 {
 	return ;
 }
@@ -88,4 +90,54 @@ void VirtualServer::setPort(std::string const& port)
 void VirtualServer::setFd(int const& fd)
 {
 	this->fd = fd;
+}
+
+std::string const& VirtualServer::getIndex(void) const
+{
+	return (this->index);
+}
+
+void VirtualServer::setIndex(std::string const& str)
+{
+	this->index = str;
+}
+
+int VirtualServer::getPermissions(void) const
+{
+	return (this->permissions);
+}
+
+void	VirtualServer::setPermissions(int perm)
+{
+	this->permissions = perm;
+}
+
+void VirtualServer::addLocation(std::string path, Location const& location)
+{
+	this->location_pool[path] = location;
+}
+
+size_t VirtualServer::getMaxBodySize(void) const
+{
+	return (this->max_body_size);
+}
+
+void	VirtualServer::setMaxBodySize(size_t size)
+{
+	this->max_body_size = size;
+}
+
+bool	VirtualServer::getAutoindex(void) const
+{
+	return (this->autoindex);
+}
+
+void	VirtualServer::setAutoindex(bool autoindex)
+{
+	this->autoindex = autoindex;
+}
+
+void	VirtualServer::addErrorPage(int error, std::string const& path)
+{
+	this->error_page[error] = path;
 }

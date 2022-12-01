@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/17 11:56:16 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/25 14:57:15 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/28 11:24:23 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,6 +41,18 @@ public:
 	void	setHost(std::string const&);
 	void	setPort(std::string const&);
 	void	setFd(int const&);
+	void	addLocation(std::string, Location const&);
+
+	std::string const& getIndex(void) const;
+	void	setIndex(std::string const&);
+
+	int		getPermissions(void) const;
+	void	setPermissions(int);
+	size_t	getMaxBodySize(void) const;
+	void	setMaxBodySize(size_t);
+	bool	getAutoindex(void) const;
+	void	setAutoindex(bool);
+	void	addErrorPage(int, std::string const&);
 
 private:
 	int			fd;
@@ -48,23 +60,19 @@ private:
 	std::string	root;
 	std::string	host;
 	std::string	port;
+	std::string index;
+	int			permissions;
+	size_t		max_body_size;
+	bool		autoindex;
+
 
 	std::map<std::string, Location> location_pool;
-	std::map<int, std::string> error_page;
-	//index
-	//permissions -default G
-	//max_body_size
-	//autoindex
+	std::map<int, std::string> error_page; // chemin abs
 	//locations
 		//redirect
-		//root
-		//index
-		//autoindex
 		//default_file directory
-		//permissions
 		//post_dir
 		//cgi permissions (.php/.py....)
-		//max_body_size
 };
 
 #endif /* VIRTUALSERVER_H */

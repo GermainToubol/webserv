@@ -6,24 +6,26 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/24 15:50:42 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/25 12:04:12 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/11/30 17:23:05 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Location.hpp"
 #include "VirtualServer.hpp"
 
-Location::Location() {}
+Location::Location(): _permissions(GET_PERM | POST_PERM), _autoindex(1), _default_file(""),
+					_root("/"), _index("index.html"), _post_dir("/"),
+					 _redirect(""), _max_body_size(32000000)  {}
 
 Location::Location(VirtualServer const& server):
-	_permissions(GET_PERM),
-	_autoindex(false),
+	_permissions(server.getPermissions()),
+	_autoindex(server.getAutoindex()),
 	_default_file(""),
 	_root(server.getRoot()),
-	_index(""),
-	_post_dir(""),
-	_max_body_size(""),
+	_index(server.getIndex()),
+	_post_dir("/"),
 	_redirect(""),
+	_max_body_size(server.getMaxBodySize()),
 	_cgi_path()
 {
 	return ;
@@ -70,7 +72,67 @@ std::map<std::string, std::string>	const& Location::getCgiPerm() const
 	return (this->_cgi_path);
 }
 
+void	Location::setPermissions(int perm)
+{
+	this->_permissions = perm;
+}
+
+bool	const& Location::getAutoindex() const
+{
+	return (this->_autoindex);
+}
+
+std::string	const& Location::getDefaultFile() const
+{
+	return (this->_default_file);
+}
+
+std::string	const& Location::getPostDir() const
+{
+	return (this->_post_dir);
+}
+
+std::string::size_type	const& Location::getMaxBodySize() const
+{
+	return (this->_max_body_size);
+}
+
 void	Location::setRoot(std::string const& str)
 {
 	this->_root = str;
+}
+
+void	Location::setIndex(std::string const& str)
+{
+	this->_index = str;
+}
+
+void	Location::setMaxBodySize(size_t size)
+{
+	this->_max_body_size = size;
+}
+
+void	Location::setAutoindex(bool autoindex)
+{
+	this->_autoindex = autoindex;
+}
+
+void	Location::setRedirect(std::string const& redirect)
+{
+	this->_redirect = redirect;
+}
+
+void	Location::setDefaultFile(std::string const& file)
+{
+	this->_default_file = file;
+}
+
+void	Location::setPostDir(std::string const& file)
+{
+	this->_post_dir = file;
+}
+
+void	Location::addCGIPerm(std::string const& cgi, std::string const& path)
+{
+	this->_cgi_path[cgi] = path;
 }

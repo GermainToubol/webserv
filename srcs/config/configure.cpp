@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-//   Updated: 2022/11/28 17:50:13 by gtoubol          ###   ########.fr       //
+/*   Updated: 2022/11/30 18:03:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,14 +29,12 @@
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
 
-
-#define MAX_LINE_SIZE 8192
-
 Configure::Configure(std::string const& file):
 	filename(file),
 	_ifs(),
 	_status(1),
 	server_list(),
+	duoIVS(),
 	n_line(0)
 {
 	ConfigTree parse_tree;
@@ -53,7 +51,6 @@ Configure::Configure(std::string const& file):
 		_status = 1;
 	}
 	_ifs.close();
-	this->tree->print("");
 	this->tree = NULL;
 }
 
@@ -62,11 +59,6 @@ std::vector<VirtualServer> const& Configure::getServers(void) const
 	return (this->server_list);
 }
 
-/**
- * @brief Extract the list of virtual servers related to their full interface description
- *
- * The string describes the interface as "IPV4:IP"
- */
 std::map<std::string, std::vector<VirtualServer*> > const& Configure::getDuoIVS(void) const
 {
 	return (this->duoIVS);
@@ -89,9 +81,7 @@ int Configure::readFile(void)
 
 	current_line.reserve(8192);
 	while (this->readLine(current_line))
-	{
 		;
-	}
 	if (_ifs.fail() && _ifs.bad())
 	{
 		_status = 1;
@@ -181,37 +171,61 @@ void	Configure::TreeToServers(void)
 		}
 		this->setServerProperties(*it_server, current_server);
 		this->server_list.push_back(current_server);
+		this->duoIVS[current_server.getHost() + ":" + current_server.getPort()];
 	}
+	this->setDuoIVS();
 }
 
 void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
 {
+	const t_server_pair	function_tab[] = {
+		{"listen",			&Configure::addListen},
+		{"root",			&Configure::addRoot},
+		{"server_name",		&Configure::addServerName},
+		{"location",		&Configure::addLocation},
+		{"index",			&Configure::addIndex},
+		{"permissions",		&Configure::addPermission},
+		{"max_body_size",	&Configure::addMaxBodySize},
+		{"autoindex",		&Configure::addAutoindex},
+		{"error_pages",		&Configure::addErrorPages}
+	};
+	bool				executed;
+	bool				has_duplicates;
+
+	has_duplicates = false;
+	for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
+	{
+		if (function_tab[i].str != "location"
+			and std::count(
+				node.getLeaves().begin(),
+				node.getLeaves().end(),
+				function_tab[i].str) > 1)
+		{
+			this->putError("server: " + function_tab[i].str + ": multiple definition", node.getLineNumber());
+			has_duplicates = true;
+		}
+	}
+
+	if (has_duplicates)
+		return ;
+
 	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
 		 server_prop != node.getLeaves().end();
 		 ++server_prop
 		)
 	{
-		if (server_prop->getKey() == "listen")
+		executed = false;
+		for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 		{
-			this->addListen(*server_prop, server);
-			continue ;
+			if (server_prop->getKey() == function_tab[i].str)
+			{
+				(this->*(function_tab[i].fnc))(*server_prop, server);
+				executed = true;
+				break ;
+			}
 		}
-		if (server_prop->getKey() == "root")
-		{
-			this->addRoot(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "server_name")
-		{
-			this->addServerName(*server_prop, server);
-			continue ;
-		}
-		if (server_prop->getKey() == "location")
-		{
-			this->addLocation(*server_prop, server);
-			continue ;
-		}
-		this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
+		if (not executed)
+			this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
 }
 
@@ -247,19 +261,12 @@ bool	Configure::setPort(std::string const& value, VirtualServer& server, size_t 
 	long int port_nbr;
 	char *end;
 
-	// Skip all terminating spaces
 	for (rit = value.rbegin(); rit != value.rend(); ++rit)
-	{
-		if (not isspace(*rit))
-			break;
-	}
-	it = rit.base();
-	for (; rit != value.rend(); ++rit)
 	{
 		if (not isdigit(*rit))
 			break ;
 	}
-	port_str.assign(rit.base(), it);
+	port_str.assign(rit.base(), value.end());
 	if (port_str != "")
 	{
 		port_nbr = strtol(port_str.c_str(), &end, 10);
@@ -281,11 +288,6 @@ void Configure::setHost(std::string const& value, VirtualServer& server, size_t 
 
 	for (rit = value.rbegin(); rit != value.rend(); ++rit)
 	{
-		if (not isspace(*rit))
-			break ;
-	}
-	for (; rit != value.rend(); ++rit)
-	{
 		if (not isdigit(*rit))
 			break;
 	}
@@ -306,10 +308,7 @@ void Configure::setHost(std::string const& value, VirtualServer& server, size_t 
 	{
 		host_str = "0.0.0.0";
 	}
-	if (this->validHost(host_str, server, line_nb))
-	{
-		server.setHost(host_str);
-	}
+	this->validHost(host_str, server, line_nb);
 }
 
 bool Configure::validHost(std::string const& address, VirtualServer& server, size_t line_nb)
@@ -325,7 +324,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 		NULL
 	};
 	struct addrinfo *res;
-	char buffer[INET6_ADDRSTRLEN];
+	char buffer[INET_ADDRSTRLEN];
 
 	(void)server;
 	(void)hint;
@@ -334,7 +333,7 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 		this->putError("listen: could not resolve `" + address + "`", line_nb);
 		return (false);
 	}
-	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET6_ADDRSTRLEN);
+	inet_ntop(res->ai_family, &((struct sockaddr_in *)res->ai_addr)->sin_addr, buffer, INET_ADDRSTRLEN);
 	freeaddrinfo(res);
 	server.setHost(buffer);
 	return (true);
@@ -346,8 +345,6 @@ bool Configure::validHost(std::string const& address, VirtualServer& server, siz
 template<class T>
 void	Configure::addRoot(ConfigTree const& node, T &server)
 {
-	std::string::const_iterator it;
-	std::string ::const_reverse_iterator rit;
 	std::string root;
 
 	if (not node.getLeaves().empty())
@@ -360,22 +357,64 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 		this->putError("root: missing delimiter", node.getLineNumber());
 		return ;
 	}
-	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
-	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (rit = node.getValue().rbegin(); rit != node.getValue().rend(); ++rit)
-	{
-		if (not isspace(*rit))
-			break ;
-	}
-	root.assign(it, rit.base());
+	root = node.getValue();
 	if (root == "" or root[0] != '/')
 	{
 		return (this->putError("root: expect absolut path", node.getLineNumber()));
 	}
 	server.setRoot(root);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                   Index                                   //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addIndex(ConfigTree const& node, T& server)
+{
+	std::string index;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("index: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("index: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	index = node.getValue();
+	if (index == "")
+	{
+		return (this->putError("index: empty value", node.getLineNumber()));
+	}
+	server.setIndex(index);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                 Autoindex                                 //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addAutoindex(ConfigTree const& node, T& server)
+{
+	std::string value;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("autoindex: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("autoindex: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	value = node.getValue();
+	if (value == "on")
+		return (server.setAutoindex(true));
+	if (value == "off")
+		return (server.setAutoindex(false));
+	return (this->putError("autoindex: invalid value", node.getLineNumber()));
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,7 +425,6 @@ void	Configure::addRoot(ConfigTree const& node, T &server)
 void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 {
 	std::string::const_iterator it;
-	// std::string::const_reverse_iterator rit;
 	std::string server_name;
 
 	if (not node.getLeaves().empty())
@@ -401,23 +439,15 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
 	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (; it != node.getValue().end(); ++it)
-	{
 		if (isalnum(*it) or (*it == '.') or (*it == '-') or (*it == '_'))
 			server_name.push_back(tolower(*it));
 		else
 			break ;
 	}
-	for (; it != node.getValue().end(); ++it)
+	if (it != node.getValue().end())
 	{
-		if (not isspace(*it))
-		{
 			this->putError("server_name: invalid character", node.getLineNumber());
 			return ;
-		}
 	}
 	if (server_name == "")
 	{
@@ -425,6 +455,146 @@ void	Configure::addServerName(ConfigTree const& node, VirtualServer& server)
 		return ;
 	}
 	server.setServerName(server_name);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                Permissions                                //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addPermission(ConfigTree const& node, T& server)
+{
+	std::string permissions;
+	long n;
+	char *pos;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("permissions: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("permissions: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	permissions = node.getValue();
+	n = strtol(permissions.c_str(), &pos, 10);
+	if (n < 0 or n >= 8 or *pos != '\0')
+	{
+		this->putError("permissions: invalid value", node.getLineNumber());
+		return;
+	}
+	server.setPermissions(n);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                               Max Body Size                               //
+///////////////////////////////////////////////////////////////////////////////
+template<class T>
+void	Configure::addMaxBodySize(ConfigTree const& node, T& server)
+{
+	std::string size_str;
+	long n;
+	char *pos;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("max_body_size: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("max_body_size: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	size_str = node.getValue();
+	n = strtol(size_str.c_str(), &pos, 10);
+	if (size_str == "" or n < 0 or *pos != '\0')
+	{
+		this->putError("max_body_size: invalid value", node.getLineNumber());
+		return;
+	}
+	server.setMaxBodySize(static_cast<size_t>(n));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  Redirect                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addRedirect(ConfigTree const& node, Location& location)
+{
+	std::string redirect;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("redirection: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("redirection: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	redirect = node.getValue();
+	if (redirect == "")
+	{
+		this->putError("redirection: invalid value", node.getLineNumber());
+		return;
+	}
+	location.setRedirect(redirect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                 DefautFile                                //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addDefaultFile(ConfigTree const& node, Location &location)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string file;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("default_file: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("default_file: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	file = node.getValue();
+	if (file == "" or file[0] != '/')
+	{
+		return (this->putError("default_file: expect absolut path", node.getLineNumber()));
+	}
+	location.setDefaultFile(file);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  Post_dir                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addPostDir(ConfigTree const& node, Location &location)
+{
+	std::string::const_iterator it;
+	std::string ::const_reverse_iterator rit;
+	std::string file;
+
+	if (not node.getLeaves().empty())
+	{
+		this->putError("post_dir: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	if (not node.hasDelimiter())
+	{
+		this->putError("post_dir: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	file = node.getValue();
+	if (file == "" or file[0] != '/')
+	{
+		return (this->putError("post_dir: expect absolut path", node.getLineNumber()));
+	}
+	location.setPostDir(file);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -489,19 +659,156 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 
 void	Configure::setLocation(ConfigTree const& node, Location& location)
 {
+	const t_location_pair	function_tab[] = {
+		{"root",			&Configure::addRoot},
+		{"index",			&Configure::addIndex},
+		{"permissions",		&Configure::addPermission},
+		{"max_body_size",	&Configure::addMaxBodySize},
+		{"autoindex",		&Configure::addAutoindex},
+		{"redirect",		&Configure::addRedirect},
+		{"default_file",	&Configure::addDefaultFile},
+		{"post_dir",		&Configure::addPostDir},
+		{"cgi",				&Configure::addCGI}
+	};
+	bool					executed;
+	bool					has_duplicates;
+
+	has_duplicates = false;
+	for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
+	{
+		if (std::count(node.getLeaves().begin(), node.getLeaves().end(), function_tab[i].str) > 1)
+		{
+			this->putError("location: " + function_tab[i].str + ": multiple definitions", node.getLineNumber());
+			has_duplicates = true;
+		}
+	}
+	if (has_duplicates)
+		return ;
+
 	for (std::vector<ConfigTree>::const_iterator location_prop = node.getLeaves().begin();
 		 location_prop != node.getLeaves().end();
 		 ++location_prop
 		)
 	{
-		if (location_prop->getKey() == "root")
+		executed = false;
+		for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 		{
-			this->addRoot(*location_prop, location);
-			continue ;
+			if (location_prop->getKey() == function_tab[i].str)
+			{
+				(this->*(function_tab[i].fnc))(*location_prop, location);
+				executed = true;
+				break ;
+			}
 		}
-		this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
+		if (not executed)
+			this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//                                Error Pages                                //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addErrorPages(ConfigTree const& node, VirtualServer& server)
+{
+	if (not node.hasDelimiter())
+	{
+		this->putError("error_pages: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() != "")
+	{
+		this->putError("error_pages: unexpected value", node.getLineNumber());
+		return ;
+	}
+	for (
+		std::vector<ConfigTree>::const_iterator it = node.getLeaves().begin();
+		it != node.getLeaves().end();
+		++it
+		)
+	{
+		this->addSingleErrorPage(*it, server);
+	}
+}
+
+void	Configure::addSingleErrorPage(ConfigTree const& node, VirtualServer& server)
+{
+	long	n;
+	char	*pos;
+
+	if (not node.hasDelimiter())
+	{
+		this->putError("error_page: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (not node.getLeaves().empty())
+	{
+		this->putError("error_page: unexpected properties", node.getLineNumber());
+		return ;
+	}
+	n = strtol(node.getKey().c_str(), &pos, 10);
+	if (n < 0 or n > 1000 or pos[0] != '\0')
+	{
+		this->putError("error_page: invalid key", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() == "" or node.getValue()[0] != '/')
+	{
+		this->putError("error_page: invalid value", node.getLineNumber());
+		return ;
+	}
+	server.addErrorPage(static_cast<int>(n), node.getValue());
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  CGI Path                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addCGI(ConfigTree const& node, Location& location)
+{
+	if (not node.hasDelimiter())
+	{
+		this->putError("cgi: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() != "")
+	{
+		this->putError("cgi: unexpected value", node.getLineNumber());
+		return ;
+	}
+	for (
+		std::vector<ConfigTree>::const_iterator it = node.getLeaves().begin();
+		it != node.getLeaves().end();
+		++it
+		)
+	{
+		this->addSingleCGI(*it, location);
+	}
+}
+
+void	Configure::addSingleCGI(ConfigTree const& node, Location& location)
+{
+	if (not node.hasDelimiter())
+	{
+		this->putError("cgi: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (not node.getLeaves().empty())
+	{
+		this->putError("cgi: missing properties", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() == "" or node.getValue()[0] != '/')
+	{
+		this->putError("cgi: invalid value", node.getLineNumber());
+		return ;
+	}
+	if (location.getCgiPerm().find(node.getKey()) != location.getCgiPerm().end())
+	{
+		this->putError("cgi: " + node.getKey() + ": execution already defined", node.getLineNumber());
+		return ;
+	}
+	location.addCGIPerm(node.getKey(), node.getValue());
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //                          Error-related functions                          //
@@ -517,4 +824,56 @@ void	Configure::putError(std::string const& msg, size_t n_line)
 {
 	std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
 	_status = 1;
+}
+
+//addDuoIVS
+void	Configure::addDuoIVS(std::string name, std::vector<VirtualServer*> list)
+{
+	this->duoIVS[name] = list;
+}
+
+bool	str_endswith(std::string const& str, std::string const& suffix)
+{
+	if (str.length() < suffix.length())
+		return (false);
+	else
+		return (std::equal(suffix.rbegin(), suffix.rend(), str.rbegin()));
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                 SetDuoIVS                                 //
+///////////////////////////////////////////////////////////////////////////////
+
+void	Configure::setDuoIVS(void)
+{
+	std::string suffix;
+	std::string fullname;
+
+	for (
+		std::vector<VirtualServer>::iterator server_it = this->server_list.begin();
+		server_it != this->server_list.end();
+		++server_it
+		)
+	{
+		suffix = ":" + server_it->getPort();
+		fullname = server_it->getHost() + suffix;
+		for (
+			std::map<std::string, std::vector<VirtualServer*> >::iterator inter_it = this->duoIVS.begin();
+			inter_it != this->duoIVS.end();
+			++inter_it
+			)
+		{
+			if (str_endswith(inter_it->first, suffix))
+			{
+				if (inter_it->first == fullname or server_it->getHost() == "0.0.0.0")
+				{
+					inter_it->second.push_back(&(*server_it));
+				}
+			}
+		}
+	}
+	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
+	{
+		std::cout << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
+	}
 }

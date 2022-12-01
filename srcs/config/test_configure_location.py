@@ -66,3 +66,75 @@ Bad config: line 13: location: `/coucou/` is already defined
 Bad config: line 14: location: `/test/` is already defined
 """,
         1)
+
+    def test_inputfile_location_properties(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""server:
+  root: /test
+  index: ls
+  location: /root
+    index: ls- --
+    root: /ls/ls
+""")
+
+        self.run_error(
+            tmp,
+            """""",
+            0)
+
+    def test_inputfile_location_permissions(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+  location: /test
+    permissions: 2a
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 7: permissions: invalid value
+""",
+            1)
+
+    def test_inputfile_location_max_body_size(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+    max_body_size:
+  max_body_size: -25
+
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 6: max_body_size: invalid value
+Bad config: line 7: max_body_size: invalid value
+""",
+            1)
+
+
+    def test_inputfile_location_autoindex(self, tmp_path):
+        tmp = tmp_path / str(uuid.uuid4())
+        tmp.write_text("""
+server:
+  permissions: 7
+  location: /coucou
+    permissions:
+    autoindex: on
+  autoindex: off
+server:
+  autoindex: test
+
+""")
+
+        self.run_error(
+            tmp,
+            """Bad config: line 9: autoindex: invalid value
+""",
+            1)
