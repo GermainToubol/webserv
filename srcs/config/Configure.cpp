@@ -249,6 +249,10 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		if (not executed)
 			this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
+	if (this->isGood() and server.getLocationPool().find("/") == server.getLocationPool().end())
+	{
+		server.addLocation("/", Location(server));
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -815,7 +819,7 @@ void	Configure::addSingleCGI(ConfigTree const& node, Location& location)
 	}
 	if (not node.getLeaves().empty())
 	{
-		this->putError("cgi: missing properties", node.getLineNumber());
+		this->putError("cgi: unexpected properties", node.getLineNumber());
 		return ;
 	}
 	if (node.getValue() == "" or node.getValue()[0] != '/')
