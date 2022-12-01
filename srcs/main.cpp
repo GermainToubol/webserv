@@ -45,20 +45,24 @@ void	derror(std::string const& msg)
 	std::cerr << msg << std::endl;
 }
 
-int	main(void)
+int	main(int argc, char **argv)
 {
-	Configure config("test_config");
+	std::string filename("test_config");
+
+	if (argc == 2)
+		filename = argv[1];
+	Configure config(filename);
 
 	init_sig(get_sig, SIGINT);
-	
+
 	if (!config.isGood())
 		return (1);
-	
+
 	WebServer server(config);
 	if (server.init())
 		return (1);
 	server.run();
 	server.end();
-	
+
 	return (0);
 }
