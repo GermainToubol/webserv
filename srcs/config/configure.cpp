@@ -189,9 +189,15 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		{"autoindex",		&Configure::addAutoindex},
 		{"error_pages",		&Configure::addErrorPages}
 	};
+	const std::string	minimal_req[] = {
+		"listen",
+		"root",
+		"index"
+	};
 	bool				executed;
 	bool				has_duplicates;
 
+	// Check duplicates ///////////////////////////////////////////////////////
 	has_duplicates = false;
 	for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 	{
@@ -206,6 +212,22 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		}
 	}
 
+	if (has_duplicates)
+		return ;
+
+	// Check presence of minimal requirements /////////////////////////////////
+	has_duplicates = false;
+	for (size_t i = 0; i < sizeof(minimal_req) / sizeof(minimal_req[0]); ++i)
+	{
+		if (std::count(
+				node.getLeaves().begin(),
+				node.getLeaves().end(),
+				minimal_req[i]) == 0)
+		{
+			this->putError("server: " + minimal_req[i] + ": missing declaration", node.getLineNumber());
+			has_duplicates = true;
+		}
+	}
 	if (has_duplicates)
 		return ;
 
