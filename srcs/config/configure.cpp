@@ -204,7 +204,8 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		{"index", &Configure::addIndex},
 		{"permissions", &Configure::addPermission},
 		{"max_body_size", &Configure::addMaxBodySize},
-		{"autoindex", &Configure::addAutoindex}
+		{"autoindex", &Configure::addAutoindex},
+		{"error_pages", &Configure::addErrorPages}
 	};
 	bool				executed;
 	bool				has_duplicates;
@@ -719,6 +720,15 @@ void	Configure::setLocation(ConfigTree const& node, Location& location)
 		if (not executed)
 			this->putError(location_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//                                Error Pages                                //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addErrorPages(ConfigTree const& node, VirtualServer& server)
+{
+	(void)node;
+	(void)server;
 }
 
 ///////////////////////////////////////////////////////////////////////////////

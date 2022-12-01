@@ -43,7 +43,7 @@ public:
 	int	isGood(void) const;
 	std::vector<VirtualServer>							const& getServers(void) const;
 	std::map<std::string, std::vector<VirtualServer*> >	const& getDuoIVS(void) const;
-	
+
 	void	addDuoIVS(std::string, std::vector<VirtualServer*>);
 
 private:
@@ -81,6 +81,7 @@ private:
 	void	addDefaultFile(ConfigTree const&, Location&);
 	void	addPostDir(ConfigTree const&, Location&);
 	void	setDuoIVS(void);
+	void	addErrorPages(ConfigTree const&, VirtualServer&);
 
 	std::string											filename;
 	std::ifstream										_ifs;
