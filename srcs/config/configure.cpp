@@ -676,7 +676,7 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 
 void	Configure::setLocation(ConfigTree const& node, Location& location)
 {
-	const t_location_pair function_tab[] = {
+	const t_location_pair	function_tab[] = {
 		{"root",		&Configure::addRoot},
 		{"index", &Configure::addIndex},
 		{"permissions", &Configure::addPermission},
@@ -686,7 +686,20 @@ void	Configure::setLocation(ConfigTree const& node, Location& location)
 		{"default_file", &Configure::addDefaultFile},
 		{"post_dir", &Configure::addPostDir}
 	};
-	bool executed;
+	bool					executed;
+	bool					has_duplicates;
+
+	has_duplicates = false;
+	for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
+	{
+		if (std::count(node.getLeaves().begin(), node.getLeaves().end(), function_tab[i].str) > 1)
+		{
+			this->putError("location: " + function_tab[i].str + ": multiple definitions", node.getLineNumber());
+			has_duplicates = true;
+		}
+	}
+	if (has_duplicates)
+		return ;
 
 	for (std::vector<ConfigTree>::const_iterator location_prop = node.getLeaves().begin();
 		 location_prop != node.getLeaves().end();

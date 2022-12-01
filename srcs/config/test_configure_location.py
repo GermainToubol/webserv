@@ -89,12 +89,13 @@ server:
   permissions: 7
   location: /coucou
     permissions:
+  location: /test
     permissions: 2a
 """)
 
         self.run_error(
             tmp,
-            """Bad config: line 6: permissions: invalid value
+            """Bad config: line 7: permissions: invalid value
 """,
             1)
 
