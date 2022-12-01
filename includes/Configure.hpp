@@ -27,6 +27,7 @@
 
 // number of available ports
 #define MAX_PORT_NBR 65536
+#define MAX_LINE_SIZE 8192
 
 /**
  * @class Configure
@@ -82,6 +83,7 @@ private:
 	void	addPostDir(ConfigTree const&, Location&);
 	void	setDuoIVS(void);
 	void	addErrorPages(ConfigTree const&, VirtualServer&);
+	void	addSingleErrorPage(ConfigTree const&, VirtualServer&);
 
 	std::string											filename;
 	std::ifstream										_ifs;
@@ -93,5 +95,21 @@ private:
 };
 
 bool	str_endswith(std::string const&, std::string const&);
+
+typedef void (Configure::*t_server_func)(ConfigTree const&, VirtualServer&);
+typedef void (Configure::*t_location_func)(ConfigTree const&, Location&);
+
+typedef struct s_server_pair
+{
+	std::string		str;
+	t_server_func	fnc;
+}	t_server_pair;
+
+typedef struct s_location_pair
+{
+	std::string str;
+	t_location_func fnc;
+}	t_location_pair;
+
 
 #endif

@@ -29,24 +29,6 @@
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
 
-
-#define MAX_LINE_SIZE 8192
-
-typedef void (Configure::*t_server_func)(ConfigTree const&, VirtualServer&);
-typedef void (Configure::*t_location_func)(ConfigTree const&, Location&);
-
-typedef struct s_server_pair
-{
-	std::string		str;
-	t_server_func	fnc;
-}	t_server_pair;
-
-typedef struct s_location_pair
-{
-	std::string str;
-	t_location_func fnc;
-}	t_location_pair;
-
 Configure::Configure(std::string const& file):
 	filename(file),
 	_ifs(),
@@ -727,8 +709,53 @@ void	Configure::setLocation(ConfigTree const& node, Location& location)
 ///////////////////////////////////////////////////////////////////////////////
 void	Configure::addErrorPages(ConfigTree const& node, VirtualServer& server)
 {
-	(void)node;
-	(void)server;
+	if (not node.hasDelimiter())
+	{
+		this->putError("error_pages: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() != "")
+	{
+		this->putError("error_pages: unexpected value", node.getLineNumber());
+		return ;
+	}
+	for (
+		std::vector<ConfigTree>::const_iterator it = node.getLeaves().begin();
+		it != node.getLeaves().end();
+		++it
+		)
+	{
+		this->addSingleErrorPage(*it, server);
+	}
+}
+
+void	Configure::addSingleErrorPage(ConfigTree const& node, VirtualServer& server)
+{
+	long	n;
+	char	*pos;
+
+	if (not node.hasDelimiter())
+	{
+		this->putError("error_page: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (not node.getLeaves().empty())
+	{
+		this->putError("error_page: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	n = strtol(node.getKey().c_str(), &pos, 10);
+	if (n < 0 or n > 1000 or pos[0] != '\0')
+	{
+		this->putError("error_page: invalid key", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() == "" or node.getValue()[0] != '/')
+	{
+		this->putError("error_page: invalid value", node.getLineNumber());
+		return ;
+	}
+	server.addErrorPage(static_cast<int>(n), node.getValue());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
