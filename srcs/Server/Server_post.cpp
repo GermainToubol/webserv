@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 16:02:36 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 16:49:37 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 	
-	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL);
+	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 	
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);

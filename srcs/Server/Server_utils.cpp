@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_utils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 14:43:19 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 16:48:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -149,7 +149,7 @@ void	WebServer::clearTimeout(void)
 		return ;
 	while (it != this->_timeout.end())
 	{
-		if (time(NULL) - it->second.time > REQUEST_TIMEOUT)
+		if (time(NULL) - it->second.time > REQUEST_TIMEOUT || itdel->second.state == 4)
 		{
 			itdel = it;
 			it++;
@@ -163,6 +163,8 @@ void	WebServer::clearTimeout(void)
 			}
 			else if (itdel->second.state == 2)
 				this->removeResponse(itdel->first);
+			else if (itdel->second.state == 3)
+				this->closeCgiResponse(this->_cgiFD[itdel->first], itdel->first);
 			this->_timeout.erase(itdel);
 		}
 		else

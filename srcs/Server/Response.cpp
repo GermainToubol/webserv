@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 20:12:08 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 16:53:12 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,11 @@ void	Response::eraseHeader(int start, int end)
 void	Response::eraseBody(int start, int end)
 {
 	this->_body.erase(start, end);
+}
+
+void	Response::addHeader(std::string const& value)
+{
+	this->_header += value;
 }
 
 /*Accesseurs*/
@@ -120,6 +125,11 @@ void	Response::setBody(int code, std::string const& type)
 </body>\n\
 </html>";
 	this->_body_size = this->_body.size();
+}
+
+void	Response::setBodyAlone(std::string const& body)
+{
+	this->_body = body;
 }
 
 int	Response::setListingBody(std::string uri, std::string const& root)

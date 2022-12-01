@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:39:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 11:01:46 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 16:52:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,12 +41,14 @@ class Response
 		void					setHeader(Setup *setup, std::map<int, std::string> const& status_code, std::multimap<std::string, std::string> const& mime_type, size_t body_size);
 		void					setBody(std::string const& body);
 		void					setBody(int code, std::string const& type);
+		void					setBodyAlone(std::string const& body);
 		void					setBodySize(std::string::size_type const& body_size);
 		void					setPosition(std::string::size_type const& position);
 		void					setFd(int const& fd);
 		void					setStatus(int const& status);
 
 		/*Fonctions*/
+		void	addHeader(std::string const& value);
 		void	eraseHeader(int start, int end);
 		void	eraseBody(int start, int end);
 		int		setListingBody(std::string uri, std::string const& root);

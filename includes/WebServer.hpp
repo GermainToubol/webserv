@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 15:21:22 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 16:32:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -80,6 +80,7 @@ class WebServer
 		int	sendFile(int client_fd, Response *response);
 
 		/*Cgi*/
+		int		closeCgiResponse(int client_fd, int file_fd);
 		bool	isCgi(int fd);
 		int		cgiResponse(int fd);
 

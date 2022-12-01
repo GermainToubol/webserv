@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_modeChoice.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 15:40:18 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 16:49:11 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,7 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 	response.setFd(client_fd);
 	response.setStatus(0);
 	response.setPosition(0);
+	response.setBodySize(-1);
 	setup->setExtension(".html");
 
 	response.setHeader("HTTP/1.1 200 OK\n\rConnection: close\r\n");
@@ -76,6 +77,12 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
 
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+	if (this->_timeout.find(client_fd) != this->_timeout.end())
+	{
+		this->_timeout.find(client_fd)->second.time = time(NULL);
+		this->_timeout.find(client_fd)->second.state = 4;
+	}
+	this->_timeout.insert( std::make_pair(cgi_fd, (t_pair){time(NULL), 3} ) );
 	return (0);
 }
 
@@ -170,7 +177,7 @@ int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 	setup->setExtension("");
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBody().size());
 	
-	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL);
+	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);

@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi_manager.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/01 16:04:04 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 16:57:08 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Cgi_manager.hpp"
 #include "utils.hpp"
 #include <unistd.h>
+#include <cstdlib>
 
 #ifndef __GNUC__
 #pragma region Constructor &&Destructor
@@ -63,7 +64,9 @@ Setup *Cgi_manager::getSetup(void) const
 }
 std::ostream &operator<<(std::ostream &o, Cgi_manager const &rhs)
 {
-	std::cout << "Cgi manager" << std::endl;
+	(void)rhs;
+	o << "Cgi manager" << std::endl;
+	return o;
 }
 
 void Cgi_manager::_init(void)
@@ -126,6 +129,7 @@ int Cgi_manager::execute(int *cgi_fd)
 
 	if (pipe(fd_pipe) != 0)
 		return 500;
+	*cgi_fd = fd_pipe[0]; //j'imagine que c ca qu'il faut faire
 
 	saveSTDIN = dup(STDIN_FILENO);
 	saveSTDOUT = dup(STDOUT_FILENO);
