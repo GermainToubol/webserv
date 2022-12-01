@@ -85,6 +85,10 @@ private:
 	void	addErrorPages(ConfigTree const&, VirtualServer&);
 	void	addSingleErrorPage(ConfigTree const&, VirtualServer&);
 
+	void	addCGI(ConfigTree const&, Location&);
+	void	addSingleCGI(ConfigTree const&, Location&);
+
+
 	std::string											filename;
 	std::ifstream										_ifs;
 	int													_status;

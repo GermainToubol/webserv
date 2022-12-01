@@ -179,15 +179,15 @@ void	Configure::TreeToServers(void)
 void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& server)
 {
 	const t_server_pair	function_tab[] = {
-		{"listen",		&Configure::addListen},
-		{"root",		&Configure::addRoot},
-		{"server_name",	&Configure::addServerName},
-		{"location", &Configure::addLocation},
-		{"index", &Configure::addIndex},
-		{"permissions", &Configure::addPermission},
-		{"max_body_size", &Configure::addMaxBodySize},
-		{"autoindex", &Configure::addAutoindex},
-		{"error_pages", &Configure::addErrorPages}
+		{"listen",			&Configure::addListen},
+		{"root",			&Configure::addRoot},
+		{"server_name",		&Configure::addServerName},
+		{"location",		&Configure::addLocation},
+		{"index",			&Configure::addIndex},
+		{"permissions",		&Configure::addPermission},
+		{"max_body_size",	&Configure::addMaxBodySize},
+		{"autoindex",		&Configure::addAutoindex},
+		{"error_pages",		&Configure::addErrorPages}
 	};
 	bool				executed;
 	bool				has_duplicates;
@@ -660,14 +660,15 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 void	Configure::setLocation(ConfigTree const& node, Location& location)
 {
 	const t_location_pair	function_tab[] = {
-		{"root",		&Configure::addRoot},
-		{"index", &Configure::addIndex},
-		{"permissions", &Configure::addPermission},
-		{"max_body_size", &Configure::addMaxBodySize},
-		{"autoindex", &Configure::addAutoindex},
-		{"redirect", &Configure::addRedirect},
-		{"default_file", &Configure::addDefaultFile},
-		{"post_dir", &Configure::addPostDir}
+		{"root",			&Configure::addRoot},
+		{"index",			&Configure::addIndex},
+		{"permissions",		&Configure::addPermission},
+		{"max_body_size",	&Configure::addMaxBodySize},
+		{"autoindex",		&Configure::addAutoindex},
+		{"redirect",		&Configure::addRedirect},
+		{"default_file",	&Configure::addDefaultFile},
+		{"post_dir",		&Configure::addPostDir},
+		{"cgi",				&Configure::addCGI}
 	};
 	bool					executed;
 	bool					has_duplicates;
@@ -741,7 +742,7 @@ void	Configure::addSingleErrorPage(ConfigTree const& node, VirtualServer& server
 	}
 	if (not node.getLeaves().empty())
 	{
-		this->putError("error_page: missing delimiter", node.getLineNumber());
+		this->putError("error_page: unexpected properties", node.getLineNumber());
 		return ;
 	}
 	n = strtol(node.getKey().c_str(), &pos, 10);
@@ -757,6 +758,57 @@ void	Configure::addSingleErrorPage(ConfigTree const& node, VirtualServer& server
 	}
 	server.addErrorPage(static_cast<int>(n), node.getValue());
 }
+
+///////////////////////////////////////////////////////////////////////////////
+//                                  CGI Path                                 //
+///////////////////////////////////////////////////////////////////////////////
+void	Configure::addCGI(ConfigTree const& node, Location& location)
+{
+	if (not node.hasDelimiter())
+	{
+		this->putError("cgi: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() != "")
+	{
+		this->putError("cgi: unexpected value", node.getLineNumber());
+		return ;
+	}
+	for (
+		std::vector<ConfigTree>::const_iterator it = node.getLeaves().begin();
+		it != node.getLeaves().end();
+		++it
+		)
+	{
+		this->addSingleCGI(*it, location);
+	}
+}
+
+void	Configure::addSingleCGI(ConfigTree const& node, Location& location)
+{
+	if (not node.hasDelimiter())
+	{
+		this->putError("cgi: missing delimiter", node.getLineNumber());
+		return ;
+	}
+	if (not node.getLeaves().empty())
+	{
+		this->putError("cgi: missing properties", node.getLineNumber());
+		return ;
+	}
+	if (node.getValue() == "" or node.getValue()[0] != '/')
+	{
+		this->putError("cgi: invalid value", node.getLineNumber());
+		return ;
+	}
+	if (location.getCgiPerm().find(node.getKey()) != location.getCgiPerm().end())
+	{
+		this->putError("cgi: " + node.getKey() + ": execution already defined", node.getLineNumber());
+		return ;
+	}
+	location.addCGIPerm(node.getKey(), node.getValue());
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //                          Error-related functions                          //
