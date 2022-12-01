@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 20:45:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 11:59:24 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,8 @@
 #include <cstring>
 #include <stack>
 #include <string>
+
+#include <sys/stat.h>
 
 std::string	reformatUri(std::string const& uri)
 {
@@ -63,4 +65,57 @@ std::string	reformatUri(std::string const& uri)
 	if (new_uri.size() == 0)
 		new_uri = "/";
 	return (new_uri);
+}
+
+bool	doesPathExist(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	return (true);
+}
+
+bool	isPathReadable(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (buf.st_mode & S_IRUSR)
+		return (true);
+	return (false);
+}
+
+bool	isPathWriteable(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (buf.st_mode & S_IWUSR)
+		return (true);
+	return (false);
+}
+
+bool	isDirectory(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (S_ISDIR(buf.st_mode))
+		return (true);
+	return (false);
+}
+
+bool	isFile(std::string const& path)
+{
+	struct stat		buf;
+
+	if (stat(path.c_str(), &buf) == -1)
+		return (false);
+	if (S_ISREG(buf.st_mode))
+		return (true);
+	return (false);
 }

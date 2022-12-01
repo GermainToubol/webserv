@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:44:18 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 17:02:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 11:56:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,4 +33,10 @@ std::string to_string ( T Number )
 void		derror(std::string const& msg);
 std::string	reformatUri(std::string const& uri);
 
+bool	doesPathExist(std::string const& path);
+bool	isPathReadable(std::string const& path);
+bool	isPathWriteable(std::string const& path);
+
+bool	isDirectory(std::string const& path);
+bool	isFile(std::string const& path);
 #endif

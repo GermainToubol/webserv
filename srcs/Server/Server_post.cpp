@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 16:02:36 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 11:58:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,12 +81,12 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl;
 	std::cerr << "[ Post dir path : " << file_path << " ]" << std::endl;
 	setup->setUri(dir_path);
-	if (!this->doesPathExist(setup->getUri()))
+	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathWriteable(setup->getUri()))
+	if (!isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	setup->addUri(file_path);
-	if (this->doesPathExist(setup->getUri()) && !this->isPathWriteable(setup->getUri()))
+	if (doesPathExist(setup->getUri()) && !isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	return (0);
 }

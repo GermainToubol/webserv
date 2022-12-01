@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 21:45:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 11:59:02 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,11 +60,11 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 	std::cerr << "[ Get Mode ]" << std::endl;
 
 	std::cerr << "[ Uri : " << setup->getUri() << " ]" << std::endl;
-	if (!this->doesPathExist(setup->getUri()))
+	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathReadable(setup->getUri()))
+	if (!isPathReadable(setup->getUri()))
 		return (setup->setCode(403), 403);
-	if (this->isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == false)
+	if (isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == false)
 	{
 		if (request->getLocation()->getDefaultFile() == "" || request->getLocation()->getDefaultFile() == setup->getUri())
 			return (setup->setCode(404), 404);
@@ -80,9 +80,9 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 				return (this->getMode(request, setup, client_fd));
 		}
 	}
-	if (this->isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == true)
+	if (isDirectory(setup->getUri()) && request->getLocation()->getAutoindex() == true)
 		return (setup->setCode(200), this->buildResponseListing(request, setup, client_fd));
-	if (this->isFile(setup->getUri()))
+	if (isFile(setup->getUri()))
 		return (setup->setCode(200), this->buildResponseGet(request, setup, client_fd));
 	return (setup->setCode(403), 403);
 }
@@ -124,7 +124,7 @@ int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 	std::cerr << "[ Delete Mode ]" << std::endl;
 
 	ret = 1;
-	if (this->doesPathExist(setup->getUri()) && this->isFile(setup->getUri()))
+	if (doesPathExist(setup->getUri()) && isFile(setup->getUri()))
 		ret = 0;
 
 	if (ret == 0)
