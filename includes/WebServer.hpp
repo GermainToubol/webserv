@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 20:40:24 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 15:21:22 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,6 +55,7 @@ class WebServer
 		
 		/*Init*/
 		int	addDuoCS(int client, int server);
+		int	addClientIP(int client, std::string const& ip);
 		int	create_socket(std::string port, std::string ip);
 		int	init(void);
 
@@ -77,6 +78,10 @@ class WebServer
 		int	sendHeader(int client_fd, Response *response);
 		int	sendBody(int client_fd, Response *response);
 		int	sendFile(int client_fd, Response *response);
+
+		/*Cgi*/
+		bool	isCgi(int fd);
+		int		cgiResponse(int fd);
 
 		/*Post*/
 	
@@ -110,6 +115,9 @@ class WebServer
 		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
 		void	clearCache(void);
 		void	clearTimeout(void);
+		std::string	getType(std::string const& extension);
+		std::string	getExtension(std::string const& type);
+		std::string	getStatus(int code);
 
 		std::vector<std::string>	splitFormdata(std::string const& file, std::string const& boundary);
 
@@ -126,6 +134,8 @@ class WebServer
 		std::map<int, std::string>							_duoSI;
 		std::map<int, int>									_duoCS;
 		std::map<int, t_pair>								_timeout;
+		std::map<int, std::string>							_clientIP;
+		std::map<int, int>									_cgiFD;
 		char												_buffer[BUFFER_SIZE + 1];
 		char												_send_buffer[SEND_SIZE + 1];
 };

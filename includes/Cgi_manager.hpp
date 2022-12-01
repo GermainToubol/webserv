@@ -6,7 +6,7 @@
 /*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/01 04:57:35 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/01 11:42:55 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 14:58:49 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,17 +32,18 @@ private:
 	std::map<std::string, std::string> _env;
 	std::string _response;
 	std::string _content_type;
+	std::string _client_ip;
 	int			_file_fd;
 	void _init(void);
 
 public:
-	Cgi_manager(Request *request, Setup *setup, std::string content_type);
+	Cgi_manager(Request *request, Setup *setup, std::string const& client_ip);
 	Cgi_manager(Cgi_manager const &src);
 	~Cgi_manager();
 
 	Request *getRequest(void) const;
 	Setup *getSetup(void) const;
-	int execute(void);
+	int execute(int *cgi_fd);
 	Cgi_manager &operator=(Cgi_manager const &rhs);
 };
 

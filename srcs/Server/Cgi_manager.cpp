@@ -6,7 +6,7 @@
 /*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/01 12:52:28 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/01 14:59:00 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,12 @@
 #pragma region Constructor &&Destructor
 #endif
 
-Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string content_type) : _request(request), _setup(setup), _content_type(content_type)
+Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& client_ip) :
+	_request(request),
+	_setup(setup),
+	_client_ip(client_ip)
 {
+	this->_content_type = request->getField("Content-Type");
 	this->_init();
 	return;
 }
@@ -80,7 +84,8 @@ void Cgi_manager::_init(void)
 	this->_env["SCRIPT_NAME"] = "/bin/php-cgi";	   // cgi binary
 	this->_env["SCRIPT_FILENAME"] = this->_env["SCRIPT_NAME"]; // full pathname
 
-	this->_env["REMOTE_ADDR"] = _config->getAddr(); // Addr remote get from socket
+	 this->_env["REMOTE_ADDR"] = this->_client_ip; // Addr remote get from socket
+	 this->_env["REMOTE_HOST"] = this->_client_ip; // Addr remote get from socket
 
 	//if AUTH
 	// this->_env["REMOTE_IDENT"] = _request->getClient()->getLogin(); // Need class CLIENT link request and socket
@@ -97,7 +102,7 @@ char *convert(const std::string &s)
 	return pc;
 }
 
-int Cgi_manager::execute()
+int Cgi_manager::execute(int *cgi_fd)
 {
 	char *argv[3];
 	int fd_pipe[2];
@@ -120,7 +125,7 @@ int Cgi_manager::execute()
 	argv[2] = NULL;
 
 	if (pipe(fd_pipe) != 0)
-		return 1;
+		return 500;
 
 	saveSTDIN = dup(STDIN_FILENO);
 	saveSTDOUT = dup(STDOUT_FILENO);
@@ -132,7 +137,7 @@ int Cgi_manager::execute()
 		exit(1);
 	}
 	else if (pid < 0)
-		return 2;
+		return 500;
 	dup2(saveSTDIN, STDIN_FILENO);
 	dup2(saveSTDOUT, STDOUT_FILENO);
 	close(saveSTDIN);

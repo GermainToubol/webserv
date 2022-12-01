@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_utils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 14:44:00 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 14:43:19 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -168,4 +168,24 @@ void	WebServer::clearTimeout(void)
 		else
 			it++;
 	}
+}
+
+std::string	WebServer::getType(std::string const& extension)
+{
+	if (this->_mimetypes.find(extension) == this->_mimetypes.end())
+		return ("text/plain");
+	return (this->_mimetypes.find(extension)->second);
+}
+
+std::string	WebServer::getExtension(std::string const& type)
+{
+	(void)type;
+	return ("");
+}
+
+std::string	WebServer::getStatus(int code)
+{
+	if (this->_status_codes.find(code) == this->_status_codes.end())
+		return ("Unknown");
+	return (this->_status_codes.find(code)->second);
 }

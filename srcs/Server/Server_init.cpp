@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_init.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:27:37 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 14:19:38 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,14 @@ int	WebServer::addDuoCS(int client, int server)
 	if (this->_duoCS.find(client) != this->_duoCS.end())
 		this->_duoCS.erase(client);
 	this->_duoCS.insert(std::pair<int, int>(client, server));
+	return (0);
+}
+
+int	WebServer::addClientIP(int client, std::string const& ip)
+{
+	if (this->_clientIP.find(client) != this->_clientIP.end())
+		this->_clientIP.erase(client);
+	this->_clientIP.insert(std::pair<int, std::string>(client, ip));
 	return (0);
 }
 

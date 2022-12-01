@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_modeChoice.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 21:45:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 15:40:18 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 #include "WebServer.hpp"
+#include "Cgi_manager.hpp"
 #include "utils.hpp"
 
 int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
@@ -49,9 +50,32 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
-	(void)setup;
-	(void)request;
-	(void)client_fd;
+	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second);
+	Response	response;
+	struct epoll_event	event;
+	int	cgi_fd;
+	int ret;
+
+	ret = CgiManager.execute(&cgi_fd);
+	if (ret != 0)
+		return (setup->setCode(ret), ret);
+	this->_cgiFD.insert(std::make_pair(cgi_fd, client_fd));
+
+	response.setFd(client_fd);
+	response.setStatus(0);
+	response.setPosition(0);
+	setup->setExtension(".html");
+
+	response.setHeader("HTTP/1.1 200 OK\n\rConnection: close\r\n");
+
+	this->_all_response.push_back(response);
+
+	std::memset(&event, 0, sizeof(event));
+	event.data.fd = cgi_fd;
+ 	event.events = EPOLLIN;
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
+
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
 	return (0);
 }
 

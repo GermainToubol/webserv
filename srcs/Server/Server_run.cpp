@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_run.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 17:07:35 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 15:17:03 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,11 @@
 #include <cstring>
 
 #include <sys/epoll.h>
+#include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -31,16 +35,23 @@ int	WebServer::newConnection(int server_fd)
 {
 	int					client_socket;
 	struct epoll_event	event;
+	struct sockaddr_in	address;
+	socklen_t			sock_len = sizeof(address);
+	char buffer[INET_ADDRSTRLEN];
+
 
 	std::cerr << "[ New connection on server " << server_fd << " ]" << std::endl;
-	client_socket = accept(server_fd, NULL, NULL);
+	client_socket = accept(server_fd, (struct sockaddr *)&address, &sock_len);
 	if (client_socket == -1 && errno != EWOULDBLOCK)
-		return (derror("/!\\ Accept failed"), -1);
+		return (perror("/!\\ Accept failed"), -1);
 	else
 	{
 		if (fcntl(client_socket, F_SETFL, O_NONBLOCK) == -1)
-			return (close(client_socket), derror("/!\\ Fcntl failed"), 1);
-		
+			return (close(client_socket), perror("/!\\ Fcntl failed"), 1);
+		std::memset(&buffer, 0, INET_ADDRSTRLEN);
+		inet_ntop(address.sin_family, &address.sin_addr.s_addr, buffer, INET_ADDRSTRLEN);
+		std::cerr << "[ Client IP: " << buffer << " ]" << std::endl;
+		this->addClientIP(client_socket, buffer);
 		std::memset(&event, 0, sizeof(event));
 		event.data.fd = client_socket;
 		event.events = EPOLLIN;
@@ -157,6 +168,8 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 		listen_sock = this->is_server(events[i].data.fd);
 		if (listen_sock != -1)
 			this->newConnection(listen_sock);
+		else if (this->isCgi(events[i].data.fd))
+			this->cgiResponse(events[i].data.fd);
 		else if (events[i].events & EPOLLIN)
 			this->getRequest(events[i].data.fd);
 		else if (events[i].events & EPOLLOUT)
