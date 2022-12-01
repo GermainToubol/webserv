@@ -94,6 +94,7 @@ _CYAN		= \033[36m
 _WHITE		= \033[37m
 _NO_COLOR	= \033[0m
 
+all:		$(NAME)
 
 $(NAME):	$(OBJS)
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(OBJS)
@@ -104,8 +105,6 @@ $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp $(OBJS_DIR)/%.d
 		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \
 	fi
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
-
-all:		$(NAME)
 
 clean:		dclean
 			$(RM) $(OBJS)
@@ -126,12 +125,18 @@ doc:
 test:		$(TEST_EXE)
 			pytest
 
+up:			down all
+			cd docker_test && sudo docker compose up --build --force-recreate -d
+
+down:
+			cd docker_test && sudo docker compose down
+
 $(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out %main.o objs/Server%,$(OBJS))
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 re:			fclean all
 
-.PHONY:		all clean fclean re doc tests
+.PHONY:		all clean fclean re doc tests up down
 .SILENT:	test
 .NOTPARALLEL: re
 

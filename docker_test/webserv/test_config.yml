@@ -1,0 +1,34 @@
+# **************************************************************************** #
+#                                                                              #
+#                                                         :::      ::::::::    #
+#    test_config.yml                                    :+:      :+:    :+:    #
+#                                                     +:+ +:+         +:+      #
+#    By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+         #
+#                                                 +#+#+#+#+#+   +#+            #
+#    Created: 2022/12/01 18:06:19 by gtoubol           #+#    #+#              #
+#    Updated: 2022/12/01 18:06:19 by gtoubol          ###   ########.fr        #
+#                                                                              #
+# **************************************************************************** #
+
+# First server can be accessed by any one
+server:
+  server_name: webserv.42.fr
+  listen: 80
+  root: /var/www
+  index: index.html
+  location: /
+  location: /a/b/
+    root: /var/www/test
+
+# Second server can be accessed from "outside only"
+server:
+  server_name: out.webserv.42.fr
+  listen: 192.168.12.1:80
+  root: /var/www/coucou
+  index: index.html
+
+server:
+  server_name: in.webserv.42.fr
+  listen: webserv.inside:80
+  root: /var/www/hidden
+  index: index.html

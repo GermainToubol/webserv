@@ -1,0 +1,57 @@
+services:
+  webserv:
+    container_name: webserv
+    ports:
+      - "80:80"
+    build:
+      context: ./webserv
+    volumes:
+      - server_data:/home/server
+    stop_signal: SIGINT
+    networks:
+      inside:
+        ipv4_address: 192.168.13.1
+      outside:
+        ipv4_address: 192.168.12.1
+  in:
+    container_name: in
+    build:
+      context: ./default
+    stop_signal: SIGKILL
+    networks:
+      inside:
+        ipv4_address: 192.168.13.2
+  out:
+    container_name: outside
+    build:
+      context: ./default
+    stop_signal: SIGKILL
+    networks:
+      outside:
+        ipv4_address: 192.168.12.2
+
+volumes:
+  server_data:
+    name: server_data
+    driver: local
+    driver_opts:
+      device: "/home/gtoubol/webserv"
+      type: none
+      o: bind
+
+networks:
+  outside:
+    name: outside
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: 192.168.12.0/24
+          gateway: 192.168.12.254
+
+  inside:
+    name: inside
+    driver: "bridge"
+    ipam:
+      config:
+        - subnet: 192.168.13.0/24
+          gateway: 192.168.13.254
