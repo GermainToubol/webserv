@@ -6,7 +6,7 @@
 /*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:35:03 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/02 15:49:06 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,6 @@ public:
 	int run(void);
 
 	/*Utils*/
-	bool isDirectory(std::string const &path);
-	bool isFile(std::string const &path);
 	void remove_fd_request(int fd);
 	Request *get_fd_request(int fd);
 	int is_server(int fd);
