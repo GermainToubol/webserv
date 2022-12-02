@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 20:26:43 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 15:44:06 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:27:21 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,9 +36,16 @@ int	WebServer::openFile(Setup *setup, Response *response)
 	try {stream = new std::ifstream(setup->getUri().c_str());}
 	catch (std::exception &e) {return (perror("/!\\ Open file failed"), setup->setCode(500), 500);}
 
+	std::cerr << "[ Open file " << setup->getUri() << " ]" << std::endl;
 	stream->seekg(0, stream->end);
 	cache.setSize(stream->tellg());
 	stream->seekg(0, stream->beg);
+	if (cache.getSize() == std::string::npos)
+	{
+		std::cerr << "/!\\ File size failed" << std::endl;
+		delete stream;
+		return (setup->setCode(500), 500);
+	}
 	cache.setStream(stream);
 	cache.setUri(setup->getUri());
 	cache.setUsers(1);

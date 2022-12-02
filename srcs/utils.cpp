@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 11:59:24 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:35:36 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,33 @@
 #include <cstring>
 #include <stack>
 #include <string>
+#include <cstdlib>
 
 #include <sys/stat.h>
+
+std::string uriDecode(const std::string &src)
+{
+	std::string result;
+	int			i = 0;
+
+	while (src[i])
+	{
+		if (src[i] == '%')
+		{
+			if (src[i + 1] && src[i + 2] && std::isxdigit(src[i + 1]) && std::isxdigit(src[i + 2]))
+			{
+				result += (char)std::strtol(src.substr(i + 1, 2).c_str(), NULL, 16);
+				i += 2;
+			}
+		}
+		else if (src[i] == '+')
+			result += ' ';
+		else
+			result += src[i];
+		i++;
+	}
+	return (result);
+}
 
 std::string	reformatUri(std::string const& uri)
 {

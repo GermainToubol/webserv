@@ -10,6 +10,6 @@ x -> 1 bind par ip:port
 x -> Stat dans utils
 x -> rajouter le check de la taille de l'uri
 -> need to test CGI and CGI timeout
--> need to free to correctement
+-> need to free tout correctement
 
--> chnager le path dudefault filedirectory // faire tous les checks des file absolute or relative via le config file
+x -> chnager le path dudefault filedirectory // faire tous les checks des file absolute or relative via le config file

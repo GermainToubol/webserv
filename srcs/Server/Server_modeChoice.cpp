@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 11:59:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:07:03 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 		{
 			// ca va probablement pas marcher parce que le file va dependre de la root de location et de la root generale
 			// peut etre que je peux recuperer le path de la root de location dans l'uri, erase la fin et ajouter le default file
-			setup->addUri(request->getLocation()->getDefaultFile());
+			setup->setUri(request->getLocation()->getDefaultFile());
 			setup->setExtension();
 			if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
 				return (this->cgiMode(request, setup, client_fd));

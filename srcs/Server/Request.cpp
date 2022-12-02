@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 12:08:32 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:35:09 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,7 +120,7 @@ int	Request::setUri(Setup *setup)
 	if (setup->getUri() == "/" && this->_method == "GET")
 		setup->setUri(this->_location->getIndex());
 	
-	setup->setUri(reformatUri(setup->getUri()));
+	setup->setUri(uriDecode(reformatUri(setup->getUri())));
 	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
 
 	if (isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')

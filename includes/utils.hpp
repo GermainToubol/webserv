@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:44:18 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 11:56:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:34:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ std::string to_string ( T Number )
 }
 
 void		derror(std::string const& msg);
+std::string uriDecode(const std::string &src);
 std::string	reformatUri(std::string const& uri);
 
 bool	doesPathExist(std::string const& path);
