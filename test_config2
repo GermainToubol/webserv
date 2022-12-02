@@ -2,7 +2,7 @@ server:
   listen: 0.0.0.0:8080
   root: /home/seriots/42_cursus/Server/test_folder
   server_name: myname
-  index: kebab.php
+  index: test.php
   permissions: 7
   max_body_size: 32000000
   autoindex: off
@@ -13,13 +13,13 @@ server:
     post_dir: /home/seriots/42_cursus/Server/test_folder/upload
     max_body_size: 32000000
     cgi:
-      php: /usr/bin/php-cgi
+      php: /bin/php-cgi
     
   location: /oui
     default_file: /home/seriots/42_cursus/Server/test_folder/oui/ANon.html
     post_dir: /home/seriots/42_cursus/Server/test_folder/upload
     root: /home/seriots/42_cursus/Server/test_folder/
-    index: kebab.php
+    index: test.php
     permissions: 7
     max_body_size: 4096
     autoindex: off

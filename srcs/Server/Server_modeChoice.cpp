@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 17:37:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 18:36:04 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
-	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second);
+	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second, request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second);
 	Response	response;
 	struct epoll_event	event;
 	int	cgi_fd;

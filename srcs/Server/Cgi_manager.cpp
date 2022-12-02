@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/02 18:20:57 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 19:00:19 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,12 +23,15 @@ extern int flags;
 #pragma region Constructor &&Destructor
 #endif
 
-Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& client_ip) :
+Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& client_ip, std::string const& cgi_exe) :
 	_request(request),
 	_setup(setup),
-	_client_ip(client_ip)
+	_client_ip(client_ip),
+    _cgi_exe(cgi_exe)
 {
 	this->_content_type = request->getField("Content-Type");
+    if (this->_content_type == "")
+        {this->_content_type = "text/plain";}
 	this->_init();
 	return;
 }
@@ -88,7 +91,7 @@ void Cgi_manager::_init(void)
     this->_env["PATH_TRANSLATED"] = _setup->getUri();                    // cgi file
     this->_env["REQUEST_URI"] = _setup->getUri();                        // cgi file
     this->_env["QUERY_STRING"] = _setup->getQuery();
-    this->_env["SCRIPT_NAME"] = "/usr/bin/php-cgi";       // cgi binary
+    this->_env["SCRIPT_NAME"] = this->_cgi_exe;       // cgi binary
     
     if (flags & FLAG_VERBOSE)
         std::cerr << "[ CGI uri: " << _setup->getUri() << " ]" << std::endl;
@@ -121,6 +124,7 @@ int Cgi_manager::execute(int *cgi_fd)
     int saveSTDOUT;
     std::string tmp;
 
+    std::cout << "======================CGI EXECUTE===========================" << std::endl;
     char **env = new char*[_env.size() + 1];
     int i = 0;
     std::string *env_arr = new std::string[_env.size() + 1];
@@ -129,6 +133,7 @@ int Cgi_manager::execute(int *cgi_fd)
         tmp = it->first + "=" + it->second;
         env_arr[i] = it->first + "=" + it->second;
         env[i] = &env_arr[i][0];
+        std::cerr<<env[i] << std::endl;
         i++;
     }
     env[i] = NULL;
@@ -146,10 +151,13 @@ int Cgi_manager::execute(int *cgi_fd)
     if (pid == 0)
     {
         if (dup2(fd_pipe[1], 1) == -1)
-            return 500;
+            return (500);
         close(fd_pipe[0]);
         close(fd_pipe[1]);
+        std::cerr << "[ EXECVE ]" << std::endl;
         execve(argv[0], argv, env);
+        std::cerr << "[ EXECVE FAIL ]" << std::endl;
+
         delete[] env;
         delete[] env_arr;
         exit(1);

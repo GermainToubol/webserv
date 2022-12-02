@@ -291,6 +291,7 @@ multimap->insert( std::make_pair( ".pem-certificate-chain", "application/pem-cer
 multimap->insert( std::make_pair( ".pgp-encrypted", "application/pgp-encrypted") );
 multimap->insert( std::make_pair( ".pgp-keys", "application/pgp-keys") );
 multimap->insert( std::make_pair( ".pgp-signature", "application/pgp-signature") );
+multimap->insert( std::make_pair( ".php", "text/php") );
 multimap->insert( std::make_pair( ".pidf-diff+xml", "application/pidf-diff+xml") );
 multimap->insert( std::make_pair( ".pidf+xml", "application/pidf+xml") );
 multimap->insert( std::make_pair( ".pkcs10", "application/pkcs10") );

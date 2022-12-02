@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 17:09:53 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 18:49:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,8 +91,8 @@ int	main(int argc, char **argv)
 		ret = get_flags(&argv[2], argc - 2);
 	if (ret)
 		return (display_usage(), 1);
-	std::cout << argc <<" "<< (int)flags << " " << ret << std::endl;
 	Configure config(filename);
+	
 
 	if (!config.isGood())
 		return (1);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/01 15:18:26 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/02 17:54:46 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 19:14:16 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,7 +62,7 @@ int	WebServer::cgiResponse(int file_fd)
 			return (this->closeCgiResponse(client_fd, file_fd));
 		
 		if (flags & FLAG_VERBOSE)
-			std::cerr << "[ CGI Response ] Header sended : " << response->getHeader() << " size: " << sended << std::endl;
+			std::cerr << "[ Header CGI ]\n Header sended : " << response->getHeader() << " size: " << sended << std::endl;
 		response->eraseHeader(0, sended);
 		if (response->getHeader().size() == 0)
 		{
@@ -74,7 +74,7 @@ int	WebServer::cgiResponse(int file_fd)
 	}
 	else if (response->getStatus() == 1)
 	{
-		readed = recv(file_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+		readed = read(file_fd, this->_buffer, BUFFER_SIZE);
 		if (readed == 0 || readed == -1)
 			return (this->closeCgiResponse(client_fd, file_fd));
 		buf = std::string(this->_buffer, readed);
@@ -102,7 +102,7 @@ int	WebServer::cgiResponse(int file_fd)
 			response->eraseBody(0, sended);
 			if (response->getBody().size() == 0)
 			{
-				readed = recv(file_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
+				readed = read(file_fd, this->_buffer, BUFFER_SIZE);
 				if (readed == 0 || readed == -1)
 					return (this->closeCgiResponse(client_fd, file_fd));
 				response->setBodyAlone(std::string(this->_buffer, readed));
