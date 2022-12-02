@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 20:26:43 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:56:31 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:41:33 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int	WebServer::openFile(Setup *setup, Response *response)
 		}
 	}
 	try {stream = new std::ifstream(setup->getUri().c_str());}
-	catch (std::exception &e) {return (perror("/!\\ Open file failed"), setup->setCode(500), 500);}
+	catch (std::exception &e) {return (perror("/!\\ Open file failed"), setup->setServer(0),  setup->setCode(500), 500);}
 
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Open file " << setup->getUri() << " ]" << std::endl;
@@ -48,7 +48,7 @@ int	WebServer::openFile(Setup *setup, Response *response)
 		if (flags & FLAG_VERBOSE)
 			std::cerr << "/!\\ File size failed" << std::endl;
 		delete stream;
-		return (setup->setCode(500), 500);
+		return (setup->setServer(0), setup->setCode(404), 404);
 	}
 	cache.setStream(stream);
 	cache.setUri(setup->getUri());

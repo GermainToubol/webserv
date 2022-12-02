@@ -1,15 +1,16 @@
 server:
-# listen can take either port only, or a host witch can be resolved in IPV4
   listen: 0.0.0.0:8080
   root: /home/seriots/42_cursus/Server/test_folder
   server_name: myname
-  index: index.html
+  index: index.php
   permissions: 7
   max_body_size: 32000000
   autoindex: off
   error_pages:
     404: /home/seriots/42_cursus/Server/test_error/404.html
     405: /home/seriots/42_cursus/Server/test_error/405.html
+  cgi:
+    php: /usr/bin/php-cgi
   location: /
     post_dir: /home/seriots/42_cursus/Server/test_folder/upload
     max_body_size: 32000000
@@ -18,14 +19,10 @@ server:
     default_file: /home/seriots/42_cursus/Server/test_folder/oui/ANon.html
     post_dir: /home/seriots/42_cursus/Server/test_folder/upload
     root: /home/seriots/42_cursus/Server/test_folder/
-    index: index.html
+    index: index.php
     permissions: 7
     max_body_size: 4096
     autoindex: off
-#   cgi:
-#      .py: /bin/python3
-#      .php: /usr/bin/php-cgi
-#      lama: /coucou/sh
   location: /upload
     root: /home/seriots/42_cursus/Server/test_folder/upload
     autoindex: on
@@ -39,7 +36,7 @@ server:
   listen: localhost:8080
   root: /home/seriots/42_cursus/Server/test_folder
   server_name: myname
-  index: index.html
+  index: index.php
   permissions: 7
   max_body_size: 32000000
   autoindex: off
@@ -54,7 +51,7 @@ server:
     default_file: /home/seriots/42_cursus/Server/test_folder/oui/ANon.html
     post_dir: /home/seriots/42_cursus/Server/test_folder/upload
     root: /home/seriots/42_cursus/Server/test_folder/
-    index: index.html
+    index: index.php
     permissions: 7
     max_body_size: 4096
     autoindex: off

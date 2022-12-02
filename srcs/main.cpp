@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:12:29 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 16:56:21 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,9 @@ int	main(int argc, char **argv)
 		return (display_usage(), 1);
 	Configure config(filename);
 
-
 	if (!config.isGood())
 		return (1);
+	std::cerr << "here" << std::endl;
 
 	if (flags & FLAG_TEST)
 		return (0);
