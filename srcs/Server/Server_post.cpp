@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 13:12:26 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:04:15 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 
 #include "WebServer.hpp"
 #include "utils.hpp"
+
+extern int flags;
 
 int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
@@ -33,7 +35,8 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	}
 	else
 	{
-		std::cerr << setup->getCode() << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << setup->getCode() << std::endl;
 		setup->setCode(200);
 		response.setBody("KO");
 	}
@@ -50,7 +53,7 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 	
-	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL);
+	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 	
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
@@ -82,8 +85,9 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 		file_path = dir_path.substr(pos + 1);
 		dir_path.erase(pos + 1);
 	}
-	std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl;
-	std::cerr << "[ Post dir path : " << file_path << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl
+			<< "[ Post file name : " << file_path << " ]" << std::endl;
 	setup->setUri(dir_path);
 	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
@@ -102,7 +106,8 @@ int	WebServer::checkPostRequest(Request *request, Setup *setup)
 	field = request->getField("Content-Length");
 	if (field == "")
 		return (setup->setCode(411), 411);
-	std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
 	if (std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
 		return (setup->setCode(413), 413);
 	return (0);
@@ -116,11 +121,12 @@ int WebServer::urlEncodedPost(Request *request, Setup *setup)
 	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
-	
-	std::cerr << "[ Post body : " << request->getBody() << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body : " << request->getBody() << " ]" << std::endl;
 	request->replaceAllBody("&", "\n");
 	decoded = uriDecode(request->getBody());
-	std::cerr << "[ Post body decoded : " << decoded << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body decoded : " << decoded << " ]" << std::endl;
 	file << decoded;
 	file.close();
 	return (200);
@@ -204,8 +210,10 @@ int WebServer::multipartPost(Request *request, Setup *setup)
 
 
 	boundary = request->getField("Content-Type").substr(request->getField("Content-Type").find("boundary=") + 9);
-	std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
-	std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
 	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);

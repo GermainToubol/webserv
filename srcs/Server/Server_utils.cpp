@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 13:51:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:08:19 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,10 @@ void	WebServer::clearTimeout(void)
 		return ;
 	while (it != this->_timeout.end())
 	{
-		if (time(NULL) - it->second.time > REQUEST_TIMEOUT)
+		if (time(NULL) - it->second.time > REQUEST_TIMEOUT || it->second.state == 4)
 		{
 			itdel = it;
 			it++;
-			// std::cerr << "state: " << itdel->second.state << std::endl;
 			if (itdel->second.state == 0)
 				close(itdel->first);
 			else if (itdel->second.state == 1)
@@ -110,6 +109,8 @@ void	WebServer::clearTimeout(void)
 			}
 			else if (itdel->second.state == 2)
 				this->removeResponse(itdel->first);
+			else if (itdel->second.state == 3)
+				this->closeCgiResponse(this->_cgiFD[itdel->first], itdel->first);
 			this->_timeout.erase(itdel);
 		}
 		else
@@ -125,4 +126,23 @@ bool	WebServer::isNewInterface(std::string const& interface)
 			return (false);
 	}
 	return (true);
+}
+std::string	WebServer::getType(std::string const& extension)
+{
+	if (this->_mimetypes.find(extension) == this->_mimetypes.end())
+		return ("text/plain");
+	return (this->_mimetypes.find(extension)->second);
+}
+
+std::string	WebServer::getExtension(std::string const& type)
+{
+	(void)type;
+	return ("");
+}
+
+std::string	WebServer::getStatus(int code)
+{
+	if (this->_status_codes.find(code) == this->_status_codes.end())
+		return ("Unknown");
+	return (this->_status_codes.find(code)->second);
 }

@@ -6,7 +6,7 @@
 #    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/11/30 17:01:15 by lgiband          ###   ########.fr        #
+#    Updated: 2022/12/01 16:51:29 by lgiband          ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -31,9 +31,11 @@ SRCS =		$(addprefix config/,											\
 				Server_modeChoice.cpp										\
 				Server_sendResponse.cpp										\
 				Server_post.cpp												\
+				Server_cgi.cpp												\
 				Request.cpp													\
 				Cache.cpp													\
 				Response.cpp												\
+				Cgi_manager.cpp												\
 				Setup.cpp													\
 			)																\
 			utils.cpp														\

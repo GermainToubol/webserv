@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 20:26:43 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 10:27:21 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 14:56:31 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 #include <sys/epoll.h>
 
 #include "WebServer.hpp"
+
+extern int flags;
 
 int	WebServer::openFile(Setup *setup, Response *response)
 {
@@ -36,13 +38,15 @@ int	WebServer::openFile(Setup *setup, Response *response)
 	try {stream = new std::ifstream(setup->getUri().c_str());}
 	catch (std::exception &e) {return (perror("/!\\ Open file failed"), setup->setCode(500), 500);}
 
-	std::cerr << "[ Open file " << setup->getUri() << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Open file " << setup->getUri() << " ]" << std::endl;
 	stream->seekg(0, stream->end);
 	cache.setSize(stream->tellg());
 	stream->seekg(0, stream->beg);
 	if (cache.getSize() == std::string::npos)
 	{
-		std::cerr << "/!\\ File size failed" << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "/!\\ File size failed" << std::endl;
 		delete stream;
 		return (setup->setCode(500), 500);
 	}
@@ -62,8 +66,9 @@ int WebServer::buildResponseDefault(int client_fd, Request *request, Setup *setu
 	struct epoll_event	event;
 	Response			response;
 	std::string			status;
-
-	std::cerr << "[ Build response default ]" << std::endl;
+	
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Build response default ]" << std::endl;
 
 	response.setFd(client_fd);
 	response.setStatus(0);
@@ -91,8 +96,9 @@ int WebServer::buildResponseDefault(int client_fd, Request *request, Setup *setu
 	}
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 	this->_all_response.push_back(response);
-
-	std::cerr << "[ Response Builded on fd " << client_fd << " ]" << std::endl;
+	
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Response Builded on fd " << client_fd << " ]" << std::endl;
 	std::memset(&event, 0, sizeof(event));
 	event.data.fd = client_fd;
  	event.events = EPOLLOUT;
@@ -106,7 +112,8 @@ int	WebServer::buildResponseListing(Request *request, Setup *setup, int client_f
 	Response			response;
 
 	(void)request;
-	std::cerr << "[ Build response listing ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Build response listing ]" << std::endl;
 
 	response.setFd(client_fd);
 	response.setStatus(0);
@@ -132,7 +139,8 @@ int	WebServer::buildResponseGet(Request *request, Setup *setup, int client_fd)
 	Response			response;
 
 	(void)request;
-	std::cerr << "[ Build response Get ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Build response Get ]" << std::endl;
 
 	response.setFd(client_fd);
 	response.setStatus(0);
@@ -141,10 +149,12 @@ int	WebServer::buildResponseGet(Request *request, Setup *setup, int client_fd)
 		return (500);
 
 	setup->setExtension();
-	std::cerr << "[ Extension : " << setup->getExtension() << " ]" <<std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Extension : " << setup->getExtension() << " ]" <<std::endl;
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
-
-	std::cerr << "[ Header builded ]\n" << response.getHeader() << "[ End Header ]" << std::endl;
+	
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Header builded ]\n" << response.getHeader() << "[ End Header ]" << std::endl;
 	
 	this->_all_response.push_back(response);
 

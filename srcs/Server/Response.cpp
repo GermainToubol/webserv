@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 11:39:06 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 14:54:44 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,6 +32,11 @@ void	Response::eraseHeader(int start, int end)
 void	Response::eraseBody(int start, int end)
 {
 	this->_body.erase(start, end);
+}
+
+void	Response::addHeader(std::string const& value)
+{
+	this->_header += value;
 }
 
 /*Accesseurs*/
@@ -125,6 +130,11 @@ void	Response::setBody(int code, std::string const& type)
 	this->_body_size = this->_body.size();
 }
 
+void	Response::setBodyAlone(std::string const& body)
+{
+	this->_body = body;
+}
+
 int	Response::setListingBody(std::string uri, std::string const& root)
 {
 	DIR							*dir;
@@ -143,7 +153,6 @@ int	Response::setListingBody(std::string uri, std::string const& root)
 		relative_path += '/';
 	if (*(uri.end() - 1) != '/')
 		uri += '/';
-	std::cerr << "[ Uri: " << relative_path << " ]" << std::endl;
 	this->_body = "<!DOCTYPE html>\n\
 <html>\n<head>\n<title>Index of " + relative_path + "</title>\n</head>\n\
 <body>\n<h1 style=\"font-size:30px\">Index of " + relative_path + "</h1>\n<br><br><hr>\n";
