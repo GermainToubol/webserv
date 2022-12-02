@@ -10,7 +10,12 @@
 #                                                                              #
 # **************************************************************************** #
 
-# First server can be accessed by any one
+server:
+  server_name: in.webserv.42.fr
+  listen: webserv.inside:80
+  root: /var/www/hidden
+  index: index.html
+
 server:
   server_name: webserv.42.fr
   listen: 80
@@ -19,16 +24,12 @@ server:
   location: /
   location: /a/b/
     root: /var/www/test
+  location: /c
+    root: /var/www/test
+    permissions: 2
 
-# Second server can be accessed from "outside only"
 server:
   server_name: out.webserv.42.fr
   listen: 192.168.12.1:80
   root: /var/www/coucou
-  index: index.html
-
-server:
-  server_name: in.webserv.42.fr
-  listen: webserv.inside:80
-  root: /var/www/hidden
   index: index.html

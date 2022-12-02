@@ -11,5 +11,5 @@ COPY index_hidden.html /var/www/hidden/index.html
 COPY test_config.yml /tmp/test_config.yml
 RUN chown -R server /var/www
 
-USER server
+# USER server
 ENTRYPOINT ["/home/server/webserv", "/tmp/test_config.yml"]
