@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 20:20:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:00:04 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 18:25:58 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,5 +45,10 @@ int	WebServer::end(void)
 		close(it->getFd());
 	for (std::vector<VirtualServer>::iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
 		close(it->getFd());
+	for (std::map<int, t_pair>::iterator it = this->_timeout.begin(); it != this->_timeout.end(); it++)
+	{
+		if (it->second.state == 0)
+			close(it->first);
+	}
 	return (0);
 }
