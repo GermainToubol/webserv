@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/01 15:18:26 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/02 19:14:16 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 20:48:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int	WebServer::cgiResponse(int file_fd)
 	Response *response;
 	std::string	buf;
 	std::string::size_type	end;
-	
+
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ CGI Response ]" << std::endl;
 
