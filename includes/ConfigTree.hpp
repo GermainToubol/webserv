@@ -35,6 +35,8 @@ public:
 	bool		hasDelimiter() const;
 	size_t		getLineNumber() const;
 
+	bool		operator==(std::string const&) const;
+
 private:
 	size_t		line;
 	std::string	key;

@@ -14,60 +14,92 @@
 #include <cstring>
 #include <stack>
 #include <string>
+#include <sys/epoll.h>
+#include <unistd.h>
+#include <signal.h>
 
-std::string	reformatUri(std::string const& uri)
+int	running = 1;
+
+void	get_sig(int sig)
 {
-	std::string				new_uri;
-	std::string::size_type	start = 0;
-	std::string::size_type	end = 0;
-	std::stack<std::string>	stack;
-	std::string				tmp;
-
-	// if (uri.find("/") == std::string::npos)
-	// {
-	// 	new_uri = uri;
-	// 	return (new_uri);
-	// }
-	while (end != uri.size())
+	if (sig == SIGINT)
 	{
-		if (start != 0)
-			start = uri.find('/', end);
-		while (uri.find('/', start + 1) == 0)
-			start++;
-		if (uri[start] == '/')
-			start++;
-		end = uri.find('/', start);
-		if (end == std::string::npos)
-			end = uri.size();
-		tmp = uri.substr(start, end - start);
-		if (tmp == "..")
-		{
-			if (!stack.empty())
-				stack.pop();
-		}
-		else if (tmp != "." && tmp != "")
-			stack.push(tmp);
-		start = end;
+		std::cerr << "STOP" << std::endl;
+		running = 0;
+		return ;
 	}
-	while (!stack.empty())
-	{
-		new_uri = stack.top() + "/" + new_uri;
-		stack.pop();
-	}
-	if (uri[0] == '/')
-		new_uri = "/" + new_uri;
-	if (uri[uri.size() - 1] == '/' && new_uri[new_uri.size() - 1] != '/')
-		new_uri = new_uri + "/";
-	else if (uri[uri.size() - 1] != '/' && new_uri[new_uri.size() - 1] == '/')
-		new_uri = new_uri.erase(new_uri.size() - 1);
-	if (new_uri.size() == 0)
-		new_uri = "/";
-	return (new_uri);
 }
 
-int	main(int argc, char *argv[])
+struct sigaction	init_sig(void handler(int), int sig)
 {
-	std::string	uri = "index.html";
+	struct sigaction	act;
 
-	std::cout << reformatUri(uri) << std::endl;
+	std::memset(&act, 0, sizeof(act));
+	act.sa_handler = handler;
+	sigaction(sig, &act, NULL);
+	return (act);
+}
+void	derror(std::string const& msg)
+{
+	std::cerr << msg << std::endl;
+}
+
+
+
+int main()
+{
+	struct epoll_event	events[100];
+	int					nb_events;
+	struct epoll_event	event;
+	char buffer[1024];
+	int re;
+	char *env[] = {NULL};
+	char cmd[] = "bash";
+	char *args[] = {cmd, NULL};
+
+	init_sig(get_sig, SIGINT);
+	std::cerr << "\n=====================INIT====================\n" << std::endl;
+
+	std::memset(&event, 0, sizeof(event));
+	int _epoll_fd = epoll_create1(0);
+
+	std::cerr << "\n=====================RUN=====================\n" << std::endl;
+	
+	int fdp[2];
+	pipe(fdp);
+	if (fork() == 0)
+	{
+		dup2(fdp[1], 1);
+		close(fdp[0]);
+		close(fdp[1]);
+		execve("/usr/bin/bash", args, env);
+	}
+	close(fdp[1]);
+	std::memset(&event, 0, sizeof(event));
+	event.data.fd = fdp[0];
+ 	event.events = EPOLLIN;
+ 	epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fdp[0], &event);
+	while (running)
+	{
+		std::memset(events, 0, sizeof(events));
+		nb_events = epoll_wait(_epoll_fd, events, 100, 2000);
+		if (nb_events == -1)
+			derror("Epoll_wait failed");
+		else if (nb_events > 0)
+		{
+			std::cout << "here" << std::endl;
+			re = read(events[0].data.fd, buffer, 5);
+			if (re > 0)
+			 write(1, buffer, re);
+			else if (re == 0)
+			{
+			 	epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fdp[0], NULL);
+				std::cout << "nothing" << std::endl;
+			}
+			else
+				perror("coucou");
+		}
+
+	}
+	return (0);
 }

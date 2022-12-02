@@ -112,7 +112,7 @@ void	VirtualServer::setPermissions(int perm)
 	this->permissions = perm;
 }
 
-void VirtualServer::addLocation(std::string path, Location location)
+void VirtualServer::addLocation(std::string path, Location const& location)
 {
 	this->location_pool[path] = location;
 }
@@ -135,4 +135,9 @@ bool	VirtualServer::getAutoindex(void) const
 void	VirtualServer::setAutoindex(bool autoindex)
 {
 	this->autoindex = autoindex;
+}
+
+void	VirtualServer::addErrorPage(int error, std::string const& path)
+{
+	this->error_page[error] = path;
 }

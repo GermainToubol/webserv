@@ -33,7 +33,7 @@ public:
 	~Location();
 
 	Location& operator=(Location const&);
-	
+
 	/*Accesseurs*/
 		int									const&	getPermission() const;
 		std::string							const&	getRoot() const;
@@ -54,6 +54,7 @@ public:
 	void	setRedirect(std::string const&);
 	void	setDefaultFile(std::string const&);
 	void	setPostDir(std::string const&);
+	void	addCGIPerm(std::string const&, std::string const&);
 
 
 private:

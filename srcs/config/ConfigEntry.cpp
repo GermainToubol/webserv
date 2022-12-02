@@ -15,8 +15,8 @@
 
 ConfigEntry::ConfigEntry(std::string const& line, size_t ln): level(0), key(""), value(""), hasdelimiter(false), line_nb(ln)
 {
-
 	std::string::const_iterator it;
+	std::string::const_reverse_iterator rit;
 
 	for (it = line.begin(); it != line.end(); ++it)
 	{
@@ -32,6 +32,7 @@ ConfigEntry::ConfigEntry(std::string const& line, size_t ln): level(0), key(""),
 		else
 			break;
 	}
+	// test the delimiter presence ////////////////////////////////////////////
 	if (it != line.end())
 	{
 		if (this->isDelimiter(*it))
@@ -40,7 +41,18 @@ ConfigEntry::ConfigEntry(std::string const& line, size_t ln): level(0), key(""),
 			hasdelimiter = true;
 		}
 	}
-	value.assign(it, line.end());
+	// strip the value ////////////////////////////////////////////////////////
+	for (; it != line.end(); ++it)
+	{
+		if (not isspace(*it))
+			break ;
+	}
+	for (rit = line.rbegin(); rit.base() != it; ++rit)
+	{
+		if (not isspace(*rit))
+			break ;
+	}
+	value.assign(it, rit.base());
 }
 
 size_t	ConfigEntry::getLevel(void) const

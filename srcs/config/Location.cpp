@@ -131,3 +131,8 @@ void	Location::setPostDir(std::string const& file)
 {
 	this->_post_dir = file;
 }
+
+void	Location::addCGIPerm(std::string const& cgi, std::string const& path)
+{
+	this->_cgi_path[cgi] = path;
+}

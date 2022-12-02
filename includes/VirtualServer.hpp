@@ -41,7 +41,7 @@ public:
 	void	setHost(std::string const&);
 	void	setPort(std::string const&);
 	void	setFd(int const&);
-	void	addLocation(std::string, Location);
+	void	addLocation(std::string, Location const&);
 
 	std::string const& getIndex(void) const;
 	void	setIndex(std::string const&);
@@ -52,6 +52,7 @@ public:
 	void	setMaxBodySize(size_t);
 	bool	getAutoindex(void) const;
 	void	setAutoindex(bool);
+	void	addErrorPage(int, std::string const&);
 
 private:
 	int			fd;
