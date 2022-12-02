@@ -28,6 +28,7 @@
 #include "Configure.hpp"
 #include "ConfigEntry.hpp"
 #include "ConfigTree.hpp"
+#include "utils.hpp"
 
 Configure::Configure(std::string const& file):
 	filename(file),
@@ -129,12 +130,12 @@ void	Configure::addEntryToTree(ConfigEntry const& entry)
 	}
 	if (entry.getKey() != "")
 	{
-		if (entry.getLevel() / 2 == i && entry.getLevel() % 2 == 0)
+		if (entry.getLevel() / 2 == i and entry.getLevel() % 2 == 0)
 			current_level->getLeaves().push_back(ConfigTree(entry));
 		else
 			this->parseError("bad block level");
 	}
-	else if (entry.hasDelimiter() || (entry.getValue() != "" && entry.getValue()[0] != '#'))
+	else if (entry.hasDelimiter() or (entry.getValue() != "" and entry.getValue()[0] != '#'))
 	{
 		this->parseError("invalid entry");
 	}
@@ -231,11 +232,14 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 	if (has_duplicates)
 		return ;
 
+	// Set general properties /////////////////////////////////////////////////
 	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
 		 server_prop != node.getLeaves().end();
 		 ++server_prop
 		)
 	{
+		if (server_prop->getKey() == "location")
+			continue ;
 		executed = false;
 		for (size_t i = 0; i < sizeof(function_tab) / sizeof(function_tab[0]); ++i)
 		{
@@ -249,6 +253,18 @@ void	Configure::setServerProperties(ConfigTree const& node, VirtualServer& serve
 		if (not executed)
 			this->putError(server_prop->getKey() + ": unknown property", node.getLineNumber());
 	}
+
+	// Set locations //////////////////////////////////////////////////////////
+	for (std::vector<ConfigTree>::const_iterator server_prop = node.getLeaves().begin();
+		 server_prop != node.getLeaves().end();
+		 ++server_prop
+		)
+	{
+		if (server_prop->getKey() != "location")
+			continue ;
+		this->addLocation(*server_prop, server);
+	}
+
 	if (this->isGood() and server.getLocationPool().find("/") == server.getLocationPool().end())
 	{
 		server.addLocation("/", Location(server));
@@ -639,11 +655,6 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 	}
 	for (it = node.getValue().begin(); it != node.getValue().end(); ++it)
 	{
-		if (not isspace(*it))
-			break ;
-	}
-	for (; it != node.getValue().end(); ++it)
-	{
 		if (isalnum(*it) or (*it == '/') or (*it == '.') or (*it == '-') or (*it == '_'))
 		{
 			value.push_back(*it);
@@ -651,14 +662,12 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 		}
 		break ;
 	}
-	for (; it != node.getValue().end(); ++it)
+	if (it != node.getValue().end())
 	{
-		if (not isspace(*it))
-		{
-			this->putError("location: invalid value", node.getLineNumber());
-			return ;
-		}
+		this->putError("location: invalid value", node.getLineNumber());
+		return ;
 	}
+	value = reformatUri(value);
 	if (value == "")
 	{
 		this->putError("location: invalid value", node.getLineNumber());
@@ -669,7 +678,6 @@ void	Configure::addLocation(ConfigTree const& node, VirtualServer& server)
 		this->putError("location: location needs to start with a `/`", node.getLineNumber());
 		return ;
 	}
-	// Add reformat value: /../test/./coucou -> /test/coucou/
 	if (value[value.size() - 1] != '/')
 	{
 		value.push_back('/');

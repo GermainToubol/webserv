@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 21:51:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:35:09 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,12 +85,32 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 	return (0);	
 }
 
+bool	Request::isValidUri(std::string const& uri)
+{
+	int	total = 0;
+	int current = 0;
+
+	for (std::string::const_iterator it = uri.begin(); it != uri.end(); it++)
+	{
+		if (*it == '/')
+			current = 0;
+		else
+			current++;
+		total++;
+		if (current > 255 || total > 4095)
+			return (false);
+	}
+	return (true);
+}
+
 int	Request::basicCheck(Setup *setup)
 {
 	if (this->_version != "HTTP/1.1")
 		return (derror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
 	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
 		return (derror("/!\\ Bad Method"), setup->setCode(405), 405);
+	if (!this->isValidUri(setup->getUri()))
+		return (derror("/!\\ Bad Uri"), setup->setCode(414), 414);
 	return (0);
 }
 
@@ -100,11 +120,12 @@ int	Request::setUri(Setup *setup)
 	if (setup->getUri() == "/" && this->_method == "GET")
 		setup->setUri(this->_location->getIndex());
 	
-	setup->setUri(reformatUri(setup->getUri()));
+	setup->setUri(uriDecode(reformatUri(setup->getUri())));
 	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
 
-	if (this->isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')
+	if (isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')
 		setup->addUri("/");
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 	return (0);
 }
 
@@ -115,6 +136,8 @@ int	Request::setLocation(Setup *setup)
 	std::string::size_type	pos;
 	
 	tmp = setup->getUri();
+	if (setup->getUri()[setup->getUri().size() - 1] != '/')
+		tmp += "/";
 	while (1)
 	{
 		std::cout << "[ tmp: " << tmp << " ]" << std::endl;
@@ -204,17 +227,6 @@ void	Request::replaceAllBody(std::string const& from, std::string const& to)
 
 	while ((pos = this->_body.find(from)) != std::string::npos)
 		this->_body.replace(pos, from.size(), to);
-}
-
-bool	Request::isDirectory(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	if (S_ISDIR(buf.st_mode))
-		return (true);
-	return (false);
 }
 
 /*Accesseurs*/

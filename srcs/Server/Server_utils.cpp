@@ -6,71 +6,17 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 14:44:00 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 13:24:51 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
-#include <sys/stat.h>
 #include <sys/epoll.h>
 #include <unistd.h>
 
 #include "Request.hpp"
 #include "WebServer.hpp"
-
-bool	WebServer::doesPathExist(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	return (true);
-}
-
-bool	WebServer::isPathReadable(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	if (buf.st_mode & S_IRUSR)
-		return (true);
-	return (false);
-}
-
-bool	WebServer::isPathWriteable(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	if (buf.st_mode & S_IWUSR)
-		return (true);
-	return (false);
-}
-
-bool	WebServer::isDirectory(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	if (S_ISDIR(buf.st_mode))
-		return (true);
-	return (false);
-}
-
-bool	WebServer::isFile(std::string const& path)
-{
-	struct stat		buf;
-
-	if (stat(path.c_str(), &buf) == -1)
-		return (false);
-	if (S_ISREG(buf.st_mode))
-		return (true);
-	return (false);
-}
 
 int	WebServer::is_server(int fd)
 {
@@ -168,4 +114,14 @@ void	WebServer::clearTimeout(void)
 		else
 			it++;
 	}
+}
+
+bool	WebServer::isNewInterface(std::string const& interface)
+{
+	for (std::map<int, std::string>::iterator it = this->_duoSI.begin(); it != this->_duoSI.end(); it++)
+	{
+		if (it->second == interface)
+			return (false);
+	}
+	return (true);
 }

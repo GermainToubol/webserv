@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 16:02:36 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 10:34:35 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,6 @@
 
 #include "WebServer.hpp"
 #include "utils.hpp"
-
 
 int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
@@ -66,9 +65,9 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	if (request->getLocation()->getPostDir() != "")
 	{
 		if (*(request->getLocation()->getPostDir().end() - 1) != '/')
-			dir_path.insert(pos, request->getLocation()->getPostDir() + '/');
+			dir_path.replace(0, pos, request->getLocation()->getPostDir() + '/');
 		else
-			dir_path.insert(pos, request->getLocation()->getPostDir());
+			dir_path.replace(0, pos, request->getLocation()->getPostDir());
 	}
 	pos = dir_path.find_last_of('/');
 	if (pos == std::string::npos || pos == dir_path.size() - 1)
@@ -81,12 +80,12 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl;
 	std::cerr << "[ Post dir path : " << file_path << " ]" << std::endl;
 	setup->setUri(dir_path);
-	if (!this->doesPathExist(setup->getUri()))
+	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathWriteable(setup->getUri()))
+	if (!isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	setup->addUri(file_path);
-	if (this->doesPathExist(setup->getUri()) && !this->isPathWriteable(setup->getUri()))
+	if (doesPathExist(setup->getUri()) && !isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	return (0);
 }
@@ -102,30 +101,6 @@ int	WebServer::checkPostRequest(Request *request, Setup *setup)
 	if (std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
 		return (setup->setCode(413), 413);
 	return (0);
-}
-
-std::string uriDecode(const std::string &src)
-{
-	std::string result;
-	int			i = 0;
-
-	while (src[i])
-	{
-		if (src[i] == '%')
-		{
-			if (src[i + 1] && src[i + 2] && std::isxdigit(src[i + 1]) && std::isxdigit(src[i + 2]))
-			{
-				result += (char)std::strtol(src.substr(i + 1, 2).c_str(), NULL, 16);
-				i += 2;
-			}
-		}
-		else if (src[i] == '+')
-			result += ' ';
-		else
-			result += src[i];
-		i++;
-	}
-	return (result);
 }
 
 int WebServer::urlEncodedPost(Request *request, Setup *setup)

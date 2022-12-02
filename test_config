@@ -1,15 +1,17 @@
 server:
   listen: 127.0.0.1:8080
   server_name: coucou
-  root: /home/seriots/42_cursus/Server/test_folder
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
   index: index.html
   permissions: 7
   location: /
+    post_dir: /upload
+    
 
 server:
   listen: 0.0.0.0:8080
   server_name: coucou2
-  root: /home/seriots/42_cursus/Server/test_folder2
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder2
   index: index.html
   permissions: 4
   location: /oui
@@ -19,7 +21,7 @@ server:
 server:
   listen: 127.0.0.1:8080
   server_name: coucou3
-  root: /home/seriots/42_cursus/Server/test_folder
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
   index: index.html
   permissions: 7
   location: /
@@ -27,7 +29,7 @@ server:
 server:
   listen: 0.0.0.0:8080
   server_name: coucou4
-  root: /home/seriots/42_cursus/Server/test_folder2
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder2
   index: index.html
   permissions: 4
   location: /
