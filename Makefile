@@ -15,7 +15,7 @@ SHELL=/bin/bash
 # List of all the sources (.cpp)
 # -------------------------------------------------------------------------
 SRCS =		$(addprefix config/,											\
-				configure.cpp												\
+				Configure.cpp												\
 				ConfigEntry.cpp												\
 				VirtualServer.cpp											\
 				ConfigTree.cpp												\

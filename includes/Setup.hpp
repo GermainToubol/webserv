@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:06:50 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/29 12:57:02 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 11:46:09 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ class Setup
 		void				setServer(VirtualServer *server);
 
 		/*Fonctions*/
+		void	setUserSession(std::string const& cookie);
 		void	addUri(std::string const& uri);
 		int	addField(std::string const& key, std::string const& value);
 		int	eraseUri(std::string::size_type pos);

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_post.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 16:49:37 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:16:17 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,11 @@
 #include "WebServer.hpp"
 #include "utils.hpp"
 
-
-int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
+int WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
-	Response	response;
-	
+	Response response;
+	std::string origin;
+
 	(void)request;
 	if (setup->getCode() == 0)
 	{
@@ -44,31 +44,35 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 
 	setup->setExtension("");
 
+	origin = request->getField("Origin");
+	if (origin != "")
+		setup->addField("Refresh", "1; url=" + origin);
+
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
-	
+
 	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
-	
+
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
 	this->_timeout.erase(client_fd);
 	close(client_fd);
 	return (0);
 }
 
-int	WebServer::setPostUri(Request *request, Setup *setup)
+int WebServer::setPostUri(Request *request, Setup *setup)
 {
-	std::string	dir_path;
-	std::string	file_path;
-	std::string::size_type	pos;
+	std::string dir_path;
+	std::string file_path;
+	std::string::size_type pos;
 
 	pos = setup->getServer()->getRoot().size();
 	dir_path = setup->getUri();
 	if (request->getLocation()->getPostDir() != "")
 	{
 		if (*(request->getLocation()->getPostDir().end() - 1) != '/')
-			dir_path.insert(pos, request->getLocation()->getPostDir() + '/');
+			dir_path.replace(0, pos, request->getLocation()->getPostDir() + '/');
 		else
-			dir_path.insert(pos, request->getLocation()->getPostDir());
+			dir_path.replace(0, pos, request->getLocation()->getPostDir());
 	}
 	pos = dir_path.find_last_of('/');
 	if (pos == std::string::npos || pos == dir_path.size() - 1)
@@ -81,19 +85,19 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl;
 	std::cerr << "[ Post dir path : " << file_path << " ]" << std::endl;
 	setup->setUri(dir_path);
-	if (!this->doesPathExist(setup->getUri()))
+	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathWriteable(setup->getUri()))
+	if (!isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	setup->addUri(file_path);
-	if (this->doesPathExist(setup->getUri()) && !this->isPathWriteable(setup->getUri()))
+	if (doesPathExist(setup->getUri()) && !isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	return (0);
 }
 
-int	WebServer::checkPostRequest(Request *request, Setup *setup)
+int WebServer::checkPostRequest(Request *request, Setup *setup)
 {
-	std::string	field;
+	std::string field;
 
 	field = request->getField("Content-Length");
 	if (field == "")
@@ -104,39 +108,15 @@ int	WebServer::checkPostRequest(Request *request, Setup *setup)
 	return (0);
 }
 
-std::string uriDecode(const std::string &src)
-{
-	std::string result;
-	int			i = 0;
-
-	while (src[i])
-	{
-		if (src[i] == '%')
-		{
-			if (src[i + 1] && src[i + 2] && std::isxdigit(src[i + 1]) && std::isxdigit(src[i + 2]))
-			{
-				result += (char)std::strtol(src.substr(i + 1, 2).c_str(), NULL, 16);
-				i += 2;
-			}
-		}
-		else if (src[i] == '+')
-			result += ' ';
-		else
-			result += src[i];
-		i++;
-	}
-	return (result);
-}
-
 int WebServer::urlEncodedPost(Request *request, Setup *setup)
 {
-	std::ofstream				file;
-	std::string					decoded;
+	std::ofstream file;
+	std::string decoded;
 
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
-	
+
 	std::cerr << "[ Post body : " << request->getBody() << " ]" << std::endl;
 	request->replaceAllBody("&", "\n");
 	decoded = uriDecode(request->getBody());
@@ -146,11 +126,11 @@ int WebServer::urlEncodedPost(Request *request, Setup *setup)
 	return (200);
 }
 
-std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::string const& boundary)
+std::vector<std::string> WebServer::splitFormdata(std::string const &file, std::string const &boundary)
 {
-	std::string					tmp;
-	std::vector<std::string>	lines;
-	size_t						pos;
+	std::string tmp;
+	std::vector<std::string> lines;
+	size_t pos;
 
 	tmp = file;
 	while (tmp.size() > 2)
@@ -159,7 +139,7 @@ std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::
 		if (pos == std::string::npos)
 		{
 			lines.push_back(tmp);
-			break ;
+			break;
 		}
 		if (pos > 0)
 			lines.push_back(tmp.substr(0, pos - 2));
@@ -168,16 +148,16 @@ std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::
 	return (lines);
 }
 
-std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string const& str)
+std::string WebServer::parseChamp(Setup *setup, Request *request, std::string const &str)
 {
-	std::string 			header = "";
-	std::string 			body = "";
-	std::string 			filename = "";
-	std::string 			name = "";
-	std::string				path;
-	std::ofstream			file;
-	std::string::size_type	start;
-	std::string::size_type	end;
+	std::string header = "";
+	std::string body = "";
+	std::string filename = "";
+	std::string name = "";
+	std::string path;
+	std::ofstream file;
+	std::string::size_type start;
+	std::string::size_type end;
 
 	(void)request;
 	start = str.find("\r\n\r\n");
@@ -192,7 +172,7 @@ std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string co
 		if (end != std::string::npos)
 			name = header.substr(start + 6, end - start - 6);
 	}
-	
+
 	start = header.find("filename=\"");
 	if (start != std::string::npos)
 	{
@@ -217,16 +197,15 @@ std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string co
 
 int WebServer::multipartPost(Request *request, Setup *setup)
 {
-	std::ofstream	file;
-	std::string		boundary;
-	std::vector<std::string>	champ;
-	std::string			line;
-
+	std::ofstream file;
+	std::string boundary;
+	std::vector<std::string> champ;
+	std::string line;
 
 	boundary = request->getField("Content-Type").substr(request->getField("Content-Type").find("boundary=") + 9);
 	std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
 	std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
 	champ = this->splitFormdata(request->getBody(), "--" + boundary);
@@ -239,16 +218,16 @@ int WebServer::multipartPost(Request *request, Setup *setup)
 	return (0);
 }
 
-int	WebServer::plainTextPost(Request *request, Setup *setup)
+int WebServer::plainTextPost(Request *request, Setup *setup)
 {
-	std::ofstream	file;
+	std::ofstream file;
 
 	(void)request;
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
 	file << request->getBody();
 	file.close();
-	
+
 	return (0);
 }
