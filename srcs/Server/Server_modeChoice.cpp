@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:02:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 17:37:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -60,6 +60,9 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 	struct epoll_event	event;
 	int	cgi_fd;
 	int ret;
+
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ CGI mode ]" << std::endl;
 
 	ret = CgiManager.execute(&cgi_fd);
 	if (ret != 0)
@@ -212,7 +215,7 @@ int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 	if (request->getMethod() == "DELETE" && !(request->getLocation()->getPermission() & DEL_PERM))
 		return (derror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
 	
-	if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
+	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		return (this->cgiMode(request, setup, client_fd));
 	
 	if (request->getMethod() == "GET")
