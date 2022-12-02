@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_core.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:19:07 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 14:13:35 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/02 15:10:01 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,9 @@
 #include "WebServer.hpp"
 #include "Configure.hpp"
 #include "VirtualServer.hpp"
+#include "utils.hpp"
 
-#define DEBUG 0
+extern int flags;
 
 WebServer::WebServer(Configure const& config)
 {
@@ -31,17 +32,11 @@ WebServer::WebServer(Configure const& config)
 	#include "status_codes"
 	
 	this->_duoIVS = config.getDuoIVS();
-	std::cerr << " [ duoIVS (server side) size: " << config.getDuoIVS().size() << " ]" << std::endl;
-	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = config.getDuoIVS().begin(); it != config.getDuoIVS().end(); it++)
+	if (flags & FLAG_VERBOSE)
 	{
-		std::cout << " [ duoIVS (server side) ] " << it->first << " " <<  std::endl;
-	}
-	if (DEBUG)
-	{
-		for (std::multimap<std::string, std::string>::iterator it = multimap->begin(); it != multimap->end(); it++)
-			std::cerr << it->first << ":" << it->second << std::endl;
-		for (std::map<int, std::string>::iterator it = map->begin(); it != map->end(); it++)
-			std::cerr << it->first << ":" << it->second << std::endl;
+		std::cerr << " [ duoIVS (server side) size: " << config.getDuoIVS().size() << " ]" << std::endl;
+		for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = config.getDuoIVS().begin(); it != config.getDuoIVS().end(); it++)
+				std::cerr << " [ duoIVS (server side) ] " << it->first << " " <<  std::endl;
 	}
 }
 
@@ -80,9 +75,10 @@ Cache	*WebServer::getCache(std::string const& filename) const
 
 std::vector<VirtualServer*> const* WebServer::getAccessibleServer(int client_fd) const
 {
-	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->_duoIVS.begin(); it != this->_duoIVS.end(); it++)
+	if (flags & FLAG_VERBOSE)
 	{
-		std::cout << " [ duoIVS (server side) ] " << it->first << " " << std::endl;
+		for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->_duoIVS.begin(); it != this->_duoIVS.end(); it++)
+			std::cerr << " [ duoIVS (server side) ] " << it->first << " " << std::endl;
 	}
 	if (this->_duoCS.find(client_fd) == this->_duoCS.end())
 		return (NULL);

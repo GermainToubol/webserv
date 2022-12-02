@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_run.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 15:17:03 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/02 15:07:37 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,6 +27,7 @@
 #include "utils.hpp"
 
 extern int running;
+extern int flags;
 
 /*
 * Take the connection from the server socket and add it to the epoll
@@ -39,8 +40,8 @@ int	WebServer::newConnection(int server_fd)
 	socklen_t			sock_len = sizeof(address);
 	char buffer[INET_ADDRSTRLEN];
 
-
-	std::cerr << "[ New connection on server " << server_fd << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ New connection on server " << server_fd << " ]" << std::endl;
 	client_socket = accept(server_fd, (struct sockaddr *)&address, &sock_len);
 	if (client_socket == -1 && errno != EWOULDBLOCK)
 		return (perror("/!\\ Accept failed"), -1);
@@ -50,7 +51,8 @@ int	WebServer::newConnection(int server_fd)
 			return (close(client_socket), perror("/!\\ Fcntl failed"), 1);
 		std::memset(&buffer, 0, INET_ADDRSTRLEN);
 		inet_ntop(address.sin_family, &address.sin_addr.s_addr, buffer, INET_ADDRSTRLEN);
-		std::cerr << "[ Client IP: " << buffer << " ]" << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "[ Client IP: " << buffer << " ]" << std::endl;
 		this->addClientIP(client_socket, buffer);
 		std::memset(&event, 0, sizeof(event));
 		event.data.fd = client_socket;
@@ -61,7 +63,8 @@ int	WebServer::newConnection(int server_fd)
 			this->_timeout.erase(client_socket);
 		this->_timeout.insert( std::make_pair(client_socket, (t_pair){time(NULL), 0} ) );
 	}
-	std::cout << "[ New client connected on " << client_socket << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ New client connected on " << client_socket << " ]" << std::endl;
 	return (0);
 }
 
@@ -70,28 +73,29 @@ int	WebServer::setResponse(int client_fd, Request *request)
 	int					ret;
 	Setup				setup;
 
-	std::cerr << "[ Set response ]" << std::endl;
+	derror("[ Set response ]");
 	ret = request->parsing(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
-	std::cerr << "[ Parsing OK ]" << std::endl;
+	derror("[ Parsing OK ]");
 	ret = request->setServer(&setup, this->getAccessibleServer(client_fd));
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
-	std::cerr << "[ Set server OK ]" << std::endl;
+	derror("[ Set server OK ]");
 	ret = request->setLocation(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
-	std::cerr << "[ Set location OK ]" << std::endl;
+	derror("[ Set location OK ]");
 	ret = request->setUri(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
-	std::cerr << "[ Set uri OK ]" << std::endl;
+	derror("[ Set uri OK ]");
 	ret = request->basicCheck(&setup);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
-	std::cerr << "[ Uri: " << setup.getUri() << " ]" << std::endl;
-	std::cerr << "[ Basic check OK ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Uri: " << setup.getUri() << " ]" << std::endl;
+	derror("[ Basic check OK ]");
 	ret = this->modeChoice(request, &setup, client_fd);
 	if (ret != 0)
 		return (this->buildResponseDefault(client_fd, request, &setup));
@@ -110,18 +114,20 @@ int	WebServer::getRequest(int client_fd)
 	
 	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
-		derror("/!\\ Recv failed");
+		perror("/!\\ Recv failed");
 	else
 	{
 		this->_buffer[ret] = '\0';
-		std::cerr << "[ Recv " << ret << " bytes ]" << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "[ Recv " << ret << " bytes ]" << std::endl;
 		request = this->get_fd_request(client_fd);
 		if (request == NULL)
 			return (derror("/!\\ Request not found"), -1);
 		state = request->addContent(this->_buffer, ret);
 		if (state == 1)
 		{
-			std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+			if (flags & FLAG_VERBOSE)
+				std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
 			this->setResponse(client_fd, request);
 			this->remove_fd_request(client_fd);
 		}
@@ -191,14 +197,14 @@ int	WebServer::run(void)
 	struct epoll_event	events[MAX_CLIENTS];
 	int					nb_events;
 	
-	std::cerr << "\n=====================RUN=====================\n" << std::endl;
+	std::cout << "\n=====================RUN=====================\n" << std::endl;
 	
 	while (running)
 	{
 		std::memset(events, 0, sizeof(events));
 		nb_events = epoll_wait(this->_epoll_fd, events, MAX_CLIENTS, TIMEOUT);
 		if (nb_events == -1)
-			derror("Epoll_wait failed");
+			perror("Epoll_wait failed");
 		else if (nb_events == 0)
 		{
 			std::cout  << "\33[2K\r" << wait[++frame % 6] << "\033[0;32m" << " Waiting for Connection... " << "\033[0m" << std::flush;
@@ -207,8 +213,8 @@ int	WebServer::run(void)
 		}
 		else
 		{
-			if (this->event_loop(events, nb_events) == -1)
-				std::cout << "Error in requests" << std::endl;
+			if (this->event_loop(events, nb_events) == -1 && flags & FLAG_VERBOSE)
+				std::cerr << "Error in requests" << std::endl;
 		}
 		this->clearTimeout();	
 		this->clearCache();

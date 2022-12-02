@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 21:49:12 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/01 12:05:35 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,6 +48,7 @@ class Request
 		void				replaceAllBody(std::string const&, std::string const&);
 	
 		/*basicCheck*/
+		bool				isValidUri(std::string const& uri);
 		int					basicCheck(Setup *setup);
 
 		/*setUri*/
@@ -65,7 +66,6 @@ class Request
 
 		/*Fonctions*/
 		int					addContent(char *buf, int ret);
-		bool				isDirectory(std::string const& path);
 
 	private:
 		int									_fd;

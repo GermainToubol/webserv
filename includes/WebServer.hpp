@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 16:32:08 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 14:23:41 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,18 +104,13 @@ class WebServer
 		int	run(void);
 
 		/*Utils*/
-		bool	doesPathExist(std::string const& path);
-		bool	isPathReadable(std::string const& path);
-		bool	isPathWriteable(std::string const& path);
-
-		bool	isDirectory(std::string const& path);
-		bool	isFile(std::string const& path);
 		void	remove_fd_request(int fd);
 		Request	*get_fd_request(int fd);
 		int		is_server(int fd);
 		int		isMe(std::string const& uri, std::string const& path, std::string const& host);
 		void	clearCache(void);
 		void	clearTimeout(void);
+		bool	isNewInterface(std::string const& interface);
 		std::string	getType(std::string const& extension);
 		std::string	getExtension(std::string const& type);
 		std::string	getStatus(int code);

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 16:49:37 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:04:15 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,10 +20,12 @@
 #include "WebServer.hpp"
 #include "utils.hpp"
 
+extern int flags;
 
 int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
 	Response	response;
+	std::string	origin;
 	
 	(void)request;
 	if (setup->getCode() == 0)
@@ -33,7 +35,8 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	}
 	else
 	{
-		std::cerr << setup->getCode() << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << setup->getCode() << std::endl;
 		setup->setCode(200);
 		response.setBody("KO");
 	}
@@ -43,6 +46,10 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	response.setPosition(0);
 
 	setup->setExtension("");
+
+	origin = request->getField("Origin");
+	if (origin != "")
+		setup->addField("Refresh", "1; url=" + origin);
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 	
@@ -66,9 +73,9 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	if (request->getLocation()->getPostDir() != "")
 	{
 		if (*(request->getLocation()->getPostDir().end() - 1) != '/')
-			dir_path.insert(pos, request->getLocation()->getPostDir() + '/');
+			dir_path.replace(0, pos, request->getLocation()->getPostDir() + '/');
 		else
-			dir_path.insert(pos, request->getLocation()->getPostDir());
+			dir_path.replace(0, pos, request->getLocation()->getPostDir());
 	}
 	pos = dir_path.find_last_of('/');
 	if (pos == std::string::npos || pos == dir_path.size() - 1)
@@ -78,15 +85,16 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 		file_path = dir_path.substr(pos + 1);
 		dir_path.erase(pos + 1);
 	}
-	std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl;
-	std::cerr << "[ Post dir path : " << file_path << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post dir path : " << dir_path << " ]" << std::endl
+			<< "[ Post file name : " << file_path << " ]" << std::endl;
 	setup->setUri(dir_path);
-	if (!this->doesPathExist(setup->getUri()))
+	if (!doesPathExist(setup->getUri()))
 		return (setup->setCode(404), 404);
-	if (!this->isPathWriteable(setup->getUri()))
+	if (!isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	setup->addUri(file_path);
-	if (this->doesPathExist(setup->getUri()) && !this->isPathWriteable(setup->getUri()))
+	if (doesPathExist(setup->getUri()) && !isPathWriteable(setup->getUri()))
 		return (setup->setCode(403), 403);
 	return (0);
 }
@@ -98,34 +106,11 @@ int	WebServer::checkPostRequest(Request *request, Setup *setup)
 	field = request->getField("Content-Length");
 	if (field == "")
 		return (setup->setCode(411), 411);
-	std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
 	if (std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
 		return (setup->setCode(413), 413);
 	return (0);
-}
-
-std::string uriDecode(const std::string &src)
-{
-	std::string result;
-	int			i = 0;
-
-	while (src[i])
-	{
-		if (src[i] == '%')
-		{
-			if (src[i + 1] && src[i + 2] && std::isxdigit(src[i + 1]) && std::isxdigit(src[i + 2]))
-			{
-				result += (char)std::strtol(src.substr(i + 1, 2).c_str(), NULL, 16);
-				i += 2;
-			}
-		}
-		else if (src[i] == '+')
-			result += ' ';
-		else
-			result += src[i];
-		i++;
-	}
-	return (result);
 }
 
 int WebServer::urlEncodedPost(Request *request, Setup *setup)
@@ -136,11 +121,12 @@ int WebServer::urlEncodedPost(Request *request, Setup *setup)
 	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
-	
-	std::cerr << "[ Post body : " << request->getBody() << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body : " << request->getBody() << " ]" << std::endl;
 	request->replaceAllBody("&", "\n");
 	decoded = uriDecode(request->getBody());
-	std::cerr << "[ Post body decoded : " << decoded << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body decoded : " << decoded << " ]" << std::endl;
 	file << decoded;
 	file.close();
 	return (200);
@@ -224,8 +210,10 @@ int WebServer::multipartPost(Request *request, Setup *setup)
 
 
 	boundary = request->getField("Content-Type").substr(request->getField("Content-Type").find("boundary=") + 9);
-	std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
-	std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
 	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
