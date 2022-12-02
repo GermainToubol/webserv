@@ -6,11 +6,14 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/28 20:12:08 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 11:39:06 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
 
 #include <dirent.h>
 
@@ -124,9 +127,10 @@ void	Response::setBody(int code, std::string const& type)
 
 int	Response::setListingBody(std::string uri, std::string const& root)
 {
-	DIR				*dir;
-	struct dirent	*ent;
-	std::string		relative_path;
+	DIR							*dir;
+	struct dirent				*ent;
+	std::string					relative_path;
+	std::vector<std::string>	files;
 
 	(void)root;
 	relative_path = uri;
@@ -147,9 +151,12 @@ int	Response::setListingBody(std::string uri, std::string const& root)
 	if (dir == NULL)
 		return (500);
 	while ((ent = readdir(dir)) != NULL)
-		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + relative_path + to_string(ent->d_name) + "\">" + ent->d_name + "</a><br><hr>\n";
-	this->_body += "</body>\n</html>";
+		files.push_back(ent->d_name);
 	closedir(dir);
+	std::sort(files.begin(), files.end());
+	for (std::vector<std::string>::iterator it = files.begin(); it != files.end(); it++)
+		this->_body += "<a style=\"margin: 5px; font-size: 20px; font-style: italic;\" href=\"" + relative_path + *it + "\">" + *it + "</a><br><hr>\n";
+	this->_body += "</body>\n</html>";
 	this->_body_size = this->_body.size();
 	return (0);
 }

@@ -6,17 +6,29 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:13:01 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 20:56:50 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 13:15:00 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
 
 #include "Setup.hpp"
+#include "utils.hpp"
 
 Setup::Setup(): _code(0), _uri(""), _fields(""), _server(0) {}
 
 Setup::~Setup() {}
+
+void	Setup::setUserSession(std::string const& cookie)
+{
+	if (cookie.find(WEBSERV_COOKIE) == std::string::npos)
+	{
+		this->addField("Set-Cookie", WEBSERV_COOKIE + generateRandomCookie(32, BASE_GENERATOR) + "; SameSite=Strict; Max-Age=3600");
+		this->addField("Pragma", "Bienvenue");
+	}
+	else
+		this->addField("Pragma", "Bon retour");
+}
 
 int	Setup::addField(std::string const& key, std::string const& value)
 {

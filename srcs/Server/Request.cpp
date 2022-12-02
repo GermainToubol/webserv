@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 10:35:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 11:44:32 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,6 +218,7 @@ int	Request::parsing(Setup *setup)
 	for (std::map<std::string, std::string>::iterator it = this->_fields.begin(); it != this->_fields.end(); it++)
 		std::cerr << it->first << ": " << it->second << std::endl;
 	std::cerr << "[ End Parsed request ]" << std::endl;
+	setup->setUserSession(this->_fields["Cookie"]);
 	return (0);
 }
 

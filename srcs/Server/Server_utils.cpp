@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 13:24:51 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 13:51:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,6 +99,7 @@ void	WebServer::clearTimeout(void)
 		{
 			itdel = it;
 			it++;
+			// std::cerr << "state: " << itdel->second.state << std::endl;
 			if (itdel->second.state == 0)
 				close(itdel->first);
 			else if (itdel->second.state == 1)

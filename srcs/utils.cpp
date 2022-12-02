@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 10:35:36 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 12:06:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -143,4 +143,15 @@ bool	isFile(std::string const& path)
 	if (S_ISREG(buf.st_mode))
 		return (true);
 	return (false);
+}
+
+std::string	generateRandomCookie(int size, std::string base)
+{
+	std::string	cookie;
+	int			i = -1;
+
+	cookie.reserve(size + 2);
+	while (++i <= size)
+		cookie += base[rand() % base.size()];
+	return (cookie);
 }

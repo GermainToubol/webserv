@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 10:34:35 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 13:12:26 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@
 int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
 	Response	response;
+	std::string	origin;
 	
 	(void)request;
 	if (setup->getCode() == 0)
@@ -42,6 +43,10 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 	response.setPosition(0);
 
 	setup->setExtension("");
+
+	origin = request->getField("Origin");
+	if (origin != "")
+		setup->addField("Refresh", "1; url=" + origin);
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 	
