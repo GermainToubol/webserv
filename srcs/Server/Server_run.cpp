@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:07:37 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 20:36:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -150,12 +150,15 @@ int	WebServer::sendResponse(int client_fd)
 		this->_timeout.erase(client_fd);
 		return (derror("/!\\ Response not found"), close(client_fd), 1);
 	}
+	std::cout << response->getStatus() << std::endl;
 	if (response->getStatus() == 0)
 		this->sendHeader(client_fd, response);
 	if (response->getStatus() == 1 && response->getBody() != "")
 		this->sendBody(client_fd, response);
 	else if (response->getStatus() == 1 && response->getFilename() != "")
 		this->sendFile(client_fd, response);
+	else
+		this->removeResponse(client_fd);
 
 	if (this->_timeout.find(client_fd) != this->_timeout.end())
 	{

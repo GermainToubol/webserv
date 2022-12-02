@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/12/02 14:52:55 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 16:57:41 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,7 +50,7 @@ Configure::Configure(std::string const& file):
 	}
 	else
 	{
-		if (flags & FLAG_VERBOSE)
+		//if (flags & FLAG_VERBOSE)
 			std::cerr << "Error: " << filename << ": cannot read the file." << std::endl;
 		_status = 1;
 	}
@@ -89,7 +89,7 @@ int Configure::readFile(void)
 	if (_ifs.fail() && _ifs.bad())
 	{
 		_status = 1;
-		if (flags & FLAG_VERBOSE)
+		//if (flags & FLAG_VERBOSE)
 			std::cerr << "Error: " << this->filename << ": unreadable.\n";
 	}
 	if (this->isGood())
@@ -853,7 +853,7 @@ void	Configure::addSingleCGI(ConfigTree const& node, Location& location)
 ///////////////////////////////////////////////////////////////////////////////
 void	Configure::parseError(std::string const& msg)
 {
-	if (flags & FLAG_VERBOSE)
+	//if (flags & FLAG_VERBOSE)
 		std::cerr << "Bad config: line " << this->n_line
 			  << ": " << msg << std::endl;
 	_status = 1;
@@ -861,7 +861,7 @@ void	Configure::parseError(std::string const& msg)
 
 void	Configure::putError(std::string const& msg, size_t n_line)
 {
-	if (flags & FLAG_VERBOSE)
+	//if (flags & FLAG_VERBOSE)
 		std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
 	_status = 1;
 }
@@ -914,7 +914,7 @@ void	Configure::setDuoIVS(void)
 	}
 	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
 	{
-		if (flags & FLAG_VERBOSE)
+		//if (flags & FLAG_VERBOSE)
 			std::cerr << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
 	}
 }

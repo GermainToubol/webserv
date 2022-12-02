@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:54:19 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 17:48:53 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,7 +148,8 @@ int	Request::setLocation(Setup *setup)
 		tmp += "/";
 	while (1)
 	{
-		std::cout << "[ tmp: " << tmp << " ]" << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "[ tmp: " << tmp << " ]" << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
 			if (flags & FLAG_VERBOSE)

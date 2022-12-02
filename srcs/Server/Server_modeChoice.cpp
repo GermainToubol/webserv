@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:02:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 20:51:22 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,11 +55,14 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
-	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second);
+	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second, request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second);
 	Response	response;
 	struct epoll_event	event;
 	int	cgi_fd;
 	int ret;
+
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ CGI mode ]" << std::endl;
 
 	ret = CgiManager.execute(&cgi_fd);
 	if (ret != 0)
@@ -81,13 +84,14 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
  	event.events = EPOLLIN;
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
 
-	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL); // -> doit disparaitre
 	if (this->_timeout.find(client_fd) != this->_timeout.end())
 	{
 		this->_timeout.find(client_fd)->second.time = time(NULL);
 		this->_timeout.find(client_fd)->second.state = 4;
 	}
 	this->_timeout.insert( std::make_pair(cgi_fd, (t_pair){time(NULL), 3} ) );
+	//this->_timeout.insert( std::make_pair(client_fd, (t_pair){time(NULL), 3} ) );
 	return (0);
 }
 
@@ -212,7 +216,7 @@ int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 	if (request->getMethod() == "DELETE" && !(request->getLocation()->getPermission() & DEL_PERM))
 		return (derror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
 	
-	if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
+	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		return (this->cgiMode(request, setup, client_fd));
 	
 	if (request->getMethod() == "GET")

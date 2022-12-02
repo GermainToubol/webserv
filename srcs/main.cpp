@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:12:29 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 18:49:48 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "utils.hpp"
 
 int		running = 1;
-char	flags = 0;
+int		flags = 0;
 
 void	get_sig(int sig)
 {
@@ -87,12 +87,12 @@ int	main(int argc, char **argv)
 
 	if (argc >= 2)
 		filename = argv[1];
-	else if (argc >= 3)
+	if (argc >= 3)
 		ret = get_flags(&argv[2], argc - 2);
 	if (ret)
 		return (display_usage(), 1);
 	Configure config(filename);
-
+	
 
 	if (!config.isGood())
 		return (1);
