@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   WebServer.hpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:23:41 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 12:18:53 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,7 +82,9 @@ class WebServer
 		/*Cgi*/
 		int		closeCgiResponse(int client_fd, int file_fd);
 		bool	isCgi(int fd);
-		int		cgiResponse(int fd);
+		bool	isCgiClient(int fd);
+		int		cgiSetResponse(int fd);
+		int		cgiSendResponse(int fd);
 
 		/*Post*/
 	
@@ -120,6 +122,7 @@ class WebServer
 		
 	private:
 		int													_epoll_fd;
+		int													_file_fd;
 		std::vector<VirtualServer>							_virtual_servers;
 		std::vector<Request>								_all_request;
 		std::vector<Response>								_all_response;

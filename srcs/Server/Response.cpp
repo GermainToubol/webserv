@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:54:44 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 12:52:36 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,11 @@ void	Response::setBody(int code, std::string const& type)
 void	Response::setBodyAlone(std::string const& body)
 {
 	this->_body = body;
+}
+
+void	Response::addBodyAlone(std::string const& body)
+{
+	this->_body += body;
 }
 
 int	Response::setListingBody(std::string uri, std::string const& root)

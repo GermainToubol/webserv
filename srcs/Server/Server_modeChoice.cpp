@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_modeChoice.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 20:51:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 11:41:05 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
  	event.events = EPOLLIN;
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
 
-	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL); // -> doit disparaitre
+	//epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL); // -> doit disparaitre
 	if (this->_timeout.find(client_fd) != this->_timeout.end())
 	{
 		this->_timeout.find(client_fd)->second.time = time(NULL);
