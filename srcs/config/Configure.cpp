@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   configure.cpp                                      :+:      :+:    :+:   */
+/*   Configure.cpp                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/04 11:47:09 by gtoubol           #+#    #+#             */
-/*   Updated: 2022/11/30 18:03:08 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 16:57:41 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,8 @@
 #include "ConfigTree.hpp"
 #include "utils.hpp"
 
+extern int flags;
+
 Configure::Configure(std::string const& file):
 	filename(file),
 	_ifs(),
@@ -48,7 +50,8 @@ Configure::Configure(std::string const& file):
 	}
 	else
 	{
-		std::cerr << "Error: " << filename << ": cannot read the file." << std::endl;
+		//if (flags & FLAG_VERBOSE)
+			std::cerr << "Error: " << filename << ": cannot read the file." << std::endl;
 		_status = 1;
 	}
 	_ifs.close();
@@ -86,7 +89,8 @@ int Configure::readFile(void)
 	if (_ifs.fail() && _ifs.bad())
 	{
 		_status = 1;
-		std::cerr << "Error: " << this->filename << ": unreadable.\n";
+		//if (flags & FLAG_VERBOSE)
+			std::cerr << "Error: " << this->filename << ": unreadable.\n";
 	}
 	if (this->isGood())
 	{
@@ -849,14 +853,16 @@ void	Configure::addSingleCGI(ConfigTree const& node, Location& location)
 ///////////////////////////////////////////////////////////////////////////////
 void	Configure::parseError(std::string const& msg)
 {
-	std::cerr << "Bad config: line " << this->n_line
+	//if (flags & FLAG_VERBOSE)
+		std::cerr << "Bad config: line " << this->n_line
 			  << ": " << msg << std::endl;
 	_status = 1;
 }
 
 void	Configure::putError(std::string const& msg, size_t n_line)
 {
-	std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
+	//if (flags & FLAG_VERBOSE)
+		std::cerr << "Bad config: line " << n_line << ": " << msg << std::endl;
 	_status = 1;
 }
 
@@ -908,6 +914,7 @@ void	Configure::setDuoIVS(void)
 	}
 	for (std::map<std::string, std::vector<VirtualServer*> >::const_iterator it = this->duoIVS.begin(); it != this->duoIVS.end(); it++)
 	{
-		std::cout << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
+		//if (flags & FLAG_VERBOSE)
+			std::cerr << " [ duoIVS (config side) ] " << it->first << " " << it->second.size() << std::endl;
 	}
 }
