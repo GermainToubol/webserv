@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:00:57 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 14:08:18 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,7 @@ int	WebServer::addDuoCS(int client, int server)
 	return (0);
 }
 
-int	WebServer::addClientIP(int client, std::string const& ip)
+int WebServer::addClientIP(int client, std::string const &ip)
 {
 	if (this->_clientIP.find(client) != this->_clientIP.end())
 		this->_clientIP.erase(client);
@@ -44,11 +44,11 @@ int	WebServer::addClientIP(int client, std::string const& ip)
 	return (0);
 }
 
-int	WebServer::create_socket(std::string port, std::string ip)
+int WebServer::create_socket(std::string port, std::string ip)
 {
-	int					server_fd;
-	struct sockaddr_in	address;
-	int					on = 1;
+	int server_fd;
+	struct sockaddr_in address;
+	int on = 1;
 
 	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 	if (server_fd == -1)
@@ -71,21 +71,21 @@ int	WebServer::create_socket(std::string port, std::string ip)
 		std::cerr << "[ Bind " << ip << ":" << port << " on " << server_fd << " ]" << std::endl;
 	
 	if (listen(server_fd, MAX_LISTEN) == -1)
-		return (close(server_fd), perror("/!\\ Listen failed /!\\"), -1); 
+		return (close(server_fd), perror("/!\\ Listen failed /!\\"), -1);
 
 	return (server_fd);
 }
 
-int	WebServer::init(void)
+int WebServer::init(void)
 {
-	int					max = this->_virtual_servers.size();
-	struct epoll_event	event;
+	int max = this->_virtual_servers.size();
+	struct epoll_event event;
 
 	std::cout << "\n=====================INIT====================\n" << std::endl;
 
 	std::memset(&event, 0, sizeof(event));
 	this->_epoll_fd = epoll_create1(0);
-	
+
 	/*Create all the sockets corresponding to servers in the config file*/
 	for (std::vector<VirtualServer>::iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
 	{

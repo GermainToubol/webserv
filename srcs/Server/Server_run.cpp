@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_run.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 20:36:28 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 11:55:24 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -178,7 +178,9 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 		if (listen_sock != -1)
 			this->newConnection(listen_sock);
 		else if (this->isCgi(events[i].data.fd))
-			this->cgiResponse(events[i].data.fd);
+			this->cgiSetResponse(events[i].data.fd);
+		else if (this->isCgiClient(events[i].data.fd))
+			this->cgiSendResponse(events[i].data.fd);
 		else if (events[i].events & EPOLLIN)
 			this->getRequest(events[i].data.fd);
 		else if (events[i].events & EPOLLOUT)

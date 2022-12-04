@@ -6,12 +6,12 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:09:47 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:23:41 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 14:07:54 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef SERVER_HPP
-# define SERVER_HPP
+#define SERVER_HPP
 #pragma once
 
 #include <string>
@@ -25,16 +25,16 @@
 #include "Configure.hpp"
 #include "Cache.hpp"
 
-# define MAX_LISTEN 100
-# define MAX_CLIENTS 100
-# define TIMEOUT 200
-# define SEND_SIZE 1048575
+#define MAX_LISTEN 100
+#define MAX_CLIENTS 100
+#define TIMEOUT 200
+#define SEND_SIZE 1048575
 
 typedef struct s_pair
 {
-	long int		time;
-	int		state;
-}	t_pair;
+	long int time;
+	int state;
+} t_pair;
 
 class WebServer
 {
@@ -82,7 +82,9 @@ class WebServer
 		/*Cgi*/
 		int		closeCgiResponse(int client_fd, int file_fd);
 		bool	isCgi(int fd);
-		int		cgiResponse(int fd);
+		bool	isCgiClient(int fd);
+		int		cgiSetResponse(int fd);
+		int		cgiSendResponse(int fd);
 
 		/*Post*/
 	
@@ -120,6 +122,7 @@ class WebServer
 		
 	private:
 		int													_epoll_fd;
+		int													_file_fd;
 		std::vector<VirtualServer>							_virtual_servers;
 		std::vector<Request>								_all_request;
 		std::vector<Response>								_all_response;
