@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 14:04:42 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 15:11:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@
 #include "Response.hpp"
 #include "utils.hpp"
 
-Response::Response() : _fd(-1), _send_status(0), _header(""), _body_size(0), _position(0), _body(""), _filename("") {}
+Response::Response() : _fd(-1), _send_status(0), _header(""), _body_size(-1), _position(0), _body(""), _filename("") {}
 
 Response::~Response() {}
 

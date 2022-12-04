@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 14:34:23 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 15:11:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,7 +89,6 @@ int WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event2);
 
-	//epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL); // -> doit disparaitre
 	this->_timeout.insert( std::make_pair(cgi_fd, (t_pair){time(NULL), 3} ) );
 	return (0);
 }

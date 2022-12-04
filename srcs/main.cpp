@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 18:49:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 15:26:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,10 +102,20 @@ int	main(int argc, char **argv)
 	init_sig(get_sig, SIGINT);
 	
 	WebServer server(config);
-	if (server.init())
-		return (1);
-	server.run();
-	server.end();
 
+	while (running)
+	{
+		try {
+			if (server.init())
+				return (1);
+			server.run();
+		}
+		catch (std::exception &e)
+		{
+			std::cerr << "ta crash BG: " << e.what() << std::endl;
+			server.end();
+		}
+	}
+	server.end();
 	return (0);
 }
