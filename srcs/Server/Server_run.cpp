@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_run.cpp                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 11:55:24 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/04 20:04:12 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,13 +123,29 @@ int	WebServer::getRequest(int client_fd)
 		request = this->get_fd_request(client_fd);
 		if (request == NULL)
 			return (derror("/!\\ Request not found"), -1);
-		state = request->addContent(this->_buffer, ret);
-		if (state == 1)
+		if (request->getChunkedMode() == 1)
 		{
-			if (flags & FLAG_VERBOSE)
-				std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
-			this->setResponse(client_fd, request);
-			this->remove_fd_request(client_fd);
+			state = request->addChunkedData(this->_buffer, ret);
+			if (state == 1)
+			{
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+				this->setResponse(client_fd, request);
+				this->remove_fd_request(client_fd);
+			}
+		}
+		else
+		{
+			state = request->addContent(this->_buffer, ret);
+			if (state == 1)
+			{
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+				this->setResponse(client_fd, request);
+				this->remove_fd_request(client_fd);
+			}
+			if (state == 2)
+				request->setChunkedMode(1);
 		}
 		if (this->_timeout.find(client_fd) != this->_timeout.end())
 		{
@@ -148,9 +164,9 @@ int	WebServer::sendResponse(int client_fd)
 	if (response == NULL)
 	{
 		this->_timeout.erase(client_fd);
+		epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
 		return (derror("/!\\ Response not found"), close(client_fd), 1);
 	}
-	std::cout << response->getStatus() << std::endl;
 	if (response->getStatus() == 0)
 		this->sendHeader(client_fd, response);
 	if (response->getStatus() == 1 && response->getBody() != "")

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/04 14:04:19 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 20:09:44 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,11 +133,13 @@ int Cgi_manager::execute(int *cgi_fd)
         tmp = it->first + "=" + it->second;
         env_arr[i] = it->first + "=" + it->second;
         env[i] = &env_arr[i][0];
-        std::cerr<<env[i] << std::endl;
         i++;
     }
     env[i] = NULL;
     argv[0] = &_env["SCRIPT_NAME"][0];
+
+    if (flags & FLAG_VERBOSE)
+        std::cerr << "[ Execute CGI: " << argv[0] << " ]" << std::endl;
     argv[1] = &_env["SCRIPT_FILENAME"][0];
     argv[2] = NULL;
 

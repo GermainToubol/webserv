@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/01 15:18:26 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/04 15:26:12 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 20:04:55 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,6 +45,8 @@ bool	WebServer::isCgiClient(int client_fd)
 
 int	WebServer::closeCgiResponse(int client_fd, int file_fd)
 {
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, file_fd, NULL);
 	this->removeResponse(client_fd);
 	this->_cgiFD.erase(file_fd);
 	close(file_fd);
@@ -57,8 +59,8 @@ int	WebServer::cgiSendResponse(int client_fd)
 	int			sended;
 	Response	*response;
 
-	if (flags & FLAG_VERBOSE)
-		std::cerr << "[ CGI send Response ]" << std::endl;
+	//if (flags & FLAG_VERBOSE)
+	//	std::cerr << "[ CGI send Response ]" << std::endl;
 
 	file_fd = this->_file_fd;
 	response = this->getResponse(client_fd);

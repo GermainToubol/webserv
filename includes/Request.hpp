@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 12:05:35 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 19:29:23 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,14 @@ class Request
 		std::string const&	getUri() const;
 		std::string const&	getField(std::string) const;
 		std::string const&	getBody() const;
+		bool		const&	getChunkedMode() const;
 		
 		void				setBoundary(std::string const& boundary);
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);
+		void				setChunkedMode(bool const& mode);
 		void				addBody(char *buffer, int size);
+		int					addChunkedData(const char *buffer, int size);
 	
 		void				replaceAllBody(std::string const&, std::string const&);
 	
@@ -69,6 +72,9 @@ class Request
 
 	private:
 		int									_fd;
+		bool								_chunked_mode;
+		std::string::size_type				_chunked_size;
+		std::string							_chunked_buffer;
 
 		std::string							_boundary;
 		std::string							_content;

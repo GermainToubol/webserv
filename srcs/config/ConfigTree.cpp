@@ -1,14 +1,14 @@
-// ************************************************************************** //
-//                                                                            //
-//                                                        :::      ::::::::   //
-//   ConfigTree.cpp                                     :+:      :+:    :+:   //
-//                                                    +:+ +:+         +:+     //
-//   By: gtoubol <marvin@42.fr>                     +#+  +:+       +#+        //
-//                                                +#+#+#+#+#+   +#+           //
-//   Created: 2022/11/23 11:34:12 by gtoubol           #+#    #+#             //
-//   Updated: 2022/11/25 18:12:41 by gtoubol          ###   ########.fr       //
-//                                                                            //
-// ************************************************************************** //
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   ConfigTree.cpp                                     :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/11/23 11:34:12 by gtoubol           #+#    #+#             */
+/*   Updated: 2022/12/04 15:32:26 by lgiband          ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 #include <cstddef>
 #include <iostream>
@@ -40,7 +40,6 @@ std::vector<ConfigTree> const& ConfigTree::getLeaves() const
 
 void	ConfigTree::print(std::string const& spacer) const
 {
-	std::cout << spacer << this->key << std::endl;
 	for (std::vector<ConfigTree>::const_iterator it = this->leaves.begin();
 		 it != leaves.end(); ++it)
 	{

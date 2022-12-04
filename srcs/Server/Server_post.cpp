@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 14:06:43 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 16:48:23 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,9 +102,11 @@ int WebServer::setPostUri(Request *request, Setup *setup)
 int WebServer::checkPostRequest(Request *request, Setup *setup)
 {
 	std::string field;
+	std::string mode;
 
 	field = request->getField("Content-Length");
-	if (field == "")
+	mode = request->getField("Transfer-Encoding");
+	if (field == "" && mode != "chunked")
 		return (setup->setCode(411), 411);
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Content-Length : " << field << " ]" << std::endl;

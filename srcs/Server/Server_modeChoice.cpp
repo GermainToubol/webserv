@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 15:11:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 16:39:30 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,6 @@ int WebServer::getMode(Request *request, Setup *setup, int client_fd)
 			return (setup->setCode(404), 404);
 		else
 		{
-			// ca va probablement pas marcher parce que le file va dependre de la root de location et de la root generale
-			// peut etre que je peux recuperer le path de la root de location dans l'uri, erase la fin et ajouter le default file
 			setup->setUri(request->getLocation()->getDefaultFile());
 			setup->setExtension();
 			if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
@@ -213,14 +211,17 @@ int WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 	if (request->getMethod() == "DELETE" && !(request->getLocation()->getPermission() & DEL_PERM))
 		return (derror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
 	
+	std::cerr << "extensionName: " << setup->getExtensionName() << std::endl;
+	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
+		std::cerr << request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second << std::endl;
 	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		return (this->cgiMode(request, setup, client_fd));
 
-	if (request->getMethod() == "GET")
-		return (this->getMode(request, setup, client_fd));
-	if (request->getMethod() == "POST")
+	if (request->getMethod() == "POST" || request->getMethod() == "PUT")
 		return (this->postMode(request, setup, client_fd));
 	if (request->getMethod() == "DELETE")
 		return (this->deleteMode(request, setup, client_fd));
+	if (request->getMethod() == "GET")
+		return (this->getMode(request, setup, client_fd));
 	return (derror("/!\\ Not Implemented"), setup->setCode(501), 501);
 }

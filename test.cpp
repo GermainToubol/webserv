@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/11/30 20:47:03 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 15:32:37 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,14 +87,12 @@ int main()
 			derror("Epoll_wait failed");
 		else if (nb_events > 0)
 		{
-			std::cout << "here" << std::endl;
 			re = read(events[0].data.fd, buffer, 5);
 			if (re > 0)
 			 write(1, buffer, re);
 			else if (re == 0)
 			{
 			 	epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fdp[0], NULL);
-				std::cout << "nothing" << std::endl;
 			}
 			else
 				perror("coucou");

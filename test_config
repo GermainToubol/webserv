@@ -1,36 +1,29 @@
 server:
   listen: 127.0.0.1:8080
-  server_name: coucou
-  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
-  index: index.html
-  permissions: 7
-  location: /
-    post_dir: /upload
+  root: /home/seriots/42_cursus/Server/YoupiBanane
+  index: youpi.bad_extension
+  autoindex: on
+  location: /directory/
+    root: /home/seriots/42_cursus/Server/YoupiBanane/directory
+    post_dir: /home/seriots/42_cursus/Server/YoupiBanane/
+    index: youpi.bad_extension
+    autoindex: on
+    permissions: 6
+    max_body_size: 320000000
+   # cgi:
+    #  bla: /home/seriots/42_cursus/Server/ubuntu_cgi_tester
+  location: /directory/Yeah
+    root: /home/seriots/42_cursus/Server/YoupiBanane/directory/Yeah
+    index: youpi.bad_extension
+    autoindex: off
     
-
-server:
-  listen: 0.0.0.0:8080
-  server_name: coucou2
-  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder2
-  index: index.html
-  permissions: 4
-  location: /oui
-    redirect: http://127.0.0.1:8080/
+  location: /post_body
+    max_body_size: 100
+    cgi:
+      bla: /home/seriots/42_cursus/Server/ubuntu_cgi_tester
+  location: /Yeah/
   location: /
-
-server:
-  listen: 127.0.0.1:8080
-  server_name: coucou3
-  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder
-  index: index.html
-  permissions: 7
-  location: /
-
-server:
-  listen: 0.0.0.0:8080
-  server_name: coucou4
-  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder2
-  index: index.html
-  permissions: 4
-  location: /
-
+    permissions: 4
+  location: /put_test/
+    post_dir: /home/seriots/42_cursus/Server/YoupiBanane/
+    permissions: 7
