@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_init.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:24:38 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:14:29 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/04 14:08:18 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,7 +26,9 @@
 #include "WebServer.hpp"
 #include "utils.hpp"
 
-int WebServer::addDuoCS(int client, int server)
+extern int flags;
+
+int	WebServer::addDuoCS(int client, int server)
 {
 	if (this->_duoCS.find(client) != this->_duoCS.end())
 		this->_duoCS.erase(client);
@@ -64,8 +66,10 @@ int WebServer::create_socket(std::string port, std::string ip)
 	address.sin_port = htons(std::atoi(port.c_str()));
 	if (bind(server_fd, (struct sockaddr *)&address, sizeof(address)) == -1)
 		return (close(server_fd), perror("/!\\ Bind failed /!\\"), -1);
-	std::cerr << "[ Bind " << ip << ":" << port << " on " << server_fd << " ]" << std::endl;
-
+	
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Bind " << ip << ":" << port << " on " << server_fd << " ]" << std::endl;
+	
 	if (listen(server_fd, MAX_LISTEN) == -1)
 		return (close(server_fd), perror("/!\\ Listen failed /!\\"), -1);
 
@@ -77,8 +81,7 @@ int WebServer::init(void)
 	int max = this->_virtual_servers.size();
 	struct epoll_event event;
 
-	std::cerr << "\n=====================INIT====================\n"
-			  << std::endl;
+	std::cout << "\n=====================INIT====================\n" << std::endl;
 
 	std::memset(&event, 0, sizeof(event));
 	this->_epoll_fd = epoll_create1(0);
@@ -103,8 +106,8 @@ int WebServer::init(void)
 			}
 		}
 	}
-	std::cerr << "[ " << this->getVirtualServers().size() << "/" << max << " servers created"
-			  << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ " << this->getVirtualServers().size() << "/" << max << " servers created" << " ]" << std::endl;
 	if (this->getVirtualServers().size() == 0)
 		return (derror("/!\\ No server created /!\\"), 1);
 	return (0);

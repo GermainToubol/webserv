@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 11:44:32 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 17:48:53 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,8 @@
 #include "Request.hpp"
 #include "utils.hpp"
 
+extern int flags;
+
 Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1), _is_header(0),
 							_method(""), _uri(""),
 							_version(""), _body(""), _empty("") {}
@@ -33,8 +35,10 @@ int	Request::addContent(char *buf, int ret)
 	std::string::size_type	pos2;
 
 	this->_content += std::string(buf, ret);
-	std::cerr << "[ Ret: " << ret << " ]" << std::endl;
-	std::cerr << "[ end header: " << this->_content.find("\r\n\r\n") << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Ret: " << ret << " ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ end header: " << this->_content.find("\r\n\r\n") << " ]" << std::endl;
 	if (ret == 0)
 		return (1);
 	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 0)
@@ -45,16 +49,19 @@ int	Request::addContent(char *buf, int ret)
 		pos2 = this->_content.find("\r\n", pos); //check overflow
 		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str(), NULL, 10);
 		this->_is_header = 1;
-		std::cerr << "content size: " << this->_content_size << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "content size: " << this->_content_size << std::endl;
 		if (this->_content_size <= 0)
 			return (1);
 	}
 	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 1)
 	{
-		std::cerr << "content size after: " << this->_content_size << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "content size after: " << this->_content_size << std::endl;
 		pos = this->_content.find("\r\n\r\n");
 		pos2 = this->_content.size() - pos - 4;
-		std::cerr << "pos2: " << pos2 << " max: " << this->_content_size << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "pos2: " << pos2 << " max: " << this->_content_size << std::endl;
 		if (pos2 >= (unsigned int)this->_content_size)
 			return (derror("normal end"), 1);
 	}
@@ -125,7 +132,8 @@ int	Request::setUri(Setup *setup)
 
 	if (isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')
 		setup->addUri("/");
-	std::cerr << "uri: " << setup->getUri() << std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "uri: " << setup->getUri() << std::endl;
 	return (0);
 }
 
@@ -140,10 +148,12 @@ int	Request::setLocation(Setup *setup)
 		tmp += "/";
 	while (1)
 	{
-		std::cout << "[ tmp: " << tmp << " ]" << std::endl;
+		if (flags & FLAG_VERBOSE)
+			std::cerr << "[ tmp: " << tmp << " ]" << std::endl;
 		if (location_pool.find(tmp) != location_pool.end())
 		{
-			std::cerr << "[ location: " << location_pool.find(tmp)->first << " ]" << std::endl;
+			if (flags & FLAG_VERBOSE)
+				std::cerr << "[ location: " << location_pool.find(tmp)->first << " ]" << std::endl;
 			this->_location = &location_pool.find(tmp)->second;
 			this->_location_path = tmp;
 			return (0);
@@ -210,14 +220,17 @@ int	Request::parsing(Setup *setup)
 			return (derror("/!\\ bad syntax on header field"), setup->setCode(400), 400);
 		this->_fields[line.substr(0, line.find(": "))] = line.substr(line.find(": ") + 2);
 	}
-	std::cerr << "[ Parsed request ]" << std::endl;
-	std::cerr << "Method: " << this->_method << std::endl;
-	std::cerr << "URI: " << this->_uri << std::endl;
-	std::cerr << "Version: " << this->_version << std::endl;
-	std::cerr << "Body size: " << this->_body.size() << std::endl;
-	for (std::map<std::string, std::string>::iterator it = this->_fields.begin(); it != this->_fields.end(); it++)
-		std::cerr << it->first << ": " << it->second << std::endl;
-	std::cerr << "[ End Parsed request ]" << std::endl;
+	if (flags & FLAG_VERBOSE)
+	{
+		std::cerr << "[ Parsed request ]" << std::endl;
+		std::cerr << "Method: " << this->_method << std::endl;
+		std::cerr << "URI: " << this->_uri << std::endl;
+		std::cerr << "Version: " << this->_version << std::endl;
+		std::cerr << "Body size: " << this->_body.size() << std::endl;
+		for (std::map<std::string, std::string>::iterator it = this->_fields.begin(); it != this->_fields.end(); it++)
+			std::cerr << it->first << ": " << it->second << std::endl;
+		std::cerr << "[ End Parsed request ]" << std::endl;
+	}
 	setup->setUserSession(this->_fields["Cookie"]);
 	return (0);
 }

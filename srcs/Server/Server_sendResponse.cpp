@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/28 10:07:30 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 13:50:18 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 15:08:14 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,9 @@
 
 #include "WebServer.hpp"
 #include "Cache.hpp"
+#include "utils.hpp"
+
+extern int flags;
 
 int	WebServer::removeResponse(int client_fd)
 {
@@ -28,12 +31,12 @@ int	WebServer::removeResponse(int client_fd)
 	{
 		if (it->getFd() == client_fd)
 		{
-			/*same with cache*/
 			if (it->getFilename() != "")
 				cache = this->getCache(it->getFilename());
 			if (cache)
 				cache->setUsers(cache->getUsers() - 1);
-			std::cerr << "[ Client disconnected on " << client_fd << " ]" << std::endl;
+			if (flags & FLAG_VERBOSE)
+				std::cerr << "[ Client disconnected on " << client_fd << " ]" << std::endl;
 			close(client_fd);
 			this->_all_response.erase(it);
 			return (1);
@@ -95,7 +98,8 @@ int	WebServer::sendFile(int client_fd, Response *response)
 	readed = cache->getStream()->readsome(this->_send_buffer, std::min(SEND_SIZE, (int)(response->getBodySize() - response->getPosition())));
 	this->_send_buffer[readed] = '\0';
 	sended = send(client_fd, this->_send_buffer, readed, MSG_NOSIGNAL | MSG_DONTWAIT);
-	std::cerr << "[ Send " << sended << " bytes on " << client_fd << " ]" << " -> " << response->getBodySize() - response->getPosition() - sended <<  std::endl;
+	if (flags & FLAG_VERBOSE)
+		std::cerr << "[ Send " << sended << " bytes on " << client_fd << " ]" << " -> " << response->getBodySize() - response->getPosition() - sended <<  std::endl;
 	if (sended == -1)
 	{
 		perror("Send failed");

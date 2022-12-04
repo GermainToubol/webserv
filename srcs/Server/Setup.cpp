@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:13:01 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 13:15:00 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 17:22:54 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,15 @@ std::string const&	Setup::getQuery() const
 std::string const&	Setup::getExtension() const
 {
 	return (this->_extension);
+}
+
+std::string	const Setup::getExtensionName()
+{
+	this->setExtension();
+	if (this->_extension.size() > 1 && this->_extension[0] == '.')
+		return (this->_extension.substr(1));
+	else
+		return (this->_extension);
 }
 
 std::string const&	Setup::getFields() const

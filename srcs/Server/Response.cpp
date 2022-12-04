@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.cpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:48:17 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:14:18 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/04 14:04:42 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -137,7 +137,12 @@ void Response::setBodyAlone(std::string const &body)
 	this->_body = body;
 }
 
-int Response::setListingBody(std::string uri, std::string const &root)
+void	Response::addBodyAlone(std::string const& body)
+{
+	this->_body += body;
+}
+
+int	Response::setListingBody(std::string uri, std::string const& root)
 {
 	DIR *dir;
 	struct dirent *ent;
@@ -155,7 +160,6 @@ int Response::setListingBody(std::string uri, std::string const &root)
 		relative_path += '/';
 	if (*(uri.end() - 1) != '/')
 		uri += '/';
-	std::cerr << "[ Uri: " << relative_path << " ]" << std::endl;
 	this->_body = "<!DOCTYPE html>\n\
 <html>\n<head>\n<title>Index of " +
 				  relative_path + "</title>\n</head>\n\

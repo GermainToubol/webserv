@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 20:06:50 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 11:46:09 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 17:21:29 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ class Setup
 		std::string		const&	getUri() const;
 		std::string		const&	getQuery() const;
 		std::string		const&	getExtension() const;
+		std::string		const	getExtensionName() ;
 		std::string		const&	getFields() const;
 		VirtualServer	const	*getServer() const;
 		

@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Response.hpp                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:39:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/01 16:52:55 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 12:52:35 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ class Response
 		void					setBody(std::string const& body);
 		void					setBody(int code, std::string const& type);
 		void					setBodyAlone(std::string const& body);
+		void					addBodyAlone(std::string const& body);
 		void					setBodySize(std::string::size_type const& body_size);
 		void					setPosition(std::string::size_type const& position);
 		void					setFd(int const& fd);

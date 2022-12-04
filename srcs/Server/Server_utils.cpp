@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_utils.cpp                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:11:10 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/04 14:39:19 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,11 +95,10 @@ void WebServer::clearTimeout(void)
 		return;
 	while (it != this->_timeout.end())
 	{
-		if (time(NULL) - it->second.time > REQUEST_TIMEOUT || itdel->second.state == 4)
+		if (time(NULL) - it->second.time > REQUEST_TIMEOUT)
 		{
 			itdel = it;
 			it++;
-			// std::cerr << "state: " << itdel->second.state << std::endl;
 			if (itdel->second.state == 0)
 				close(itdel->first);
 			else if (itdel->second.state == 1)
@@ -119,7 +118,7 @@ void WebServer::clearTimeout(void)
 	}
 }
 
-bool WebServer::isNewInterface(std::string const &interface)
+bool	WebServer::isNewInterface(std::string const& interface)
 {
 	for (std::map<int, std::string>::iterator it = this->_duoSI.begin(); it != this->_duoSI.end(); it++)
 	{
@@ -129,7 +128,7 @@ bool WebServer::isNewInterface(std::string const &interface)
 	return (true);
 }
 
-std::string WebServer::getType(std::string const &extension)
+std::string	WebServer::getType(std::string const& extension)
 {
 	if (this->_mimetypes.find(extension) == this->_mimetypes.end())
 		return ("text/plain");

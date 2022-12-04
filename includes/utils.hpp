@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:44:18 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:21:30 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/02 14:45:01 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@
 # define REQUEST_TIMEOUT 180 //3min
 # define WEBSERV_COOKIE "WebServCookie="
 # define BASE_GENERATOR "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+# define FLAG_VERBOSE	0x01
+# define FLAG_TEST		0x02
 
 template <typename T>
 std::string to_string ( T Number )
@@ -31,6 +33,12 @@ std::string to_string ( T Number )
 	ss << Number;
 	return ss.str();
 }
+
+typedef struct s_flags
+{
+	char	character;
+	int		value;
+}	t_flags;
 
 void		derror(std::string const& msg);
 std::string uriDecode(const std::string &src);
