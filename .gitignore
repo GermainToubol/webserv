@@ -12,4 +12,8 @@ doc/
 webserv
 ubuntu_tester
 ubuntu_cgi_tester
+<<<<<<< HEAD
+!docker_test/webserv
+=======
 YoupiBanane/*
+>>>>>>> leo
