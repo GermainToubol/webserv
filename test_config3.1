@@ -2,7 +2,7 @@ server:
   listen: 0.0.0.0:8080
   root: /mnt/nfs/homes/fmauguin/Documents/Webserv-vog/test_folder
   server_name: myname
-  index: index.php
+  index: index.html
   permissions: 7
   max_body_size: 32000000
   autoindex: off
@@ -13,7 +13,10 @@ server:
     post_dir: /mnt/nfs/homes/fmauguin/Documents/Webserv-vog/test_folder/upload
     max_body_size: 32000000
     cgi:
-      php: /bin/php-cgi
+      pl: /bin/perl
+      perl: /bin/perl
+      php: /bin/php
+      py: /bin/python3
     
   location: /oui
     default_file: /mnt/nfs/homes/fmauguin/Documents/Webserv-vog/test_folder/oui/ANon.html

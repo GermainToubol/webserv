@@ -6,7 +6,7 @@
 #    By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/12/05 12:13:12 by fmauguin         ###   ########.fr        #
+#    Updated: 2022/12/05 14:10:53 by fmauguin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -150,7 +150,6 @@ $(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp Makefile
 	$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) $(INCLUDES) $< >> $@
 
 dclean:
-			echo "dclean"
 			$(RM) $(addprefix $(OBJS_DIR)/, $(DEPS))
 
 .PHONY:		dclean

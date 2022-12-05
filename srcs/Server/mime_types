@@ -305,6 +305,7 @@ multimap->insert( std::make_pair( ".pkix-cert", "application/pkix-cert") );
 multimap->insert( std::make_pair( ".pkix-crl", "application/pkix-crl") );
 multimap->insert( std::make_pair( ".pkix-pkipath", "application/pkix-pkipath") );
 multimap->insert( std::make_pair( ".pkixcmp", "application/pkixcmp") );
+multimap->insert( std::make_pair( ".pl", "text/perl") );
 multimap->insert( std::make_pair( ".pls+xml", "application/pls+xml") );
 multimap->insert( std::make_pair( ".poc-settings+xml", "application/poc-settings+xml") );
 multimap->insert( std::make_pair( ".postscript", "application/postscript") );
@@ -322,6 +323,7 @@ multimap->insert( std::make_pair( ".prs.rdf-xml-crypt", "application/prs.rdf-xml
 multimap->insert( std::make_pair( ".prs.xsf+xml", "application/prs.xsf+xml") );
 multimap->insert( std::make_pair( ".pskc+xml", "application/pskc+xml") );
 multimap->insert( std::make_pair( ".pvd+json", "application/pvd+json") );
+multimap->insert( std::make_pair( ".py", "text/python3") );
 multimap->insert( std::make_pair( ".rdf+xml", "application/rdf+xml") );
 multimap->insert( std::make_pair( ".route-apd+xml", "application/route-apd+xml") );
 multimap->insert( std::make_pair( ".route-s-tsid+xml", "application/route-s-tsid+xml") );

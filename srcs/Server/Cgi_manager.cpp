@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi_manager.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/05 12:56:45 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 14:34:42 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,7 +33,7 @@ Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& clie
 	_client_ip(client_ip),
     _cgi_exe(cgi_exe)
 {
-	this->_content_type = request->getField("Content-Type");
+    this->_content_type = request->getField("Content-Type");
     if (this->_content_type == "")
         {this->_content_type = "text/plain";}
 	this->_init();
@@ -90,9 +90,7 @@ void Cgi_manager::_init(void)
     this->_env["CONTENT_TYPE"] = _content_type;                        // MIME TYPE, null if not known
     this->_env["CONTENT_LENGTH"] = this->_request->getField("Content-Length"); // If content is empty ==> 
     if (this->_env["CONTENT_LENGTH"] == "")
-        this->_env["CONTENT_LENGTH"] = "-1";
-    this->_env["HTTP_HOST"] = this->_request->getField("Host"); // Host header
-    this->_env["HTTP_COOKIE"] = this->_request->getField("Cookie");      // cgi file
+        this->_env["CONTENT_LENGTH"] = "0";
     this->_env["PATH_INFO"] = this->_setup->getUri().substr(this->_request->getLocation()->getRoot().size());                        // cgi file
     this->_env["PATH_TRANSLATED"] = this->_setup->getUri();                    // cgi file
     this->_env["REQUEST_URI"] = this->_setup->getUri();                        // cgi file
@@ -146,7 +144,6 @@ int Cgi_manager::execute(int *cgi_fd)
         tmp = it->first + "=" + it->second;
         env_arr[i] = it->first + "=" + it->second;
         env[i] = &env_arr[i][0];
-        std::cerr << env[i]<< std::endl;
         i++;
     }
     env[i] = NULL;
@@ -161,16 +158,16 @@ int Cgi_manager::execute(int *cgi_fd)
         return (500);
     *cgi_fd = fd_pipe[0]; //j'imagine que c ca qu'il faut faire
     pid_t pid = fork();
-
+    std::cerr << argv[0] << std::endl;
+    std::cerr << argv[1] << std::endl;
+    std::cerr << argv[2] << std::endl;
     if (pid == 0)
     {
 
         //0 = read, 1 = write
         if (dup2(fd_pipe[0], 0) == -1)
             return (500);
-            
         write(fd_pipe[1], _request->getBody().c_str(), _request->getBody().size());
-        
         if (dup2(fd_pipe[1], 1) == -1)
             return (500);
         close(fd_pipe[0]);

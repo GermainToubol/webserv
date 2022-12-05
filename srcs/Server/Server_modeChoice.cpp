@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Server_modeChoice.cpp                              :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 16:39:30 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 14:41:58 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,6 +64,12 @@ int WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ CGI mode ]" << std::endl;
+
+	if (!doesPathExist(setup->getUri()))
+		return (setup->setCode(404), 404);
+	if (!isPathReadable(setup->getUri()))
+		return (setup->setCode(403), 403);
+
 
 	ret = CgiManager.execute(&cgi_fd);
 	if (ret != 0)
