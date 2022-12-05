@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 20:36:28 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 11:58:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,10 +111,18 @@ int	WebServer::getRequest(int client_fd)
 	int		ret;
 	int		state;
 	Request	*request;
+	std::string	body;
 	
 	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			return (0);
+		epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+		close(client_fd);
+		std::cerr << "Recv fail: " << client_fd << std::endl;
 		perror("/!\\ Recv failed");
+	}
 	else
 	{
 		this->_buffer[ret] = '\0';
@@ -123,13 +131,53 @@ int	WebServer::getRequest(int client_fd)
 		request = this->get_fd_request(client_fd);
 		if (request == NULL)
 			return (derror("/!\\ Request not found"), -1);
-		state = request->addContent(this->_buffer, ret);
-		if (state == 1)
+		if (request->getChunkedMode() == 1)
 		{
 			if (flags & FLAG_VERBOSE)
-				std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
-			this->setResponse(client_fd, request);
-			this->remove_fd_request(client_fd);
+				std::cerr << "[ Chunked mode ]" << std::endl;
+			state = request->addChunkedData(this->_buffer, ret);
+			if (state == 1)
+			{
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+				this->setResponse(client_fd, request);
+				this->remove_fd_request(client_fd);
+			}
+		}
+		else
+		{
+			state = request->addContent(this->_buffer, ret);
+			if (state == 1)
+			{
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+				this->setResponse(client_fd, request);
+				this->remove_fd_request(client_fd);
+			}
+			if (state == 2)
+			{
+				request->setChunkedMode(1);
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ Chunked mode ]" << std::endl;
+				
+				if(request->getContent().find("\r\n\r\n") != std::string::npos)
+				{
+					body = request->getContent().substr(request->getContent().find("\r\n\r\n") + 4);
+					request->setContent(request->getContent().substr(0, request->getContent().find("\r\n\r\n") + 4));
+					if (body.size() > 0)
+					{
+						
+						state = request->addChunkedData(body.c_str(), body.size());
+						if (state == 1)
+						{
+							if (flags & FLAG_VERBOSE)
+								std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+							this->setResponse(client_fd, request);
+							this->remove_fd_request(client_fd);
+						}
+					}
+				}
+			}
 		}
 		if (this->_timeout.find(client_fd) != this->_timeout.end())
 		{
@@ -148,9 +196,11 @@ int	WebServer::sendResponse(int client_fd)
 	if (response == NULL)
 	{
 		this->_timeout.erase(client_fd);
-		return (derror("/!\\ Response not found"), close(client_fd), 1);
+		epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+		close(client_fd);
+		std::cout << client_fd << " disconnected" << std::endl;
+		return (derror("/!\\ Response not found"), 1);
 	}
-	std::cout << response->getStatus() << std::endl;
 	if (response->getStatus() == 0)
 		this->sendHeader(client_fd, response);
 	if (response->getStatus() == 1 && response->getBody() != "")
@@ -178,7 +228,9 @@ int	WebServer::event_loop(struct epoll_event *events, int nb_events)
 		if (listen_sock != -1)
 			this->newConnection(listen_sock);
 		else if (this->isCgi(events[i].data.fd))
-			this->cgiResponse(events[i].data.fd);
+			this->cgiSetResponse(events[i].data.fd);
+		else if (this->isCgiClient(events[i].data.fd))
+			this->cgiSendResponse(events[i].data.fd);
 		else if (events[i].events & EPOLLIN)
 			this->getRequest(events[i].data.fd);
 		else if (events[i].events & EPOLLOUT)

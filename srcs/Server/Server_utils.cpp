@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:53:59 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:08:19 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 15:13:19 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,7 +18,7 @@
 #include "Request.hpp"
 #include "WebServer.hpp"
 
-int	WebServer::is_server(int fd)
+int WebServer::is_server(int fd)
 {
 	for (std::vector<VirtualServer>::iterator it = this->_virtual_servers.begin(); it != this->_virtual_servers.end(); it++)
 	{
@@ -28,10 +28,10 @@ int	WebServer::is_server(int fd)
 	return (-1);
 }
 
-int	WebServer::isMe(std::string const& uri, std::string const& path, std::string const& host)
+int WebServer::isMe(std::string const &uri, std::string const &path, std::string const &host)
 {
-	std::string::size_type	pos = 0;
-	std::string				tmp;
+	std::string::size_type pos = 0;
+	std::string tmp;
 
 	pos = uri.find(host);
 	if (pos != std::string::npos)
@@ -43,36 +43,36 @@ int	WebServer::isMe(std::string const& uri, std::string const& path, std::string
 	return (false);
 }
 
-Request	*WebServer::get_fd_request(int fd)
+Request *WebServer::get_fd_request(int fd)
 {
-	size_t	size = this->_all_request.size();
+	size_t size = this->_all_request.size();
 
 	for (std::vector<Request>::iterator it = this->_all_request.begin(); it != this->_all_request.end(); it++)
 	{
 		if (it->getFd() == fd)
 			return (&(*it));
 	}
-	
-	Request	new_request(fd);
+
+	Request new_request(fd);
 	this->_all_request.push_back(new_request);
 	if (size + 1 != this->_all_request.size())
 		return (NULL);
 	return (&(*(this->_all_request.end() - 1)));
 }
 
-void	WebServer::remove_fd_request(int fd)
+void WebServer::remove_fd_request(int fd)
 {
 	for (std::vector<Request>::iterator it = this->_all_request.begin(); it != this->_all_request.end(); it++)
 	{
 		if (it->getFd() == fd)
 		{
 			this->_all_request.erase(it);
-			return ;
+			return;
 		}
 	}
 }
 
-void	WebServer::clearCache(void)
+void WebServer::clearCache(void)
 {
 	for (std::vector<Cache>::iterator it = this->_all_cache.begin(); it != this->_all_cache.end(); it++)
 	{
@@ -81,21 +81,21 @@ void	WebServer::clearCache(void)
 			it->getStream()->close();
 			delete it->getStream();
 			this->_all_cache.erase(it);
-			return ;
+			return;
 		}
 	}
 }
 
-void	WebServer::clearTimeout(void)
+void WebServer::clearTimeout(void)
 {
-	std::map<int, t_pair >::iterator itdel;
-	std::map<int, t_pair >::iterator it = this->_timeout.begin();
-	
+	std::map<int, t_pair>::iterator itdel;
+	std::map<int, t_pair>::iterator it = this->_timeout.begin();
+
 	if (this->_timeout.empty())
-		return ;
+		return;
 	while (it != this->_timeout.end())
 	{
-		if (time(NULL) - it->second.time > REQUEST_TIMEOUT || it->second.state == 4)
+		if (time(NULL) - it->second.time > REQUEST_TIMEOUT)
 		{
 			itdel = it;
 			it++;
@@ -110,7 +110,10 @@ void	WebServer::clearTimeout(void)
 			else if (itdel->second.state == 2)
 				this->removeResponse(itdel->first);
 			else if (itdel->second.state == 3)
-				this->closeCgiResponse(this->_cgiFD[itdel->first], itdel->first);
+			{
+				this->_cgiFD.erase(itdel->first);
+				close(itdel->first);
+			}
 			this->_timeout.erase(itdel);
 		}
 		else
@@ -127,6 +130,7 @@ bool	WebServer::isNewInterface(std::string const& interface)
 	}
 	return (true);
 }
+
 std::string	WebServer::getType(std::string const& extension)
 {
 	if (this->_mimetypes.find(extension) == this->_mimetypes.end())
@@ -134,13 +138,13 @@ std::string	WebServer::getType(std::string const& extension)
 	return (this->_mimetypes.find(extension)->second);
 }
 
-std::string	WebServer::getExtension(std::string const& type)
+std::string WebServer::getExtension(std::string const &type)
 {
 	(void)type;
 	return ("");
 }
 
-std::string	WebServer::getStatus(int code)
+std::string WebServer::getStatus(int code)
 {
 	if (this->_status_codes.find(code) == this->_status_codes.end())
 		return ("Unknown");

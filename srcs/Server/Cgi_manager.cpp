@@ -6,13 +6,17 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/02 19:00:19 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:56:45 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <cstdlib>
 
 #include <unistd.h>
+#include <algorithm>
+#include <iostream>
+#include <fstream>
+
 
 #include "Cgi_manager.hpp"
 #include "utils.hpp"
@@ -82,21 +86,23 @@ void Cgi_manager::_init(void)
     this->_env["GATEWAY_INTERFACE"] = "CGI/1.1";
     this->_env["SERVER_PROTOCOL"] = "HTTP/1.1";
     this->_env["SERVER_SOFTWARE"] = "WEBSERV/1.0";
-    this->_env["REQUEST_METHOD"] = _request->getMethod();
+    this->_env["REQUEST_METHOD"] = this->_request->getMethod();
     this->_env["CONTENT_TYPE"] = _content_type;                        // MIME TYPE, null if not known
-    this->_env["CONTENT_LENGTH"] = _request->getField("Content-Length"); // If content is empty ==> 
+    this->_env["CONTENT_LENGTH"] = this->_request->getField("Content-Length"); // If content is empty ==> 
     if (this->_env["CONTENT_LENGTH"] == "")
-        this->_env["CONTENT_LENGTH"] = "0";
-    this->_env["PATH_INFO"] = _setup->getUri();                        // cgi file
-    this->_env["PATH_TRANSLATED"] = _setup->getUri();                    // cgi file
-    this->_env["REQUEST_URI"] = _setup->getUri();                        // cgi file
-    this->_env["QUERY_STRING"] = _setup->getQuery();
+        this->_env["CONTENT_LENGTH"] = "-1";
+    this->_env["HTTP_HOST"] = this->_request->getField("Host"); // Host header
+    this->_env["HTTP_COOKIE"] = this->_request->getField("Cookie");      // cgi file
+    this->_env["PATH_INFO"] = this->_setup->getUri().substr(this->_request->getLocation()->getRoot().size());                        // cgi file
+    this->_env["PATH_TRANSLATED"] = this->_setup->getUri();                    // cgi file
+    this->_env["REQUEST_URI"] = this->_setup->getUri();                        // cgi file
+    this->_env["QUERY_STRING"] = this->_setup->getQuery();
     this->_env["SCRIPT_NAME"] = this->_cgi_exe;       // cgi binary
-    
-    if (flags & FLAG_VERBOSE)
-        std::cerr << "[ CGI uri: " << _setup->getUri() << " ]" << std::endl;
 
-    this->_env["SCRIPT_FILENAME"] = _setup->getUri(); // full pathname
+    if (flags & FLAG_VERBOSE)
+        std::cerr << "[ CGI uri: " << this->_setup->getUri() << " ]" << std::endl;
+
+    this->_env["SCRIPT_FILENAME"] = this->_setup->getUri(); // full pathname
 
      this->_env["REMOTE_ADDR"] = this->_client_ip; // Addr remote get from socket
      this->_env["REMOTE_HOST"] = this->_client_ip; // Addr remote get from socket
@@ -107,7 +113,16 @@ void Cgi_manager::_init(void)
 
     this->_env["SERVER_NAME"] = _setup->getServer()->getServerName(); // get the good NODE from ConfigureTree
     this->_env["SERVER_PORT"] = _setup->getServer()->getPort(); // get the good NODE from ConfigureTree
+
+    std::string tmp;
+    for (std::map<std::string, std::string>::const_iterator it = this->_request->getFields().begin(); it != this->_request->getFields().end(); it++)
+    {
+        tmp = "HTTP_" + it->first;
+        std::transform(tmp.begin(), tmp.end(), tmp.begin(), myToUpper);
+        this->_env[tmp.c_str()] = it->second;
+    }
 }
+
 
 char *convert(const std::string &s)
 {
@@ -120,36 +135,42 @@ int Cgi_manager::execute(int *cgi_fd)
 {
     char *argv[3];
     int fd_pipe[2];
-    int saveSTDIN;
-    int saveSTDOUT;
     std::string tmp;
 
     std::cout << "======================CGI EXECUTE===========================" << std::endl;
     char **env = new char*[_env.size() + 1];
     int i = 0;
     std::string *env_arr = new std::string[_env.size() + 1];
-    for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+    for (std::map<std::string, std::string>::iterator it = this->_env.begin(); it != _env.end(); it++)
     {
         tmp = it->first + "=" + it->second;
         env_arr[i] = it->first + "=" + it->second;
         env[i] = &env_arr[i][0];
-        std::cerr<<env[i] << std::endl;
+        std::cerr << env[i]<< std::endl;
         i++;
     }
     env[i] = NULL;
     argv[0] = &_env["SCRIPT_NAME"][0];
+
+    if (flags & FLAG_VERBOSE)
+        std::cerr << "[ Execute CGI: " << argv[0] << " ]" << std::endl;
     argv[1] = &_env["SCRIPT_FILENAME"][0];
     argv[2] = NULL;
 
     if (pipe(fd_pipe) != 0)
-        return 500;
+        return (500);
     *cgi_fd = fd_pipe[0]; //j'imagine que c ca qu'il faut faire
-    saveSTDIN = dup(STDIN_FILENO);
-    saveSTDOUT = dup(STDOUT_FILENO);
     pid_t pid = fork();
 
     if (pid == 0)
     {
+
+        //0 = read, 1 = write
+        if (dup2(fd_pipe[0], 0) == -1)
+            return (500);
+            
+        write(fd_pipe[1], _request->getBody().c_str(), _request->getBody().size());
+        
         if (dup2(fd_pipe[1], 1) == -1)
             return (500);
         close(fd_pipe[0]);
@@ -167,9 +188,6 @@ int Cgi_manager::execute(int *cgi_fd)
     close(fd_pipe[1]);
     delete[] env;
     delete[] env_arr;
-    dup2(saveSTDIN, STDIN_FILENO);
-    dup2(saveSTDOUT, STDOUT_FILENO);
-    close(saveSTDIN);
-    close(saveSTDOUT);
+
     return 0;
 }

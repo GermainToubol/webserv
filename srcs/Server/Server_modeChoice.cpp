@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 16:44:45 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 20:51:22 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/04 16:39:30 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,13 +26,13 @@ extern int flags;
 
 int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 {
-	struct epoll_event	event;
-	Response			response;
+	struct epoll_event event;
+	Response response;
 
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Build response Redirect ]" << std::endl;
 	setup->setCode(301);
-	
+
 	setup->addField("Location", request->getLocation()->getRedirect());
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Redirect to " << request->getLocation()->getRedirect() << " ]" << std::endl;
@@ -48,16 +48,17 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 	std::memset(&event, 0, sizeof(event));
 	event.data.fd = client_fd;
- 	event.events = EPOLLOUT;
- 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event);
+	event.events = EPOLLOUT;
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event);
 	return (0);
 }
 
-int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
+int WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
 	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second, request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second);
 	Response	response;
 	struct epoll_event	event;
+	struct epoll_event	event2;
 	int	cgi_fd;
 	int ret;
 
@@ -81,21 +82,18 @@ int	WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 
 	std::memset(&event, 0, sizeof(event));
 	event.data.fd = cgi_fd;
- 	event.events = EPOLLIN;
+	event.events = EPOLLIN;
+	std::memset(&event2, 0, sizeof(event2));
+	event2.data.fd = client_fd;
+	event2.events = EPOLLOUT;
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_ADD, cgi_fd, &event);
+	epoll_ctl(this->_epoll_fd, EPOLL_CTL_MOD, client_fd, &event2);
 
-	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL); // -> doit disparaitre
-	if (this->_timeout.find(client_fd) != this->_timeout.end())
-	{
-		this->_timeout.find(client_fd)->second.time = time(NULL);
-		this->_timeout.find(client_fd)->second.state = 4;
-	}
 	this->_timeout.insert( std::make_pair(cgi_fd, (t_pair){time(NULL), 3} ) );
-	//this->_timeout.insert( std::make_pair(client_fd, (t_pair){time(NULL), 3} ) );
 	return (0);
 }
 
-int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
+int WebServer::getMode(Request *request, Setup *setup, int client_fd)
 {
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Get Mode ]" << std::endl;
@@ -112,8 +110,6 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 			return (setup->setCode(404), 404);
 		else
 		{
-			// ca va probablement pas marcher parce que le file va dependre de la root de location et de la root generale
-			// peut etre que je peux recuperer le path de la root de location dans l'uri, erase la fin et ajouter le default file
 			setup->setUri(request->getLocation()->getDefaultFile());
 			setup->setExtension();
 			if (request->getLocation()->getCgiPerm().find(setup->getExtension()) != request->getLocation()->getCgiPerm().end())
@@ -129,11 +125,11 @@ int	WebServer::getMode(Request *request, Setup *setup, int client_fd)
 	return (setup->setCode(403), 403);
 }
 
-int	WebServer::postMode(Request *request, Setup *setup, int client_fd)
+int WebServer::postMode(Request *request, Setup *setup, int client_fd)
 {
-	Response			response;
-	int					ret;
-	std::string			field;
+	Response response;
+	int ret;
+	std::string field;
 
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Post Mode ]" << std::endl;
@@ -158,10 +154,10 @@ int	WebServer::postMode(Request *request, Setup *setup, int client_fd)
 	return (0);
 }
 
-int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
+int WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 {
-	Response			 response;
-	int					ret;
+	Response response;
+	int ret;
 
 	(void)request;
 	if (flags & FLAG_VERBOSE)
@@ -173,7 +169,7 @@ int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 
 	if (ret == 0)
 		ret = remove(setup->getUri().c_str());
-	
+
 	if (ret == 0)
 	{
 		setup->setCode(200);
@@ -189,26 +185,25 @@ int	WebServer::deleteMode(Request *request, Setup *setup, int client_fd)
 	response.setPosition(0);
 	setup->setExtension("");
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBody().size());
-	
+
 	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
 
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
 	this->_timeout.erase(client_fd);
 	close(client_fd);
-	
-	
+
 	return (0);
 }
 
-int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
+int WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 {
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Mode choice ]" << std::endl;
 	
 	if (request->getLocation()->getRedirect() != "" && !isMe(setup->getUri(), request->getLocation()->getRedirect(), setup->getServer()->getRoot()))
 		return (this->redirectMode(request, setup, client_fd));
-	
+
 	if (request->getMethod() == "GET" && !(request->getLocation()->getPermission() & GET_PERM))
 		return (derror("/!\\ GET not allowed"), setup->setCode(405), 405);
 	if (request->getMethod() == "POST" && !(request->getLocation()->getPermission() & POST_PERM))
@@ -216,14 +211,17 @@ int	WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 	if (request->getMethod() == "DELETE" && !(request->getLocation()->getPermission() & DEL_PERM))
 		return (derror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
 	
+	std::cerr << "extensionName: " << setup->getExtensionName() << std::endl;
+	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
+		std::cerr << request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second << std::endl;
 	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		return (this->cgiMode(request, setup, client_fd));
-	
-	if (request->getMethod() == "GET")
-		return (this->getMode(request, setup, client_fd));
-	if (request->getMethod() == "POST")
+
+	if (request->getMethod() == "POST" || request->getMethod() == "PUT")
 		return (this->postMode(request, setup, client_fd));
 	if (request->getMethod() == "DELETE")
 		return (this->deleteMode(request, setup, client_fd));
+	if (request->getMethod() == "GET")
+		return (this->getMode(request, setup, client_fd));
 	return (derror("/!\\ Not Implemented"), setup->setCode(501), 501);
 }

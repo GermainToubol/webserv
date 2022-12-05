@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 11:59:37 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 18:49:48 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 08:48:15 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,7 @@ void	display_usage(void)
 
 int	get_flags(char **argv, int argc)
 {
-	t_flags		all_flags[][2] = {{'v', FLAG_VERBOSE},{'t', FLAG_TEST}};
+	t_flags		all_flags[] = {(t_flags){'v', FLAG_VERBOSE}, (t_flags){'t', FLAG_TEST}};
 
 	for (int i = 0; i < argc; i++)
 	{
@@ -67,9 +67,9 @@ int	get_flags(char **argv, int argc)
 		{
 			for (int k = 0; k < (int)(sizeof(all_flags) / sizeof(all_flags[0])); k++)
 			{
-				if (argv[i][j] == all_flags[k]->character)
+				if (argv[i][j] == all_flags[k].character)
 				{
-					flags |= all_flags[k]->value;
+					flags |= all_flags[k].value;
 					break ;
 				}
 				if (k == sizeof(all_flags) / sizeof(all_flags[0]) - 1)
@@ -102,10 +102,20 @@ int	main(int argc, char **argv)
 	init_sig(get_sig, SIGINT);
 	
 	WebServer server(config);
-	if (server.init())
-		return (1);
-	server.run();
-	server.end();
 
+	while (running)
+	{
+		try {
+			if (server.init())
+				return (1);
+			server.run();
+		}
+		catch (std::exception &e)
+		{
+			std::cerr << "ta crash BG: " << e.what() << std::endl;
+			server.end();
+		}
+	}
+	server.end();
 	return (0);
 }

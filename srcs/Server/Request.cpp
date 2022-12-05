@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 17:48:53 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:21:19 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@
 
 extern int flags;
 
-Request::Request(int fd):	_fd(fd), _boundary(""), _content(""), _content_size(-1), _is_header(0),
+Request::Request(int fd):	_fd(fd), _chunked_mode(0), _chunked_size(0), _chunked_buffer(""), _boundary(""), _content(""), _content_size(-1), _is_header(0),
 							_method(""), _uri(""),
 							_version(""), _body(""), _empty("") {}
 
@@ -43,10 +43,15 @@ int	Request::addContent(char *buf, int ret)
 		return (1);
 	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 0)
 	{
+		pos = this->_content.find("Transfer-Encoding: chunked");
+		std::cerr << this->_content << std::endl;
+		if (pos != std::string::npos)
+			return (2);
 		pos = this->_content.find("Content-Length: ");
+		std::cerr << this->_content << std::endl;
 		if (pos == std::string::npos)
 			return (1);
-		pos2 = this->_content.find("\r\n", pos); //check overflow
+		pos2 = this->_content.find("\r\n", pos);
 		this->_content_size = std::strtol(this->_content.substr(pos + 16, pos2 - pos - 16).c_str(), NULL, 10);
 		this->_is_header = 1;
 		if (flags & FLAG_VERBOSE)
@@ -82,9 +87,14 @@ int	Request::setFirstline(Setup *setup, std::string const& line)
 		return (derror("/!\\ No Uri"), setup->setCode(400), 400);
 	this->_uri = line.substr(pos + 1, pos2 - pos - 1);
 	pos = this->_uri.find("?");
-	setup->setUri(this->_uri.substr(0, pos));
 	if (pos != std::string::npos)
-		setup->setQuery(setup->getUri().substr(pos + 1));
+	{
+		if (pos != this->_uri.size() - 1)
+			setup->setQuery(this->_uri.substr(pos + 1));
+		setup->setUri(this->_uri.substr(0, pos));
+	}
+	else
+		setup->setUri(this->_uri);
 	setup->setExtension();
 	this->_version = line.substr(pos2 + 1, line.size() - pos2 - 1);
 	if (this->_version != "HTTP/1.1")
@@ -114,7 +124,7 @@ int	Request::basicCheck(Setup *setup)
 {
 	if (this->_version != "HTTP/1.1")
 		return (derror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
-	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
+	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE" && this->_method != "PUT")
 		return (derror("/!\\ Bad Method"), setup->setCode(405), 405);
 	if (!this->isValidUri(setup->getUri()))
 		return (derror("/!\\ Bad Uri"), setup->setCode(414), 414);
@@ -123,12 +133,17 @@ int	Request::basicCheck(Setup *setup)
 
 int	Request::setUri(Setup *setup)
 {
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 	
 	if (setup->getUri() == "/" && this->_method == "GET")
 		setup->setUri(this->_location->getIndex());
 	
+	std::cerr << "uri: " << setup->getUri() << std::endl;
+
 	setup->setUri(uriDecode(reformatUri(setup->getUri())));
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 	setup->replaceUri(0, this->_location_path.size(), this->_location->getRoot());
+	std::cerr << "uri: " << setup->getUri() << std::endl;
 
 	if (isDirectory(setup->getUri()) && setup->getUri()[setup->getUri().size() - 1] != '/')
 		setup->addUri("/");
@@ -287,9 +302,19 @@ std::string const&	Request::getField(std::string key) const
 	return (this->_empty);
 }
 
+std::map<std::string, std::string> const&	Request::getFields(void) const
+{
+	return (this->_fields);
+}
+
 std::string const& Request::getBody() const
 {
 	return (this->_body);
+}
+
+bool const& Request::getChunkedMode() const
+{
+	return (this->_chunked_mode);
 }
 
 void	Request::setBoundary(std::string const& boundary)
@@ -307,7 +332,65 @@ void	Request::setFd(int const& fd)
 	this->_fd = fd;
 }
 
+void	Request::setChunkedMode(bool const& chunked_mode)
+{
+	this->_chunked_mode = chunked_mode;
+}
+
 void	Request::addBody(char *buffer, int size)
 {
 	this->_body += std::string(buffer, size);
+}
+
+int	Request::addChunkedData(const char *buffer, int size)
+{
+	std::string::size_type	pos;
+	std::string				size_data;
+	std::string				line;
+	std::string				tmp;
+
+	line = buffer;
+
+	if (size == 0)
+		return (1);
+
+	if (this->_chunked_size > 0)
+	{
+		if (line.size() > this->_chunked_size)
+		{
+			this->_content.append(line, 0, this->_chunked_size);
+			tmp = line.substr(this->_chunked_size);
+			this->_chunked_size = 0;
+			this->_content_size = this->_content.size();
+			return (addChunkedData(tmp.c_str(), tmp.size()));
+		}
+		else
+		{
+			this->_content.append(line);
+			this->_chunked_size -= line.size();
+			this->_content_size = this->_content.size();
+		}
+	}
+
+	else if (this->_chunked_size == 0)
+	{
+		this->_chunked_buffer += line;
+		pos = this->_chunked_buffer.find("\r\n");
+		if (pos == 0)
+		{
+			this->_chunked_buffer.erase(0, 2);
+			pos = this->_chunked_buffer.find("\r\n");
+		}
+		if (pos == std::string::npos)
+			return (0);
+		size_data = this->_chunked_buffer.substr(0, pos);
+		this->_chunked_buffer.erase(0, pos + 2);
+		this->_chunked_size = std::strtol(size_data.c_str(), NULL, 16);
+		if (this->_chunked_size == 0)
+			return (1);
+		tmp = this->_chunked_buffer;
+		this->_chunked_buffer = "";
+		return (addChunkedData(tmp.c_str(), tmp.size()));
+	}
+	return(0);
 }

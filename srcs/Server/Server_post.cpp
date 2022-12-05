@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:04:15 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 09:33:46 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,9 +24,9 @@ extern int flags;
 
 int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 {
-	Response	response;
-	std::string	origin;
-	
+	Response response;
+	std::string origin;
+
 	(void)request;
 	if (setup->getCode() == 0)
 	{
@@ -52,21 +52,21 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 		setup->addField("Refresh", "1; url=" + origin);
 
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
-	
+
 	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
 	send(client_fd, response.getBody().c_str(), response.getBody().size(), MSG_NOSIGNAL);
-	
+
 	epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, 0);
 	this->_timeout.erase(client_fd);
 	close(client_fd);
 	return (0);
 }
 
-int	WebServer::setPostUri(Request *request, Setup *setup)
+int WebServer::setPostUri(Request *request, Setup *setup)
 {
-	std::string	dir_path;
-	std::string	file_path;
-	std::string::size_type	pos;
+	std::string dir_path;
+	std::string file_path;
+	std::string::size_type pos;
 
 	pos = setup->getServer()->getRoot().size();
 	dir_path = setup->getUri();
@@ -99,26 +99,28 @@ int	WebServer::setPostUri(Request *request, Setup *setup)
 	return (0);
 }
 
-int	WebServer::checkPostRequest(Request *request, Setup *setup)
+int WebServer::checkPostRequest(Request *request, Setup *setup)
 {
-	std::string	field;
+	std::string field;
+	std::string mode;
 
 	field = request->getField("Content-Length");
-	if (field == "")
+	mode = request->getField("Transfer-Encoding");
+	if (field == "" && mode != "chunked")
 		return (setup->setCode(411), 411);
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
-	if (std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
+	if (field != "" && std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
 		return (setup->setCode(413), 413);
 	return (0);
 }
 
 int WebServer::urlEncodedPost(Request *request, Setup *setup)
 {
-	std::ofstream				file;
-	std::string					decoded;
+	std::ofstream file;
+	std::string decoded;
 
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
 	if (flags & FLAG_VERBOSE)
@@ -132,11 +134,11 @@ int WebServer::urlEncodedPost(Request *request, Setup *setup)
 	return (200);
 }
 
-std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::string const& boundary)
+std::vector<std::string> WebServer::splitFormdata(std::string const &file, std::string const &boundary)
 {
-	std::string					tmp;
-	std::vector<std::string>	lines;
-	size_t						pos;
+	std::string tmp;
+	std::vector<std::string> lines;
+	size_t pos;
 
 	tmp = file;
 	while (tmp.size() > 2)
@@ -145,7 +147,7 @@ std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::
 		if (pos == std::string::npos)
 		{
 			lines.push_back(tmp);
-			break ;
+			break;
 		}
 		if (pos > 0)
 			lines.push_back(tmp.substr(0, pos - 2));
@@ -154,16 +156,16 @@ std::vector<std::string>	WebServer::splitFormdata(std::string const& file, std::
 	return (lines);
 }
 
-std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string const& str)
+std::string WebServer::parseChamp(Setup *setup, Request *request, std::string const &str)
 {
-	std::string 			header = "";
-	std::string 			body = "";
-	std::string 			filename = "";
-	std::string 			name = "";
-	std::string				path;
-	std::ofstream			file;
-	std::string::size_type	start;
-	std::string::size_type	end;
+	std::string header = "";
+	std::string body = "";
+	std::string filename = "";
+	std::string name = "";
+	std::string path;
+	std::ofstream file;
+	std::string::size_type start;
+	std::string::size_type end;
 
 	(void)request;
 	start = str.find("\r\n\r\n");
@@ -178,7 +180,7 @@ std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string co
 		if (end != std::string::npos)
 			name = header.substr(start + 6, end - start - 6);
 	}
-	
+
 	start = header.find("filename=\"");
 	if (start != std::string::npos)
 	{
@@ -203,11 +205,10 @@ std::string	WebServer::parseChamp(Setup *setup, Request *request, std::string co
 
 int WebServer::multipartPost(Request *request, Setup *setup)
 {
-	std::ofstream	file;
-	std::string		boundary;
-	std::vector<std::string>	champ;
-	std::string			line;
-
+	std::ofstream file;
+	std::string boundary;
+	std::vector<std::string> champ;
+	std::string line;
 
 	boundary = request->getField("Content-Type").substr(request->getField("Content-Type").find("boundary=") + 9);
 	if (flags & FLAG_VERBOSE)
@@ -227,16 +228,16 @@ int WebServer::multipartPost(Request *request, Setup *setup)
 	return (0);
 }
 
-int	WebServer::plainTextPost(Request *request, Setup *setup)
+int WebServer::plainTextPost(Request *request, Setup *setup)
 {
-	std::ofstream	file;
+	std::ofstream file;
 
 	(void)request;
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
 	file << request->getBody();
 	file.close();
-	
+
 	return (0);
 }
