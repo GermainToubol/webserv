@@ -3,10 +3,10 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+         #
+#    By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2022/07/25 13:22:33 by gtoubol           #+#    #+#              #
-#    Updated: 2022/12/01 16:51:29 by lgiband          ###   ########.fr        #
+#    Updated: 2022/12/05 12:13:12 by fmauguin         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -75,7 +75,7 @@ NAME =		webserv
 # General rules on makefile
 # -------------------------------------------------------------------------
 OBJS = 		$(addprefix $(OBJS_DIR)/,$(SRCS:.cpp=.o))
-DEPS =		$(OBJS:.o=.d) $(TEST_OBJS:.o=.d)
+DEPS =		$(SRCS:.cpp=.d) $(TEST:.cpp=.d)
 
 INCLUDES =	$(addprefix -I,$(HEAD_DIR))
 
@@ -100,12 +100,12 @@ _NO_COLOR	= \033[0m
 $(NAME):	$(OBJS)
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $(OBJS)
 
-$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp $(OBJS_DIR)/%.d
+$(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp
 	@if [ ! -d $(dir $@) ]; then \
 		mkdir -p $(dir $@); \
 		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \
 	fi
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
+	$(CXX) -MMD -MP $(CXXFLAGS) $(INCLUDES) -o $@ -c $<
 
 all:		$(NAME)
 
@@ -150,7 +150,8 @@ $(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp Makefile
 	$(CXX) -MM -MT $(@:.d=.o) $(CXXFLAGS) $(INCLUDES) $< >> $@
 
 dclean:
-			$(RM) $(DEPS)
+			echo "dclean"
+			$(RM) $(addprefix $(OBJS_DIR)/, $(DEPS))
 
 .PHONY:		dclean
 .SILENT:    $(DEPS) dclean
