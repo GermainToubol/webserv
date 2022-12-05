@@ -1,5 +1,5 @@
 server:
-  listen: 0.0.0.0:8080
+  listen: 0.0.0.0:8087
   root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder/
   server_name: myname
   index: index.html
@@ -15,8 +15,8 @@ server:
     cgi:
       php: /bin/php-cgi
     
-  location: /ou
-    default_file: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder/oui/ANon.html
+  location: /ou/
+    default_file: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder/ou/ANon.html
     post_dir: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder/upload
     root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/test_folder/
     index: index.html

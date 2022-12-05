@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi_manager.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
+/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/05 12:46:01 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/05 12:56:45 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,9 @@
 
 #include <unistd.h>
 #include <algorithm>
+#include <iostream>
+#include <fstream>
+
 
 #include "Cgi_manager.hpp"
 #include "utils.hpp"
@@ -155,12 +158,19 @@ int Cgi_manager::execute(int *cgi_fd)
     argv[2] = NULL;
 
     if (pipe(fd_pipe) != 0)
-        return 500;
+        return (500);
     *cgi_fd = fd_pipe[0]; //j'imagine que c ca qu'il faut faire
     pid_t pid = fork();
 
     if (pid == 0)
     {
+
+        //0 = read, 1 = write
+        if (dup2(fd_pipe[0], 0) == -1)
+            return (500);
+            
+        write(fd_pipe[1], _request->getBody().c_str(), _request->getBody().size());
+        
         if (dup2(fd_pipe[1], 1) == -1)
             return (500);
         close(fd_pipe[0]);

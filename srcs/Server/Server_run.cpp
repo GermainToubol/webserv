@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/05 11:02:20 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 11:58:28 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -115,7 +115,14 @@ int	WebServer::getRequest(int client_fd)
 	
 	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
+	{
+		if (errno == EAGAIN || errno == EWOULDBLOCK)
+			return (0);
+		epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
+		close(client_fd);
+		std::cerr << "Recv fail: " << client_fd << std::endl;
 		perror("/!\\ Recv failed");
+	}
 	else
 	{
 		this->_buffer[ret] = '\0';
@@ -190,7 +197,9 @@ int	WebServer::sendResponse(int client_fd)
 	{
 		this->_timeout.erase(client_fd);
 		epoll_ctl(this->_epoll_fd, EPOLL_CTL_DEL, client_fd, NULL);
-		return (derror("/!\\ Response not found"), close(client_fd), 1);
+		close(client_fd);
+		std::cout << client_fd << " disconnected" << std::endl;
+		return (derror("/!\\ Response not found"), 1);
 	}
 	if (response->getStatus() == 0)
 		this->sendHeader(client_fd, response);
