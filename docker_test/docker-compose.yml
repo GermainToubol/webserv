@@ -1,20 +1,20 @@
 services:
   webserv:
     container_name: webserv
-    ports:
-      - "80:80"
     build:
       context: ./webserv
     volumes:
       - server_data:/home/server
     stop_signal: SIGINT
+    ports:
+      - "8080:8080"
     networks:
       inside:
         ipv4_address: 192.168.13.1
       outside:
         ipv4_address: 192.168.12.1
     healthcheck:
-      test: ["CMD", "nc", "-z", "localhost", "80"]
+      test: ["CMD", "nc", "-z", "localhost", "8080"]
       interval: 10s
 
   in:
@@ -58,7 +58,7 @@ volumes:
     name: server_data
     driver: local
     driver_opts:
-      device: "/home/gtoubol/webserv"
+      device: "/mnt/nfs/homes/gtoubol/Documents/webserv"
       type: none
       o: bind
 
@@ -66,7 +66,7 @@ volumes:
     name: files_data
     driver: local
     driver_opts:
-      device: "/home/gtoubol/webserv/docker_test/webserv"
+      device: "/mnt/nfs/homes/gtoubol/Documents/webserv/docker_test/webserv"
       type: none
       o: bind
 

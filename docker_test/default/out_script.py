@@ -2,12 +2,12 @@ import requests
 
 
 server_list = {
-    "http://webserv.42.fr": [200, "/root/index_all.html"],
-    "http://192.168.12.1": [200, "/root/index_all.html"],
-    "http://out.webserv.42.fr": [200, "/root/index_coucou.html"],
-    "http://webserv.42.fr/test/index.html": [200, "/root/index_test.html"],
-    "http://webserv.42.fr/a/b/index.html": [200, "/root/index_test.html"],
-    "http://webserv.42.fr/c/index.html": [405, ""]
+    "http://webserv.42.fr:8080": [200, "/root/index_all.html"],
+    "http://192.168.12.1:8080": [200, "/root/index_all.html"],
+    "http://out.webserv.42.fr:8080": [200, "/root/index_coucou.html"],
+    "http://webserv.42.fr:8080/test/index.html": [200, "/root/index_test.html"],
+    "http://webserv.42.fr:8080/a/b/index.html": [200, "/root/index_test.html"],
+    "http://webserv.42.fr:8080/c/index.html": [405, ""]
     }
 
 

@@ -2,9 +2,9 @@ import requests
 
 
 server_list = {
-    "http://webserv.42.fr": [200, "/root/index_all.html"],
-    "http://192.168.13.1": [200, "/root/index_hidden.html"],
-    "http://in.webserv.42.fr": [200, "/root/index_hidden.html"]
+    "http://webserv.42.fr:8080": [200, "/root/index_all.html"],
+    "http://192.168.13.1:8080": [200, "/root/index_hidden.html"],
+    "http://in.webserv.42.fr:8080": [200, "/root/index_hidden.html"]
     }
 
 

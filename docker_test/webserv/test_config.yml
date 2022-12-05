@@ -12,13 +12,13 @@
 
 server:
   server_name: in.webserv.42.fr
-  listen: webserv.inside:80
+  listen: webserv.inside:8080
   root: /var/www/hidden
   index: index.html
 
 server:
   server_name: webserv.42.fr
-  listen: 80
+  listen: 8080
   root: /var/www
   index: index.html
   location: /
@@ -30,6 +30,6 @@ server:
 
 server:
   server_name: out.webserv.42.fr
-  listen: 192.168.12.1:80
+  listen: 192.168.12.1:8080
   root: /var/www/coucou
   index: index.html
