@@ -47,10 +47,6 @@ int	WebServer::sendPostResponse(Request *request, Setup *setup, int client_fd)
 
 	setup->setExtension("");
 
-	origin = request->getField("Origin");
-	if (origin != "")
-		setup->addField("Refresh", "1; url=" + origin);
-
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, response.getBodySize());
 
 	send(client_fd, response.getHeader().c_str(), response.getHeader().size(), MSG_NOSIGNAL | MSG_MORE);
@@ -215,7 +211,7 @@ int WebServer::multipartPost(Request *request, Setup *setup)
 		std::cerr << "[ Post boundary : " << boundary << " ]" << std::endl;
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Post body size : " << request->getBody().size() << " ]" << std::endl;
-	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);	
+	file.open(setup->getUri().c_str(), std::ios::out | std::ios::trunc);
 	if (!file.is_open())
 		return (derror("/!\\ Open Fail"), setup->setCode(500), 500);
 	champ = this->splitFormdata(request->getBody(), "--" + boundary);
