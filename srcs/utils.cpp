@@ -6,11 +6,12 @@
 /*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 15:42:18 by fmauguin         ###   ########.fr       */
+/*   Updated: 2022/12/05 12:43:55 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <iostream>
+#include <algorithm>
 #include <cstring>
 #include <stack>
 #include <string>
@@ -154,4 +155,13 @@ std::string	generateRandomCookie(int size, std::string base)
 	while (++i <= size)
 		cookie += base[rand() % base.size()];
 	return (cookie);
+}
+
+int myToUpper(int c)
+{
+	if (c >= 'a' && c <= 'z')
+		return (c - 32);
+	if (c == '-')
+		return ('_');
+	return (c);
 }

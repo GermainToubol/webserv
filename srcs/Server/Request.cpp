@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.cpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/05 11:02:53 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:21:19 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -300,6 +300,11 @@ std::string const&	Request::getField(std::string key) const
 	if (this->_fields.find(key) != this->_fields.end())
 		return (this->_fields.find(key)->second);
 	return (this->_empty);
+}
+
+std::map<std::string, std::string> const&	Request::getFields(void) const
+{
+	return (this->_fields);
 }
 
 std::string const& Request::getBody() const

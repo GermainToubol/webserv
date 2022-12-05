@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   Request.hpp                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:17:54 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 19:29:23 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:20:28 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,17 +30,18 @@ class Request
 		~Request();
 
 		/*Accesseurs*/
-		std::string const&	getBoundary() const;
-		std::string const&	getContent() const;
-		int			const&	getFd() const;
-		Location	const	*getLocation() const;
-		std::string const&	getMethod() const;
-		std::string const&	getExtension() const;
-		std::string const&	getUri() const;
-		std::string const&	getField(std::string) const;
-		std::string const&	getBody() const;
-		bool		const&	getChunkedMode() const;
-		
+		std::string const&							getBoundary() const;
+		std::string const&							getContent() const;
+		int			const&							getFd() const;
+		Location	const							*getLocation() const;
+		std::string const&							getMethod() const;
+		std::string const&							getExtension() const;
+		std::string const&							getUri() const;
+		std::string const&							getField(std::string) const;
+		std::map<std::string, std::string> const&	getFields(void) const;
+		std::string const&							getBody() const;
+		bool		const&							getChunkedMode() const;
+
 		void				setBoundary(std::string const& boundary);
 		void				setContent(std::string const& content);
 		void				setFd(int const& fd);

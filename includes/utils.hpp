@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   utils.hpp                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:44:18 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/02 14:45:01 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:44:30 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,10 +40,13 @@ typedef struct s_flags
 	int		value;
 }	t_flags;
 
+
 void		derror(std::string const& msg);
 std::string uriDecode(const std::string &src);
 std::string	reformatUri(std::string const& uri);
 std::string	generateRandomCookie(int size, std::string base);
+
+int			myToUpper(int c);
 
 bool	doesPathExist(std::string const& path);
 bool	isPathReadable(std::string const& path);

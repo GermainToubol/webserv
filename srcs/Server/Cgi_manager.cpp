@@ -3,16 +3,17 @@
 /*                                                        :::      ::::::::   */
 /*   Cgi_manager.cpp                                    :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
+/*   By: fmauguin <fmauguin@student.42.fr >         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/05 11:21:39 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 12:46:01 by fmauguin         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include <cstdlib>
 
 #include <unistd.h>
+#include <algorithm>
 
 #include "Cgi_manager.hpp"
 #include "utils.hpp"
@@ -94,7 +95,7 @@ void Cgi_manager::_init(void)
     this->_env["REQUEST_URI"] = this->_setup->getUri();                        // cgi file
     this->_env["QUERY_STRING"] = this->_setup->getQuery();
     this->_env["SCRIPT_NAME"] = this->_cgi_exe;       // cgi binary
-    
+
     if (flags & FLAG_VERBOSE)
         std::cerr << "[ CGI uri: " << this->_setup->getUri() << " ]" << std::endl;
 
@@ -109,7 +110,16 @@ void Cgi_manager::_init(void)
 
     this->_env["SERVER_NAME"] = _setup->getServer()->getServerName(); // get the good NODE from ConfigureTree
     this->_env["SERVER_PORT"] = _setup->getServer()->getPort(); // get the good NODE from ConfigureTree
+
+    std::string tmp;
+    for (std::map<std::string, std::string>::const_iterator it = this->_request->getFields().begin(); it != this->_request->getFields().end(); it++)
+    {
+        tmp = "HTTP_" + it->first;
+        std::transform(tmp.begin(), tmp.end(), tmp.begin(), myToUpper);
+        this->_env[tmp.c_str()] = it->second;
+    }
 }
+
 
 char *convert(const std::string &s)
 {
@@ -128,11 +138,12 @@ int Cgi_manager::execute(int *cgi_fd)
     char **env = new char*[_env.size() + 1];
     int i = 0;
     std::string *env_arr = new std::string[_env.size() + 1];
-    for (std::map<std::string, std::string>::iterator it = _env.begin(); it != _env.end(); it++)
+    for (std::map<std::string, std::string>::iterator it = this->_env.begin(); it != _env.end(); it++)
     {
         tmp = it->first + "=" + it->second;
         env_arr[i] = it->first + "=" + it->second;
         env[i] = &env_arr[i][0];
+        std::cerr << env[i]<< std::endl;
         i++;
     }
     env[i] = NULL;
@@ -150,7 +161,6 @@ int Cgi_manager::execute(int *cgi_fd)
 
     if (pid == 0)
     {
-        
         if (dup2(fd_pipe[1], 1) == -1)
             return (500);
         close(fd_pipe[0]);
