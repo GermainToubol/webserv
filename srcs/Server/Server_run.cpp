@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 12:53:55 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 20:04:12 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 11:02:20 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -111,6 +111,7 @@ int	WebServer::getRequest(int client_fd)
 	int		ret;
 	int		state;
 	Request	*request;
+	std::string	body;
 	
 	ret = recv(client_fd, this->_buffer, BUFFER_SIZE, MSG_NOSIGNAL);
 	if (ret == -1)
@@ -125,6 +126,8 @@ int	WebServer::getRequest(int client_fd)
 			return (derror("/!\\ Request not found"), -1);
 		if (request->getChunkedMode() == 1)
 		{
+			if (flags & FLAG_VERBOSE)
+				std::cerr << "[ Chunked mode ]" << std::endl;
 			state = request->addChunkedData(this->_buffer, ret);
 			if (state == 1)
 			{
@@ -145,7 +148,29 @@ int	WebServer::getRequest(int client_fd)
 				this->remove_fd_request(client_fd);
 			}
 			if (state == 2)
+			{
 				request->setChunkedMode(1);
+				if (flags & FLAG_VERBOSE)
+					std::cerr << "[ Chunked mode ]" << std::endl;
+				
+				if(request->getContent().find("\r\n\r\n") != std::string::npos)
+				{
+					body = request->getContent().substr(request->getContent().find("\r\n\r\n") + 4);
+					request->setContent(request->getContent().substr(0, request->getContent().find("\r\n\r\n") + 4));
+					if (body.size() > 0)
+					{
+						
+						state = request->addChunkedData(body.c_str(), body.size());
+						if (state == 1)
+						{
+							if (flags & FLAG_VERBOSE)
+								std::cerr << "[ All Request received on " << client_fd << " ]" << std::endl;
+							this->setResponse(client_fd, request);
+							this->remove_fd_request(client_fd);
+						}
+					}
+				}
+			}
 		}
 		if (this->_timeout.find(client_fd) != this->_timeout.end())
 		{

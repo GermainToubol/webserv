@@ -1,29 +1,29 @@
 server:
-  listen: 127.0.0.1:8080
-  root: /home/seriots/42_cursus/Server/YoupiBanane
+  listen: 127.0.0.1:8081
+  root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/YoupiBanane
   index: youpi.bad_extension
   autoindex: on
   location: /directory/
-    root: /home/seriots/42_cursus/Server/YoupiBanane/directory
-    post_dir: /home/seriots/42_cursus/Server/YoupiBanane/
+    root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/YoupiBanane/directory
+    post_dir: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/YoupiBanane/
     index: youpi.bad_extension
     autoindex: on
     permissions: 6
     max_body_size: 320000000
-   # cgi:
-    #  bla: /home/seriots/42_cursus/Server/ubuntu_cgi_tester
+    cgi:
+      bla: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/ubuntu_cgi_tester
   location: /directory/Yeah
-    root: /home/seriots/42_cursus/Server/YoupiBanane/directory/Yeah
+    root: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/YoupiBanane/directory/Yeah
     index: youpi.bad_extension
     autoindex: off
     
   location: /post_body
     max_body_size: 100
     cgi:
-      bla: /home/seriots/42_cursus/Server/ubuntu_cgi_tester
+      bla: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/ubuntu_cgi_tester
   location: /Yeah/
   location: /
     permissions: 4
   location: /put_test/
-    post_dir: /home/seriots/42_cursus/Server/YoupiBanane/
+    post_dir: /mnt/nfs/homes/lgiband/cursus/circle_5/v3/YoupiBanane/
     permissions: 7

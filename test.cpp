@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/30 16:34:10 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 15:32:37 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 10:52:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,86 +18,99 @@
 #include <unistd.h>
 #include <signal.h>
 
-int	running = 1;
+std::string				 _content = "";
+std::string::size_type	 _content_size = 0;
+std::string 			_chunked_buffer = "";
+std::string::size_type	_chunked_size = 0;
 
-void	get_sig(int sig)
+int	addChunkedData(const char *buffer, int size)
 {
-	if (sig == SIGINT)
+	std::string::size_type	pos;
+	std::string				size_data;
+	std::string				line;
+	std::string				tmp;
+
+	line = buffer;
+
+	if (size == 0)
+		return (1);
+
+	if (_chunked_size > 0)
 	{
-		std::cerr << "STOP" << std::endl;
-		running = 0;
-		return ;
+		if (line.size() > _chunked_size)
+		{
+			_content.append(line, 0, _chunked_size);
+			std::cout << "content: " << _content << std::endl;
+			tmp = line.substr(_chunked_size);
+			_chunked_size = 0;
+			_content_size = _content.size();
+			return (addChunkedData(tmp.c_str(), tmp.size()));
+		}
+		else
+		{
+			_content.append(line);
+			_chunked_size -= line.size();
+			_content_size = _content.size();
+		}
 	}
+
+	else if (_chunked_size == 0)
+	{
+		_chunked_buffer += line;
+		pos = _chunked_buffer.find("\r\n");
+		if (pos == 0)
+		{
+			_chunked_buffer.erase(0, 2);
+			pos = _chunked_buffer.find("\r\n");
+		}
+		if (pos == std::string::npos)
+			return (0);
+		size_data = _chunked_buffer.substr(0, pos);
+		_chunked_buffer.erase(0, pos + 2);
+		_chunked_size = std::strtol(size_data.c_str(), NULL, 16);
+		if (_chunked_size == 0)
+			return (1);
+		tmp = _chunked_buffer;
+		_chunked_buffer = "";
+		return (addChunkedData(tmp.c_str(), tmp.size()));
+	}
+	return(0);
 }
-
-struct sigaction	init_sig(void handler(int), int sig)
-{
-	struct sigaction	act;
-
-	std::memset(&act, 0, sizeof(act));
-	act.sa_handler = handler;
-	sigaction(sig, &act, NULL);
-	return (act);
-}
-void	derror(std::string const& msg)
-{
-	std::cerr << msg << std::endl;
-}
-
-
 
 int main()
 {
-	struct epoll_event	events[100];
-	int					nb_events;
-	struct epoll_event	event;
-	char buffer[1024];
-	int re;
-	char *env[] = {NULL};
-	char cmd[] = "bash";
-	char *args[] = {cmd, NULL};
+	std::string test = "3e8\r\neeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee";
+	std::string test2 = "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee\r\n0\r\n\r\n";
 
-	init_sig(get_sig, SIGINT);
-	std::cerr << "\n=====================INIT====================\n" << std::endl;
+	//std::string test_end = "0\r\n\r\n";
 
-	std::memset(&event, 0, sizeof(event));
-	int _epoll_fd = epoll_create1(0);
+	std::cout << "chunked size : " << _chunked_size << std::endl;
+	addChunkedData(test.c_str(), test.size());
+	std::cout << "chunked size : " << _chunked_size << std::endl;
+	addChunkedData(test2.c_str(), test2.size());
+	std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test3.c_str(), test3.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test4.c_str(), test4.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test5.c_str(), test5.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test6.c_str(), test6.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test7.c_str(), test7.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test8.c_str(), test8.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test9.c_str(), test9.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test10.c_str(), test10.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test11.c_str(), test11.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
+	//addChunkedData(test_end.c_str(), test_end.size());
+	//std::cout << "chunked size : " << _chunked_size << std::endl;
 
-	std::cerr << "\n=====================RUN=====================\n" << std::endl;
+
+	std::cout << _content << std::endl;
 	
-	int fdp[2];
-	pipe(fdp);
-	if (fork() == 0)
-	{
-		dup2(fdp[1], 1);
-		close(fdp[0]);
-		close(fdp[1]);
-		execve("/usr/bin/bash", args, env);
-	}
-	close(fdp[1]);
-	std::memset(&event, 0, sizeof(event));
-	event.data.fd = fdp[0];
- 	event.events = EPOLLIN;
- 	epoll_ctl(_epoll_fd, EPOLL_CTL_ADD, fdp[0], &event);
-	while (running)
-	{
-		std::memset(events, 0, sizeof(events));
-		nb_events = epoll_wait(_epoll_fd, events, 100, 2000);
-		if (nb_events == -1)
-			derror("Epoll_wait failed");
-		else if (nb_events > 0)
-		{
-			re = read(events[0].data.fd, buffer, 5);
-			if (re > 0)
-			 write(1, buffer, re);
-			else if (re == 0)
-			{
-			 	epoll_ctl(_epoll_fd, EPOLL_CTL_DEL, fdp[0], NULL);
-			}
-			else
-				perror("coucou");
-		}
-
-	}
-	return (0);
 }

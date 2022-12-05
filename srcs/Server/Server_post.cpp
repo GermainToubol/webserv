@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/29 11:44:06 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 16:48:23 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 09:33:46 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,7 +110,7 @@ int WebServer::checkPostRequest(Request *request, Setup *setup)
 		return (setup->setCode(411), 411);
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Content-Length : " << field << " ]" << std::endl;
-	if (std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
+	if (field != "" && std::strtol(field.c_str(), NULL, 10) > (int)request->getLocation()->getMaxBodySize())
 		return (setup->setCode(413), 413);
 	return (0);
 }

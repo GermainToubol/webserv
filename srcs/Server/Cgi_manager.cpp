@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/25 11:55:51 by fmauguin          #+#    #+#             */
-/*   Updated: 2022/12/04 20:09:44 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 11:21:39 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -82,21 +82,23 @@ void Cgi_manager::_init(void)
     this->_env["GATEWAY_INTERFACE"] = "CGI/1.1";
     this->_env["SERVER_PROTOCOL"] = "HTTP/1.1";
     this->_env["SERVER_SOFTWARE"] = "WEBSERV/1.0";
-    this->_env["REQUEST_METHOD"] = _request->getMethod();
+    this->_env["REQUEST_METHOD"] = this->_request->getMethod();
     this->_env["CONTENT_TYPE"] = _content_type;                        // MIME TYPE, null if not known
-    this->_env["CONTENT_LENGTH"] = _request->getField("Content-Length"); // If content is empty ==> 
+    this->_env["CONTENT_LENGTH"] = this->_request->getField("Content-Length"); // If content is empty ==> 
     if (this->_env["CONTENT_LENGTH"] == "")
-        this->_env["CONTENT_LENGTH"] = "0";
-    this->_env["PATH_INFO"] = _setup->getUri();                        // cgi file
-    this->_env["PATH_TRANSLATED"] = _setup->getUri();                    // cgi file
-    this->_env["REQUEST_URI"] = _setup->getUri();                        // cgi file
-    this->_env["QUERY_STRING"] = _setup->getQuery();
+        this->_env["CONTENT_LENGTH"] = "-1";
+    this->_env["HTTP_HOST"] = this->_request->getField("Host"); // Host header
+    this->_env["HTTP_COOKIE"] = this->_request->getField("Cookie");      // cgi file
+    this->_env["PATH_INFO"] = this->_setup->getUri().substr(this->_request->getLocation()->getRoot().size());                        // cgi file
+    this->_env["PATH_TRANSLATED"] = this->_setup->getUri();                    // cgi file
+    this->_env["REQUEST_URI"] = this->_setup->getUri();                        // cgi file
+    this->_env["QUERY_STRING"] = this->_setup->getQuery();
     this->_env["SCRIPT_NAME"] = this->_cgi_exe;       // cgi binary
     
     if (flags & FLAG_VERBOSE)
-        std::cerr << "[ CGI uri: " << _setup->getUri() << " ]" << std::endl;
+        std::cerr << "[ CGI uri: " << this->_setup->getUri() << " ]" << std::endl;
 
-    this->_env["SCRIPT_FILENAME"] = _setup->getUri(); // full pathname
+    this->_env["SCRIPT_FILENAME"] = this->_setup->getUri(); // full pathname
 
      this->_env["REMOTE_ADDR"] = this->_client_ip; // Addr remote get from socket
      this->_env["REMOTE_HOST"] = this->_client_ip; // Addr remote get from socket
@@ -120,8 +122,6 @@ int Cgi_manager::execute(int *cgi_fd)
 {
     char *argv[3];
     int fd_pipe[2];
-    int saveSTDIN;
-    int saveSTDOUT;
     std::string tmp;
 
     std::cout << "======================CGI EXECUTE===========================" << std::endl;
@@ -146,12 +146,11 @@ int Cgi_manager::execute(int *cgi_fd)
     if (pipe(fd_pipe) != 0)
         return 500;
     *cgi_fd = fd_pipe[0]; //j'imagine que c ca qu'il faut faire
-    saveSTDIN = dup(STDIN_FILENO);
-    saveSTDOUT = dup(STDOUT_FILENO);
     pid_t pid = fork();
 
     if (pid == 0)
     {
+        
         if (dup2(fd_pipe[1], 1) == -1)
             return (500);
         close(fd_pipe[0]);
@@ -169,9 +168,6 @@ int Cgi_manager::execute(int *cgi_fd)
     close(fd_pipe[1]);
     delete[] env;
     delete[] env_arr;
-    dup2(saveSTDIN, STDIN_FILENO);
-    dup2(saveSTDOUT, STDOUT_FILENO);
-    close(saveSTDIN);
-    close(saveSTDOUT);
+
     return 0;
 }

@@ -6,7 +6,7 @@
 /*   By: lgiband <lgiband@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/11/23 13:36:53 by lgiband           #+#    #+#             */
-/*   Updated: 2022/12/04 19:30:31 by lgiband          ###   ########.fr       */
+/*   Updated: 2022/12/05 11:02:53 by lgiband          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ int	Request::addContent(char *buf, int ret)
 	if (this->_content.find("\r\n\r\n") != std::string::npos && this->_is_header == 0)
 	{
 		pos = this->_content.find("Transfer-Encoding: chunked");
+		std::cerr << this->_content << std::endl;
 		if (pos != std::string::npos)
 			return (2);
 		pos = this->_content.find("Content-Length: ");
@@ -341,51 +342,50 @@ int	Request::addChunkedData(const char *buffer, int size)
 	std::string::size_type	pos;
 	std::string				size_data;
 	std::string				line;
+	std::string				tmp;
 
 	line = buffer;
 
 	if (size == 0)
 		return (1);
-	if (this->_chunked_size > 2)
+
+	if (this->_chunked_size > 0)
 	{
-		if ((size_t)size > this->_chunked_size + 2)
+		if (line.size() > this->_chunked_size)
 		{
-			this->_content += line.substr(0, this->_chunked_size - 2);
-			line = line.substr(this->_chunked_size - 2);
-			this->_chunked_size = 2;
-			return (this->addChunkedData(line.c_str(), line.size()));
-		}
-		this->_content += line.substr(0, size);
-		this->_chunked_size -= size;
-		this->_content_size = this->_content.size();
-		return (0);
-	}
-	else if (this->_chunked_size > 0)
-	{
-		if ((size_t)size > this->_chunked_size)
-		{
-			line = line.substr(this->_chunked_size);
+			this->_content.append(line, 0, this->_chunked_size);
+			tmp = line.substr(this->_chunked_size);
 			this->_chunked_size = 0;
-			return (this->addChunkedData(line.c_str(), line.size()));
+			this->_content_size = this->_content.size();
+			return (addChunkedData(tmp.c_str(), tmp.size()));
 		}
-		this->_chunked_size -= size;
+		else
+		{
+			this->_content.append(line);
+			this->_chunked_size -= line.size();
+			this->_content_size = this->_content.size();
+		}
 	}
-	else
+
+	else if (this->_chunked_size == 0)
 	{
 		this->_chunked_buffer += line;
 		pos = this->_chunked_buffer.find("\r\n");
+		if (pos == 0)
+		{
+			this->_chunked_buffer.erase(0, 2);
+			pos = this->_chunked_buffer.find("\r\n");
+		}
 		if (pos == std::string::npos)
 			return (0);
 		size_data = this->_chunked_buffer.substr(0, pos);
+		this->_chunked_buffer.erase(0, pos + 2);
 		this->_chunked_size = std::strtol(size_data.c_str(), NULL, 16);
 		if (this->_chunked_size == 0)
 			return (1);
-		this->_chunked_size += 2;
-		this->_chunked_buffer.erase(0, pos + 2);
-		this->_content += this->_chunked_buffer;
-		this->_chunked_size -= _chunked_buffer.size();
-		this->_content_size = this->_content.size();
+		tmp = this->_chunked_buffer;
 		this->_chunked_buffer = "";
+		return (addChunkedData(tmp.c_str(), tmp.size()));
 	}
-	return (0);
+	return(0);
 }
