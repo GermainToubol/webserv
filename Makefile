@@ -63,7 +63,7 @@ TPP_DIR =	templates
 # List of all compilation options
 # -------------------------------------------------------------------------
 CXX = 		c++
-CXXFLAGS =	-Wall -Wextra -Werror --std=c++98 -g
+CXXFLAGS =	-Wall -Wextra -Werror --std=c++98
 
 # Description of the final target
 # -------------------------------------------------------------------------
@@ -120,10 +120,6 @@ tclean:
 fclean:		clean tclean
 			$(RM) $(NAME)
 
-
-doc:
-			doxygen $(DOC_FILE)
-
 test:		$(TEST_EXE)
 			pytest
 
@@ -147,7 +143,7 @@ re:			fclean all
 
 # General dependences management
 # ------------------------------------------------------------------------
-$(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp Makefile
+$(OBJS_DIR)/%.d: $(SRCS_DIR)/%.cpp
 	@if [ ! -d $(dir $@) ]; then \
 		mkdir -p $(dir $@); \
 		echo "\n$(_BLUE)$(dir $@): Create$(_NO_COLOR)"; \
