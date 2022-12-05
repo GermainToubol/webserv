@@ -40,7 +40,7 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 	response.setStatus(0);
 	response.setPosition(0);
 	response.setHeader(setup, this->_status_codes, this->_mimetypes, 0);
-	
+
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Header builded ]\n" << response.getHeader() << "[ End Header ]" << std::endl;
 
@@ -55,7 +55,7 @@ int	WebServer::redirectMode(Request *request, Setup *setup, int client_fd)
 
 int WebServer::cgiMode(Request *request, Setup *setup, int client_fd)
 {
-	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second, request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second);
+	Cgi_manager CgiManager(request, setup, this->_clientIP.find(client_fd)->second, request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second, *this);
 	Response	response;
 	struct epoll_event	event;
 	struct epoll_event	event2;
@@ -103,7 +103,7 @@ int WebServer::getMode(Request *request, Setup *setup, int client_fd)
 {
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Get Mode ]" << std::endl;
-	
+
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Uri : " << setup->getUri() << " ]" << std::endl;
 	if (!doesPathExist(setup->getUri()))
@@ -206,7 +206,7 @@ int WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 {
 	if (flags & FLAG_VERBOSE)
 		std::cerr << "[ Mode choice ]" << std::endl;
-	
+
 	if (request->getLocation()->getRedirect() != "" && !isMe(setup->getUri(), request->getLocation()->getRedirect(), setup->getServer()->getRoot()))
 		return (this->redirectMode(request, setup, client_fd));
 
@@ -216,7 +216,7 @@ int WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 		return (derror("/!\\ POST not allowed"), setup->setCode(405), 405);
 	if (request->getMethod() == "DELETE" && !(request->getLocation()->getPermission() & DEL_PERM))
 		return (derror("/!\\ DELETE not allowed"), setup->setCode(405), 405);
-	
+
 	std::cerr << "extensionName: " << setup->getExtensionName() << std::endl;
 	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		std::cerr << request->getLocation()->getCgiPerm().find(setup->getExtensionName())->second << std::endl;

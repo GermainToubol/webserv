@@ -27,11 +27,12 @@ extern int flags;
 #pragma region Constructor &&Destructor
 #endif
 
-Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& client_ip, std::string const& cgi_exe) :
+Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& client_ip, std::string const& cgi_exe, WebServer& webserv) :
 	_request(request),
 	_setup(setup),
 	_client_ip(client_ip),
-    _cgi_exe(cgi_exe)
+    _cgi_exe(cgi_exe),
+	_webserv(webserv)
 {
     this->_content_type = request->getField("Content-Type");
     if (this->_content_type == "")
@@ -40,7 +41,7 @@ Cgi_manager::Cgi_manager(Request *request, Setup *setup, std::string const& clie
 	return;
 }
 
-Cgi_manager::Cgi_manager(Cgi_manager const &src)
+Cgi_manager::Cgi_manager(Cgi_manager const &src): _webserv(src._webserv)
 {
 	*this = src;
 	return;
@@ -88,7 +89,7 @@ void Cgi_manager::_init(void)
     this->_env["SERVER_SOFTWARE"] = "WEBSERV/1.0";
     this->_env["REQUEST_METHOD"] = this->_request->getMethod();
     this->_env["CONTENT_TYPE"] = _content_type;                        // MIME TYPE, null if not known
-    this->_env["CONTENT_LENGTH"] = this->_request->getField("Content-Length"); // If content is empty ==> 
+    this->_env["CONTENT_LENGTH"] = this->_request->getField("Content-Length"); // If content is empty ==>
     if (this->_env["CONTENT_LENGTH"] == "")
         this->_env["CONTENT_LENGTH"] = "0";
     this->_env["PATH_INFO"] = this->_setup->getUri().substr(this->_request->getLocation()->getRoot().size());                        // cgi file
@@ -163,7 +164,7 @@ int Cgi_manager::execute(int *cgi_fd)
     std::cerr << argv[2] << std::endl;
     if (pid == 0)
     {
-
+		this->_webserv.end();
         //0 = read, 1 = write
         if (dup2(fd_pipe[0], 0) == -1)
             return (500);

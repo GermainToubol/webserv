@@ -15,6 +15,7 @@
 
 #include <iostream>
 #include "Request.hpp"
+#include "WebServer.hpp"
 #include "Configure.hpp"
 
 // Parse Request
@@ -34,11 +35,12 @@ private:
 	std::string _content_type;
 	std::string _client_ip;
 	std::string _cgi_exe;
+	WebServer&	_webserv;
 	//int			_file_fd;
 	void _init(void);
 
 public:
-	Cgi_manager(Request *request, Setup *setup, std::string const& client_ip, std::string const& cgi_exe);
+	Cgi_manager(Request *request, Setup *setup, std::string const& client_ip, std::string const& cgi_exe, WebServer&);
 	Cgi_manager(Cgi_manager const &src);
 	~Cgi_manager();
 

@@ -15,6 +15,8 @@ server:
       php: /bin/php-cgi
 
   location: /ou/
+    cgi:
+      php: /bin/php-cgi
     default_file: /mnt/nfs/homes/gtoubol/Documents/webserv/test_folder/ou/ANon.html
     post_dir: /mnt/nfs/homes/gtoubol/Documents/webserv/test_folder/
     root: /mnt/nfs/homes/gtoubol/Documents/webserv/test_folder/ou/

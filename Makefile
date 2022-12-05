@@ -63,7 +63,7 @@ TPP_DIR =	templates
 # List of all compilation options
 # -------------------------------------------------------------------------
 CXX = 		c++
-CXXFLAGS =	-Wall -Wextra -Werror --std=c++98
+CXXFLAGS =	-Wall -Wextra -Werror --std=c++98 -g
 
 # Description of the final target
 # -------------------------------------------------------------------------
