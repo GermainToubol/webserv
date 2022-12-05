@@ -128,10 +128,10 @@ test:		$(TEST_EXE)
 			pytest
 
 up:			down all
-			cd docker_test && sudo docker compose up --build --force-recreate -d
+			cd docker_test && docker compose up --build --force-recreate
 
 down:
-			cd docker_test && sudo docker compose down
+			cd docker_test && docker compose down
 
 $(SRCS_DIR)/%.test:		$(OBJS_DIR)/%.o $(filter-out %main.o objs/Server%,$(OBJS))
 			$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^

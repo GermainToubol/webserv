@@ -29,16 +29,31 @@ class Test:
                     print(": content ko", end="")
         print("")
 
+    def cookie_test(self):
+        req = requests.get(self.url)
+        print(f"{self.url}: ")
+        print(f"no cookie: -> {req.cookies['WebServCookie']} | {req.headers['Pragma']}")
+        req2 = requests.get(self.url, cookies={"WebServCookie": "testtesttest"})
+        print(f"with cookie: -> {req2.headers['Pragma']}")
+
 
 def server_selection(servers):
+    print("basic get".center(15, '-'))
     for page in servers:
         t = Test(page, *servers[page])
         t.basic_get_test()
+
+def server_cookies(servers):
+    print("servers cookies".center(15, '-'))
+    for page in servers:
+        t = Test(page, *servers[page])
+        t.cookie_test()
 
 
 def main(servers):
     print("Start testing".center(30, "="))
     server_selection(servers)
+    server_cookies(servers)
     print("End testing".center(30, "="))
 
 
