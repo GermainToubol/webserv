@@ -7,7 +7,7 @@ server_list = {
     "http://out.webserv.42.fr": [200, "/root/index_coucou.html"],
     "http://webserv.42.fr/test/index.html": [200, "/root/index_test.html"],
     "http://webserv.42.fr/a/b/index.html": [200, "/root/index_test.html"],
-    "http://webserv.42.fr/c/index.html": [403, ""]
+    "http://webserv.42.fr/c/index.html": [405, ""]
     }
 
 
@@ -20,13 +20,13 @@ class Test:
     def basic_get_test(self):
         req = requests.get(self.url)
         print(f"{self.url}: ", end="")
-        print(f"expect {self.status} got {req.status_code}: content ", end="")
+        print(f"expect {self.status} got {req.status_code}", end="")
         if self.filename:
             with open(self.filename, 'r') as expected:
                 if expected.read() == req.text:
-                    print("ok", end="")
+                    print(": content ok", end="")
                 else:
-                    print("ko", end="")
+                    print(": content ko", end="")
         print("")
 
 
