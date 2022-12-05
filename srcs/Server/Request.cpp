@@ -124,7 +124,7 @@ int	Request::basicCheck(Setup *setup)
 {
 	if (this->_version != "HTTP/1.1")
 		return (derror("/!\\ Bad HTTP version"), setup->setCode(505), 505);
-	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE" && this->_method != "PUT")
+	if (this->_method != "GET" && this->_method != "POST" && this->_method != "DELETE")
 		return (derror("/!\\ Bad Method"), setup->setCode(405), 405);
 	if (!this->isValidUri(setup->getUri()))
 		return (derror("/!\\ Bad Uri"), setup->setCode(414), 414);
@@ -161,6 +161,7 @@ int	Request::setLocation(Setup *setup)
 	tmp = setup->getUri();
 	if (setup->getUri()[setup->getUri().size() - 1] != '/')
 		tmp += "/";
+	tmp = reformatUri(tmp);
 	while (1)
 	{
 		if (flags & FLAG_VERBOSE)

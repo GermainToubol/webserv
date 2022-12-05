@@ -23,6 +23,7 @@ server:
   index: index.html
   location: /
   location: /a/b/
+    permissions: 7
     root: /var/www/test
   location: /c
     root: /var/www/test

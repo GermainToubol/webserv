@@ -223,7 +223,7 @@ int WebServer::modeChoice(Request *request, Setup *setup, int client_fd)
 	if (request->getLocation()->getCgiPerm().find(setup->getExtensionName()) != request->getLocation()->getCgiPerm().end())
 		return (this->cgiMode(request, setup, client_fd));
 
-	if (request->getMethod() == "POST" || request->getMethod() == "PUT")
+	if (request->getMethod() == "POST")
 		return (this->postMode(request, setup, client_fd));
 	if (request->getMethod() == "DELETE")
 		return (this->deleteMode(request, setup, client_fd));

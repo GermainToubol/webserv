@@ -15,7 +15,7 @@ services:
         ipv4_address: 192.168.12.1
     healthcheck:
       test: ["CMD", "nc", "-z", "localhost", "8080"]
-      interval: 10s
+      interval: 5s
 
   in:
     container_name: in

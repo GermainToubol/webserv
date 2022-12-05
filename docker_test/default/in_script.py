@@ -31,10 +31,17 @@ def server_selection(servers):
         t = Test(page, *servers[page])
         t.basic_get_test()
 
+def coucou():
+    payload = {'key1': 'value1', 'key2': 'value2'}
+    req =requests.put("http://webserv.42.fr/a/b/post", data=payload)
+    print(req.text)
+    with open("/var/www/test/post", "r") as files:
+        print(files.read())
 
 def main(servers):
     print("Start testing".center(30, "="))
     server_selection(servers)
+    coucou()
     print("End testing".center(30, "="))
 
 

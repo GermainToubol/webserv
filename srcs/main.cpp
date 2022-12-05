@@ -82,7 +82,7 @@ int	get_flags(char **argv, int argc)
 
 int	main(int argc, char **argv)
 {
-	std::string filename("test_config");
+	std::string filename("configs/default_config");
 	int			ret = 0;
 
 	if (argc >= 2)
@@ -92,7 +92,7 @@ int	main(int argc, char **argv)
 	if (ret)
 		return (display_usage(), 1);
 	Configure config(filename);
-	
+
 
 	if (!config.isGood())
 		return (1);
@@ -100,7 +100,7 @@ int	main(int argc, char **argv)
 	if (flags & FLAG_TEST)
 		return (0);
 	init_sig(get_sig, SIGINT);
-	
+
 	WebServer server(config);
 
 	while (running)
